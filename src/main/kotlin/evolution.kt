@@ -1,12 +1,12 @@
 import java.util.*
-import java.util.concurrent.atomic.AtomicInteger
 import java.util.stream.Collectors
+import kotlin.math.max
 
 /**
  * Модель особи.
  * [nw] - нейронная сеть, [rate] - рейтинг выживаемости
  */
-data class Individual(val nw: Network, var rate: AtomicInteger= AtomicInteger(0))
+data class Individual(val nw: Network, var rate: Double=.0)
 
 /**
  * [populationSize] - размер популяции
@@ -35,28 +35,17 @@ abstract class AbstractEvolution(
      */
     fun evolute(epochSize: Int, batchSize: Int, period: Int): Individual {
         var population = generatePopulation()
-        var dropoutCounter = 0
-        var dropoutRate = population[populationSize/2-1].rate.get()
+        MNIST.createBatch(batchSize)
         (0 until epochSize).forEach {
             curEpoch = it
-            if (curEpoch % period == 0) {
-                if (curEpoch != 0) {
-                    val leader = population.first()
-                    if (MNIST.batch.isNotEmpty()) testNet(leader.nw)
-                    population = generatePopulationFrom(leader, populationSize)
-                }
+            if (population.first().rate < 0.1 && curEpoch != 0) {
+                testNet(population.first().nw)
                 MNIST.createBatch(batchSize)
             }
             population = evoluteEpoch(population)
-            val testRate = population[populationSize/2-1].rate.get()
-            if (dropoutRate != testRate) {
-                dropoutRate = testRate
-                dropoutCounter = 0
-            }
-            else dropoutCounter++
-            if (dropoutCounter == 5) {
-                population.forEach { it.rate.set(0) }
-                dropout(population, mutantRate)
+            if (curEpoch % period == 0) {
+                println("DROPOUT")
+                dropout(population)
             }
         }
         return population.first()
@@ -70,7 +59,7 @@ abstract class AbstractEvolution(
      **/
     open fun evoluteEpoch(initPopulation: List<Individual>): List<Individual> {
         val population = competition(initPopulation)
-        val getRate = { pos: Int -> (population[pos].rate.get()/(10.0*MNIST.batch.size)).toString()}
+        val getRate = { pos: Int -> ((population[pos].rate*1000000).toInt()/10000.0).toString()}
         println("Рейтинг ${getRate(0)} < ${getRate(populationSize/4-1)} < ${getRate(populationSize/2-1)}")
         return nextGeneration(population) // генерируем следующее поколение особей
     }
@@ -82,7 +71,7 @@ abstract class AbstractEvolution(
 
     fun generatePopulationFrom(individual: Individual, size: Int=populationSize): List<Individual> {
         val weights = extractWeights(individual.nw)
-        individual.rate.set(0)
+        individual.rate = .0
         return (0 until size).map {
             if (it == 0) individual
             else {
@@ -103,16 +92,14 @@ abstract class AbstractEvolution(
      * Проводит соревнование внутри популяции. На выходе вычисляет поколение
      */
     private fun competition(population: List<Individual>): List<Individual> {
-        val newGeneration = population.filter { it.rate.get() == 0 }
-        MNIST.batch.forEach { image ->
-            newGeneration.parallelStream().forEach {
+        val newGeneration = population.filter { it.rate == .0 }
+        newGeneration.parallelStream().forEach {
+            it.rate = MNIST.batch.map { image ->
                 val o = it.nw.activate(image.colorsMatrix)
-                val result = o[image.index]
-                val error = 1 - result
-                it.rate.addAndGet((error*error*1000).toInt())
-            }
+                1 - o[image.index]
+            }.average()
         }
-        return population.sortedBy { it.rate.get() }
+        return population.sortedBy { it.rate }
     }
 
     /**
@@ -134,11 +121,7 @@ abstract class AbstractEvolution(
         val parents = selection(survivors)
         val generation = survivors.union(createChildren(parents)).toList()
         val dif = netsDifferent(generation.map { it.nw })
-        mutantRate = when {
-            dif < .05 -> initMutantRate*2
-            dif > .3 -> initMutantRate*.5
-            else -> initMutantRate
-        }
+        mutantRate = initMutantRate + max((1 - dif*8) *mutantRate, .0)
         inform(dif) // информируем терминал об изменениях
         return generation
     }
@@ -170,8 +153,8 @@ abstract class AbstractEvolution(
         val secondParent = pair.second.nw
         val firstParentGens = extractWeights(firstParent)
         val secondParentGens = extractWeights(secondParent)
-        var crossoverRate = 0.5
-        if (pair.first.rate.get() > pair.second.rate.get()) {
+        var crossoverRate = .5
+        if (pair.first.rate < pair.second.rate) {
             crossoverRate += 0.2*random.nextDouble()
         } else {
             crossoverRate -= 0.2*random.nextDouble()
@@ -223,11 +206,12 @@ abstract class AbstractEvolution(
         return difs.average()
     }
 
-    private fun dropout(population: List<Individual>, p: Double) = population.forEach {
+    private fun dropout(population: List<Individual>, p: Double=initMutantRate) = population.parallelStream().forEach {
+        it.rate = .0
         it.nw.layers.forEach {
             it.neurons.forEach {
                 it.weights.forEachIndexed { index, d ->
-                    it.weights[index] = if (random.nextDouble() < p) 0.0 else d
+                    it.weights[index] = if (random.nextDouble() < p) .0 else d
                 }
             }
         }

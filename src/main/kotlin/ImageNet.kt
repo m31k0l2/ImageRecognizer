@@ -1,7 +1,7 @@
 import java.io.File
 
 class ImageNet(populationSize: Int, scale: Int, mutantRate: Double=0.1): AbstractEvolution(populationSize, scale, mutantRate) {
-    private val savePerEpoch = 25
+    private val savePerEpoch = 100
     private val folder = "nets/"
     private lateinit var population: List<Individual>
 

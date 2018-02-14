@@ -2,8 +2,8 @@ import java.io.File
 import java.util.*
 
 object MNIST {
-    private val mnistTrainPath = "/home/melkor/mnist_png/training"
-    private val mnistTestPath = "/home/melkor/mnist_png/testing"
+    private val mnistTrainPath = "G:\\ih8unem\\mnist_png\\training"
+    private val mnistTestPath = "G:\\ih8unem\\mnist_png\\testing"
     private val dir = File(mnistTrainPath)
     val batch: MutableList<Image> = mutableListOf()
 
