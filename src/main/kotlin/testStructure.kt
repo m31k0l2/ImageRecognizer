@@ -39,11 +39,5 @@ fun testBest(): Boolean {
 
 fun main(args: Array<String>) {
     MNIST.createBatch(100)
-    testNet("nets/nw.net")
-    var counter = 0
-    for (i in 0..10) {
-        if (testBest()) counter++
-        println()
-    }
-    println("$counter / 10")
+    testNet("nets/nw1.net")
 }

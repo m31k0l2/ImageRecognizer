@@ -14,4 +14,6 @@ class Network(vararg layerSize: Int) {
         }
         return Layer.softmax(o)
     }
+
+    fun clone() =  Network().also { it.layers.addAll(layers.map { it.clone() }) }
 }

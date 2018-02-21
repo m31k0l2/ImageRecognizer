@@ -22,6 +22,8 @@ class Neuron {
 
     // инициализация весов случайными значениями
     private fun initWeights(inputSize: Int) = MutableList(inputSize, { 0.5 - Random().nextDouble() })
+
+    fun clone() = Neuron().also { it.weights = weights.map { it }.toMutableList() }
 }
 
 class Layer(size: Int=0) {
@@ -55,6 +57,7 @@ class Layer(size: Int=0) {
         }
     }
 
+    fun clone() = Layer().also { it.neurons.addAll(neurons.map { it.clone() }.toMutableList()) }
 }
 
 object Encoder {
