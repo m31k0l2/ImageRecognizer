@@ -1,12 +1,15 @@
+import java.io.File
+import java.io.FileWriter
 import java.util.*
 import java.util.stream.Collectors
 import kotlin.math.max
+
 
 /**
  * Модель особи.
  * [nw] - нейронная сеть, [rate] - рейтинг выживаемости
  */
-data class Individual(val nw: Network, var rate: Double=.0)
+data class Individual(val nw: Network, var rate: Double=1.0)
 
 /**
  * [populationSize] - размер популяции
@@ -18,14 +21,19 @@ data class Individual(val nw: Network, var rate: Double=.0)
  * [mutantRate] - вероятность мутации генов, не должно быть сильно большим значением, основную роль в эволюции
  * должно играть скрещивание
  */
-abstract class AbstractEvolution(
+class ImageNetEvolution(
         private var populationSize: Int,
         private val scale: Int,
-        private val initMutantRate: Double=0.1
+        private val initMutantRate: Double=.1
 ) {
     private val random = Random()
     var mutantRate = initMutantRate
-    var curEpoch = 0
+
+    init {
+        if (File("nets/").mkdir()) {
+            println("Создаю каталог nets/")
+        }
+    }
 
     /**
      * Запуск эволюции.
@@ -33,22 +41,30 @@ abstract class AbstractEvolution(
      * Создаём популяцию размером populationSize
      * Выполняем эволюцию популяции от эпохи к эпохе
      */
-    fun evolute(epochSize: Int, batchSize: Int, period: Int): Individual {
-        var population = generatePopulation()
-        MNIST.createBatch(batchSize)
-        (0 until epochSize).forEach {
-            curEpoch = it
-            if (population.first().rate < 0.1 && curEpoch != 0) {
-                testNet(population.first().nw)
-                MNIST.createBatch(batchSize)
+    fun evolute(epochSize: Int): Network {
+        var population = generatePopulation(populationSize, "nw")
+        (0 until 2*epochSize).forEach {curEpoch ->
+            println("эпоха $curEpoch")
+            val start = System.nanoTime()
+            mutantRate = ((epochSize - curEpoch)*1.0/epochSize).takeIf { it > 0 } ?: 0.01
+            if (population.first().rate < .1) {
+                return population.first().nw
+            }
+            if (curEpoch != 0 && curEpoch % 50 == 0) {
+                println("DROPOUT")
+                val generation = dropout(population, 0.1*random.nextDouble())
+                population = population.union(generation).toList()
             }
             population = evoluteEpoch(population)
-            if (curEpoch % period == 0) {
-                println("DROPOUT")
-                dropout(population)
-            }
+            val fin = System.nanoTime()
+            val getRate = { pos: Int, population: List<Individual> -> ((population[pos].rate*1000000).toInt()/10000.0).toString()}
+            val rateInfo = "${getRate(0, population)} < ${getRate(populationSize/4-1, population)} < ${getRate(populationSize/2-1, population)}"
+            writeToFile(rateInfo)
+            println("Рейтинг $rateInfo")
+            if (population.first().rate*1.001 > population[populationSize/2-1].rate) return population.first().nw
+            println("Время: ${(fin-start)/1_000_000} мс\n")
         }
-        return population.first()
+        return population.first().nw
     }
 
     /**
@@ -57,28 +73,33 @@ abstract class AbstractEvolution(
      * По итогам генерируется новое поколение для следующей эпохи
      * Условия размножения (mutantRate и crossoverRate) изменяются от эпохи к эпохе
      **/
-    open fun evoluteEpoch(initPopulation: List<Individual>): List<Individual> {
+
+    private fun evoluteEpoch(initPopulation: List<Individual>): List<Individual> {
         val population = competition(initPopulation)
-        val getRate = { pos: Int -> ((population[pos].rate*1000000).toInt()/10000.0).toString()}
-        println("Рейтинг ${getRate(0)} < ${getRate(populationSize/4-1)} < ${getRate(populationSize/2-1)}")
-        return nextGeneration(population) // генерируем следующее поколение особей
+        return nextGeneration(population)
+    }
+
+    private fun writeToFile(text: String) {
+        FileWriter("stat.txt", true).use { writer ->
+            // запись всей строки
+            writer.write(text + '\n')
+            writer.flush()
+        }
     }
 
     /**
      * Создаёт популяцию особей заданного размера [size]
      */
-    open fun generatePopulation(size: Int=populationSize) = (0 until size).map { createIndividual() }
+    private fun generatePopulation(size: Int=populationSize) = (0 until size).map { createIndividual() }
 
-    fun generatePopulationFrom(individual: Individual, size: Int=populationSize): List<Individual> {
-        val weights = extractWeights(individual.nw)
-        individual.rate = .0
-        return (0 until size).map {
-            if (it == 0) individual
-            else {
-                val mutantWeights = weights.map { it.map { it.map { if (random.nextDouble() < mutantRate) random.nextDouble() else it } } }
-                Individual(generateNet(mutantWeights))
-            }
-        }
+    private fun generatePopulation(size: Int=populationSize, name: String): List<Individual> {
+        if (!File("nets/$name.net").exists()) return generatePopulation(size)
+        val nw = NetworkIO().load("nets/$name.net")!!
+        return generatePopulation(size, Individual(nw))
+    }
+
+    private fun generatePopulation(size: Int=populationSize, individual: Individual) = (0 until size).map {
+        if (it == 0) individual else createIndividual()
     }
 
     private fun createIndividual() = Individual(createNet())
@@ -86,17 +107,16 @@ abstract class AbstractEvolution(
     /**
      * Задаётся топология сети
      */
-    abstract fun createNet(): Network
+    private fun createNet() = Network(8, 12, 160, 40, 10)
 
     /**
      * Проводит соревнование внутри популяции. На выходе вычисляет поколение
      */
     private fun competition(population: List<Individual>): List<Individual> {
-        val newGeneration = population.filter { it.rate == .0 }
+        val newGeneration = population.filter { it.rate == 1.0 }
         newGeneration.parallelStream().forEach {
-            it.rate = MNIST.batch.map { image ->
-                val o = it.nw.activate(image.colorsMatrix)
-                1 - o[image.index]
+            it.rate = 1 - MNIST.batch.map { image ->
+                it.nw.activate(image.colorsMatrix)[image.index]
             }.average()
         }
         return population.sortedBy { it.rate }
@@ -116,28 +136,37 @@ abstract class AbstractEvolution(
      * совпадение генов у всех особей популяции. Это означает, что созданный шаблон при исходных наборах гена оптимален.
      * Этот оптимальный шаблон сохраним, для дальнейшего сравнения и использования
      */
-    open fun nextGeneration(population: List<Individual>): List<Individual> {
+    private fun nextGeneration(population: List<Individual>): List<Individual> {
         val survivors = population.take(populationSize / 2)
-        val parents = selection(survivors)
-        val generation = survivors.union(createChildren(parents)).toList()
-        val dif = netsDifferent(generation.map { it.nw })
-        mutantRate = initMutantRate + max((1 - dif*8) *mutantRate, .0)
-        inform(dif) // информируем терминал об изменениях
+        val mutants = survivors.mapNotNull { if (random.nextDouble() < mutantRate) mutate(it) else null }
+        val parents = selection(survivors).take(survivors.size - mutants.size)
+        val offspring = createChildren(parents)
+        val generation = survivors.union(offspring).union(mutants).toList()
+//        val dif = netsDifferent(generation.map { it.nw })
+//        mutantRate = initMutantRate + max((1 - dif*8) *mutantRate, .0)
+        println("мутация ${(mutantRate*1000).toInt()/10.0} %")
         return generation
     }
 
     private fun createChildren(parents: List<Pair<Individual, Individual>>) = parents.parallelStream().map { cross(it) }.collect(Collectors.toList())!!
 
-    open fun inform(dif: Double) {
-        println("различие ${(dif*1000).toInt() / 10} %")
-        println("мутация ${(mutantRate*1000).toInt()/10.0} %")
-    }
-
     /**
      * Разбиваем популяцию по парам для их участия в скрещивании
      */
-    private fun selection(players: List<Individual>) = (1..populationSize/2).map {
-        players[random.nextInt(players.size)] to players[random.nextInt(players.size)]
+    private fun selection(population: List<Individual>): List<Pair<Individual, Individual>> {
+        val size = population.size
+        val s = size*(size + 1.0)
+        var rangs = population.asReversed().mapIndexed { index, individual ->
+            individual to 2*(index+1)/s
+        }
+        var rangCounter = 0.0
+        rangs = rangs.map {
+            rangCounter += it.second
+            it.first to rangCounter
+        }
+        return (0 until population.size).map {
+            rangs.find { it.second > random.nextDouble() }!!.first to rangs.find { it.second > random.nextDouble() }!!.first
+        }
     }
 
     /**
@@ -161,12 +190,27 @@ abstract class AbstractEvolution(
         }
         val childGens = firstParentGens.mapIndexed { l, layer ->
             layer.mapIndexed { n, neuron -> neuron.mapIndexed { w, gen ->
-                if (random.nextDouble() < mutantRate) {
-                    (1 - 2*random.nextDouble())*scale
-                } else gen.takeIf { random.nextDouble() < crossoverRate } ?: secondParentGens[l][n][w] }
+                gen.takeIf { random.nextDouble() < crossoverRate } ?: secondParentGens[l][n][w] }
             }
         }
         return Individual(generateNet(childGens))
+    }
+
+    private fun mutate(individual: Individual): Individual? {
+        val genMutateRate = max(random.nextDouble()*0.1, 0.005)
+        val parentGens = extractWeights(individual.nw)
+        var isMutate = false
+        val childGens = parentGens.map { layer ->
+            layer.map { neuron ->
+                neuron.map { gen ->
+                    if (random.nextDouble() < genMutateRate) {
+                        isMutate = true
+                        (1 - 2 * random.nextDouble()) * scale
+                    } else gen
+                }
+            }
+        }
+        return Individual(generateNet(childGens)).takeIf { isMutate }
     }
 
     /**
@@ -206,14 +250,18 @@ abstract class AbstractEvolution(
         return difs.average()
     }
 
-    private fun dropout(population: List<Individual>, p: Double=initMutantRate) = population.parallelStream().forEach {
-        it.rate = .0
-        it.nw.layers.forEach {
-            it.neurons.forEach {
-                it.weights.forEachIndexed { index, d ->
-                    it.weights[index] = if (random.nextDouble() < p) .0 else d
+    private fun dropout(population: List<Individual>, p: Double=initMutantRate): List<Individual> {
+        val generation = population.map { it.nw }.map { it.clone() }.map { Individual(it) }
+        population.parallelStream().forEach {
+            it.rate = 1.0
+            it.nw.layers.forEach {
+                it.neurons.forEach {
+                    it.weights.forEachIndexed { index, d ->
+                        it.weights[index] = if (random.nextDouble() < p) .0 else d
+                    }
                 }
             }
         }
+        return generation
     }
 }
