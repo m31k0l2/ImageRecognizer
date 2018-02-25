@@ -39,5 +39,5 @@ fun testBest(): Boolean {
 
 fun main(args: Array<String>) {
     MNIST.createBatch(100)
-    testNet("nets/nw1.net")
+    testNet("nets/nw.net")
 }

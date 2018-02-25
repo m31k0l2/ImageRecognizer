@@ -43,28 +43,53 @@ class ImageNetEvolution(
      */
     fun evolute(epochSize: Int): Network {
         var population = generatePopulation(populationSize, "nw")
+        var batchSize = 10
+        var nextChange = batchSize * 2
+        var lastResult = 0.0
+        var stagnation = 0
+        MNIST.createBatch(batchSize)
         (0 until 2*epochSize).forEach {curEpoch ->
+            if (stagnation == 10) {
+                return population.first().nw
+            }
             println("эпоха $curEpoch")
             val start = System.nanoTime()
             mutantRate = ((epochSize - curEpoch)*1.0/epochSize).takeIf { it > 0 } ?: 0.01
             if (population.first().rate < .1) {
                 return population.first().nw
             }
-            if (curEpoch != 0 && curEpoch % 50 == 0) {
-                println("DROPOUT")
-                val generation = dropout(population, 0.1*random.nextDouble())
-                population = population.union(generation).toList()
-            }
             population = evoluteEpoch(population)
             val fin = System.nanoTime()
             val getRate = { pos: Int, population: List<Individual> -> ((population[pos].rate*1000000).toInt()/10000.0).toString()}
+            if (curEpoch < epochSize && curEpoch % 10 == 0) {
+                population = rateGeneration(batchSize, population)
+            } else if (curEpoch > epochSize && batchSize == 10){
+                batchSize = 40
+                population = rateGeneration(batchSize, population)
+            }
+            val curResult = population[populationSize/2-1].rate
+            if (curResult == lastResult) {
+                stagnation++
+                MNIST.createBatch(batchSize)
+            } else {
+                lastResult = curResult
+            }
             val rateInfo = "${getRate(0, population)} < ${getRate(populationSize/4-1, population)} < ${getRate(populationSize/2-1, population)}"
-            writeToFile(rateInfo)
+            writeToFile(getRate(0, population).replace(".", ","))
             println("Рейтинг $rateInfo")
+            println("Размер батча: $batchSize")
             if (population.first().rate*1.001 > population[populationSize/2-1].rate) return population.first().nw
             println("Время: ${(fin-start)/1_000_000} мс\n")
         }
         return population.first().nw
+    }
+
+    private fun rateGeneration(batchSize: Int, population: List<Individual>): List<Individual> {
+        var population1 = population
+        MNIST.createBatch(batchSize)
+        rateGeneration(population1)
+        population1 = population1.sortedBy { it.rate }
+        return population1
     }
 
     /**
@@ -113,13 +138,14 @@ class ImageNetEvolution(
      * Проводит соревнование внутри популяции. На выходе вычисляет поколение
      */
     private fun competition(population: List<Individual>): List<Individual> {
-        val newGeneration = population.filter { it.rate == 1.0 }
-        newGeneration.parallelStream().forEach {
-            it.rate = 1 - MNIST.batch.map { image ->
-                it.nw.activate(image.colorsMatrix)[image.index]
-            }.average()
-        }
+        rateGeneration(population.filter { it.rate == 1.0 })
         return population.sortedBy { it.rate }
+    }
+
+    private fun rateGeneration(population: List<Individual>) = population.parallelStream().forEach {
+        it.rate = 1 - MNIST.batch.map { image ->
+            it.nw.activate(image.colorsMatrix)[image.index]
+        }.average()
     }
 
     /**
