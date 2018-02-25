@@ -44,7 +44,6 @@ class ImageNetEvolution(
     fun evolute(epochSize: Int): Network {
         var population = generatePopulation(populationSize, "nw")
         var batchSize = 10
-        var nextChange = batchSize * 2
         var lastResult = 0.0
         var stagnation = 0
         MNIST.createBatch(batchSize)
@@ -65,12 +64,14 @@ class ImageNetEvolution(
                 population = rateGeneration(batchSize, population)
             } else if (curEpoch > epochSize && batchSize == 10){
                 batchSize = 40
-                population = rateGeneration(batchSize, population)
+                populationSize = 40
+                population = rateGeneration(batchSize, population).take(populationSize)
             }
             val curResult = population[populationSize/2-1].rate
-            if (curResult == lastResult) {
+            if (curEpoch > epochSize && curResult == lastResult) {
                 stagnation++
                 MNIST.createBatch(batchSize)
+                population = rateGeneration(batchSize, population)
             } else {
                 lastResult = curResult
             }
@@ -85,11 +86,9 @@ class ImageNetEvolution(
     }
 
     private fun rateGeneration(batchSize: Int, population: List<Individual>): List<Individual> {
-        var population1 = population
         MNIST.createBatch(batchSize)
-        rateGeneration(population1)
-        population1 = population1.sortedBy { it.rate }
-        return population1
+        rateGeneration(population)
+        return population.sortedBy { it.rate }
     }
 
     /**
