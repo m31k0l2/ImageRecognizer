@@ -23,8 +23,10 @@ data class Individual(val nw: Network, var rate: Double=1.0)
  */
 class ImageNetEvolution(
         private var populationSize: Int,
-        private val scale: Int,
-        private val initMutantRate: Double=.1
+        private val batchSize: Int,
+        private val layers: List<Int>,
+        private val initMutantRate: Double=.01,
+        private val scale: Int=1
 ) {
     private val random = Random()
     var mutantRate = initMutantRate
@@ -41,42 +43,40 @@ class ImageNetEvolution(
      * Создаём популяцию размером populationSize
      * Выполняем эволюцию популяции от эпохи к эпохе
      */
-    fun evolute(epochSize: Int): Network {
+    fun evolute(epochSize1: Int, epochSize2: Int): Network {
         var population = generatePopulation(populationSize, "nw")
         var batchSize = 10
-        var lastResult = 0.0
-        var stagnation = 0
+//        var lastResult = 0.0
+//        var stagnation = 0
         MNIST.createBatch(batchSize)
-        (0 until 2*epochSize).forEach {curEpoch ->
-            if (stagnation == 10) {
-                return population.first().nw
-            }
+        (0 until epochSize2).forEach {curEpoch ->
+//            if (stagnation == 10) {
+//                return population.first().nw
+//            }
             println("эпоха $curEpoch")
             val start = System.nanoTime()
-            mutantRate = ((epochSize - curEpoch)*1.0/epochSize).takeIf { it > 0 } ?: 0.01
+            mutantRate = ((epochSize1 - curEpoch)*1.0/epochSize1).takeIf { it > 0 } ?: initMutantRate
             if (population.first().rate < .1) {
                 return population.first().nw
             }
             population = evoluteEpoch(population)
             val fin = System.nanoTime()
             val getRate = { pos: Int, population: List<Individual> -> ((population[pos].rate*1000000).toInt()/10000.0).toString()}
-            if (curEpoch < epochSize && curEpoch % 10 == 0) {
-                population = rateGeneration(batchSize, population)
-            } else if (curEpoch > epochSize && batchSize == 10){
-                batchSize = 40
-                populationSize = 40
+            if (curEpoch == epochSize1){
+                batchSize = this.batchSize
+                populationSize /= (batchSize / 10)
                 population = rateGeneration(batchSize, population).take(populationSize)
             }
-            val curResult = population[populationSize/2-1].rate
-            if (curEpoch > epochSize && curResult == lastResult) {
-                stagnation++
-                population = population.union(dropout(population)).toList()
-                population = rateGeneration(batchSize, population).take(populationSize)
-            } else {
-                lastResult = curResult
-            }
+//            val curResult = population.take(populationSize/2).map { it.rate }.sum()
+//            if (curEpoch > epochSize && curResult == lastResult) {
+//                stagnation++
+//                population = population.union(dropout(population)).toList()
+//                population = rateGeneration(batchSize, population).take(populationSize)
+//            } else {
+//                lastResult = curResult
+//            }
             val rateInfo = "${getRate(0, population)} < ${getRate(populationSize/4-1, population)} < ${getRate(populationSize/2-1, population)}"
-            writeToFile(getRate(0, population).replace(".", ","))
+//            writeToFile(getRate(0, population).replace(".", ","))
             println("Рейтинг $rateInfo")
             println("Размер батча: $batchSize")
             if (population.first().rate*1.001 > population[populationSize/2-1].rate) return population.first().nw
@@ -131,7 +131,7 @@ class ImageNetEvolution(
     /**
      * Задаётся топология сети
      */
-    private fun createNet() = Network(8, 12, 160, 40, 10)
+    private fun createNet() = Network(*layers.toIntArray())
 
     /**
      * Проводит соревнование внутри популяции. На выходе вычисляет поколение
@@ -162,9 +162,9 @@ class ImageNetEvolution(
      * Этот оптимальный шаблон сохраним, для дальнейшего сравнения и использования
      */
     private fun nextGeneration(population: List<Individual>): List<Individual> {
-        val survivors = population.take(populationSize / 2)
-        val mutants = survivors.mapNotNull { if (random.nextDouble() < mutantRate) mutate(it) else null }
-        val parents = selection(survivors).take(survivors.size - mutants.size)
+        val survivors = population.take(populationSize/2)
+        val mutants = population.mapNotNull { if (random.nextDouble() < mutantRate) mutate(it) else null }.take(populationSize/2)
+        val parents = selection(population, populationSize/2-mutants.size)
         val offspring = createChildren(parents)
         val generation = survivors.union(offspring).union(mutants).toList()
 //        val dif = netsDifferent(generation.map { it.nw })
@@ -178,7 +178,7 @@ class ImageNetEvolution(
     /**
      * Разбиваем популяцию по парам для их участия в скрещивании
      */
-    private fun selection(population: List<Individual>): List<Pair<Individual, Individual>> {
+    private fun selection(population: List<Individual>, count: Int): List<Pair<Individual, Individual>> {
         val size = population.size
         val s = size*(size + 1.0)
         var rangs = population.asReversed().mapIndexed { index, individual ->
@@ -189,7 +189,7 @@ class ImageNetEvolution(
             rangCounter += it.second
             it.first to rangCounter
         }
-        return (0 until population.size).map {
+        return (0 until count).map {
             rangs.find { it.second > random.nextDouble() }!!.first to rangs.find { it.second > random.nextDouble() }!!.first
         }
     }
