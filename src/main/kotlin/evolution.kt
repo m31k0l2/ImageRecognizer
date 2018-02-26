@@ -70,8 +70,8 @@ class ImageNetEvolution(
             val curResult = population[populationSize/2-1].rate
             if (curEpoch > epochSize && curResult == lastResult) {
                 stagnation++
-                MNIST.createBatch(batchSize)
-                population = rateGeneration(batchSize, population)
+                population = population.union(dropout(population)).toList()
+                population = rateGeneration(batchSize, population).take(populationSize)
             } else {
                 lastResult = curResult
             }
@@ -278,7 +278,6 @@ class ImageNetEvolution(
     private fun dropout(population: List<Individual>, p: Double=initMutantRate): List<Individual> {
         val generation = population.map { it.nw }.map { it.clone() }.map { Individual(it) }
         population.parallelStream().forEach {
-            it.rate = 1.0
             it.nw.layers.forEach {
                 it.neurons.forEach {
                     it.weights.forEachIndexed { index, d ->
