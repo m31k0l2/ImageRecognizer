@@ -23,9 +23,10 @@ data class Individual(val nw: Network, var rate: Double=1.0)
  */
 class ImageNetEvolution(
         private var populationSize: Int,
-        private val batchSize: Int,
         private val layers: List<Int>,
+        private val mutantStrategy: (epoch: Int, epochSize: Int) -> Double,
         private val initMutantRate: Double=.01,
+        private val mutantGenRate: Double=.005,
         private val scale: Int=1
 ) {
     private val random = Random()
@@ -43,52 +44,24 @@ class ImageNetEvolution(
      * Создаём популяцию размером populationSize
      * Выполняем эволюцию популяции от эпохи к эпохе
      */
-    fun evolute(epochSize1: Int, epochSize2: Int): Network {
+    fun evolute(epochSize: Int): List<Individual> {
         var population = generatePopulation(populationSize, "nw")
-        var batchSize = 10
-//        var lastResult = 0.0
-//        var stagnation = 0
-        MNIST.createBatch(batchSize)
-        (0 until epochSize2).forEach {curEpoch ->
-//            if (stagnation == 10) {
-//                return population.first().nw
-//            }
+        (0 until epochSize).forEach {curEpoch ->
             println("эпоха $curEpoch")
             val start = System.nanoTime()
-            mutantRate = ((epochSize1 - curEpoch)*1.0/epochSize1).takeIf { it > 0 } ?: initMutantRate
-            if (population.first().rate < .1) {
-                return population.first().nw
-            }
+            mutantRate = mutantStrategy(curEpoch, epochSize)
             population = evoluteEpoch(population)
             val fin = System.nanoTime()
             val getRate = { pos: Int, population: List<Individual> -> ((population[pos].rate*1000000).toInt()/10000.0).toString()}
-            if (curEpoch == epochSize1){
-                batchSize = this.batchSize
-                populationSize /= (batchSize / 10)
-                population = rateGeneration(batchSize, population).take(populationSize)
-            }
-//            val curResult = population.take(populationSize/2).map { it.rate }.sum()
-//            if (curEpoch > epochSize && curResult == lastResult) {
-//                stagnation++
-//                population = population.union(dropout(population)).toList()
-//                population = rateGeneration(batchSize, population).take(populationSize)
-//            } else {
-//                lastResult = curResult
-//            }
             val rateInfo = "${getRate(0, population)} < ${getRate(populationSize/4-1, population)} < ${getRate(populationSize/2-1, population)}"
-//            writeToFile(getRate(0, population).replace(".", ","))
+            println("мутация ${(mutantRate*1000).toInt()/10.0} %")
             println("Рейтинг $rateInfo")
-            println("Размер батча: $batchSize")
-            if (population.first().rate*1.001 > population[populationSize/2-1].rate) return population.first().nw
             println("Время: ${(fin-start)/1_000_000} мс\n")
+            val leader = population.first()
+            val median = population[populationSize/2-1]
+            if (leader.rate > 0.999*median.rate || leader.rate < .1) return population
         }
-        return population.first().nw
-    }
-
-    private fun rateGeneration(batchSize: Int, population: List<Individual>): List<Individual> {
-        MNIST.createBatch(batchSize)
-        rateGeneration(population)
-        return population.sortedBy { it.rate }
+        return population
     }
 
     /**
@@ -123,7 +96,7 @@ class ImageNetEvolution(
     }
 
     private fun generatePopulation(size: Int=populationSize, individual: Individual) = (0 until size).map {
-        if (it == 0) individual else createIndividual()
+        if (it == 0) individual else mutate(individual) ?: createIndividual()
     }
 
     private fun createIndividual() = Individual(createNet())
@@ -137,11 +110,11 @@ class ImageNetEvolution(
      * Проводит соревнование внутри популяции. На выходе вычисляет поколение
      */
     private fun competition(population: List<Individual>): List<Individual> {
-        rateGeneration(population.filter { it.rate == 1.0 })
+        ratePopulation(population.filter { it.rate == 1.0 })
         return population.sortedBy { it.rate }
     }
 
-    private fun rateGeneration(population: List<Individual>) = population.parallelStream().forEach {
+    private fun ratePopulation(population: List<Individual>) = population.parallelStream().forEach {
         it.rate = 1 - MNIST.batch.map { image ->
             it.nw.activate(image.colorsMatrix)[image.index]
         }.average()
@@ -163,14 +136,10 @@ class ImageNetEvolution(
      */
     private fun nextGeneration(population: List<Individual>): List<Individual> {
         val survivors = population.take(populationSize/2)
-        val mutants = population.mapNotNull { if (random.nextDouble() < mutantRate) mutate(it) else null }.take(populationSize/2)
-        val parents = selection(population, populationSize/2-mutants.size)
+        val mutants = survivors.mapNotNull { if (random.nextDouble() < mutantRate) mutate(it) else null }.take(populationSize/2)
+        val parents = selection(survivors, populationSize/2-mutants.size)
         val offspring = createChildren(parents)
-        val generation = survivors.union(offspring).union(mutants).toList()
-//        val dif = netsDifferent(generation.map { it.nw })
-//        mutantRate = initMutantRate + max((1 - dif*8) *mutantRate, .0)
-        println("мутация ${(mutantRate*1000).toInt()/10.0} %")
-        return generation
+        return survivors.union(offspring).union(mutants).toList()
     }
 
     private fun createChildren(parents: List<Pair<Individual, Individual>>) = parents.parallelStream().map { cross(it) }.collect(Collectors.toList())!!
@@ -222,7 +191,7 @@ class ImageNetEvolution(
     }
 
     private fun mutate(individual: Individual): Individual? {
-        val genMutateRate = max(random.nextDouble()*0.1, 0.005)
+        val genMutateRate = max(random.nextDouble()*0.1, mutantGenRate)
         val parentGens = extractWeights(individual.nw)
         var isMutate = false
         val childGens = parentGens.map { layer ->
