@@ -59,6 +59,7 @@ class ImageNetEvolution(
             val getRate = { pos: Int, population: List<Individual> -> ((population[pos].rate*1000000).toInt()/10000.0).toString()}
             val rateInfo = "${getRate(0, population)} < ${getRate(population.size/4-1, population)} < ${getRate(population.size/2-1, population)}"
             println("мутация ${(mutantRate*1000).toInt()/10.0} %")
+            println("Размер батча ${batch.size}")
             println("Рейтинг $rateInfo")
             println("Время: ${(fin-start)/1_000_000} мс\n")
             leader = population.first()
@@ -258,9 +259,9 @@ class ImageNetEvolution(
         return difs.average()
     }
 
-    private fun dropout(population: List<Individual>, p: Double): List<Individual> {
+    fun dropout(population: List<Individual>, p: Double): List<Individual> {
         val generation = population.map { it.nw }.map { it.clone() }.map { Individual(it) }
-        population.parallelStream().forEach {
+        generation.parallelStream().forEach {
             it.nw.layers.forEach {
                 it.neurons.forEach {
                     it.weights.forEachIndexed { index, d ->
@@ -269,6 +270,6 @@ class ImageNetEvolution(
                 }
             }
         }
-        return generation
+        return competition(generation.union(population).toList()).take(population.size/2)
     }
 }
