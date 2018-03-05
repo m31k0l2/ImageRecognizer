@@ -1,13 +1,13 @@
-fun testNet(name: String): Double {
+fun testNet(name: String, batch: List<Image>): Double {
     println("test $name")
     val nw = NetworkIO().load(name)!!
-    return testNet(nw)
+    return testNet(nw, batch)
 }
 
-fun testNet(nw: Network): Double {
+fun testNet(nw: Network, batch: List<Image>): Double {
     var y = 0.0
     var counter = 0
-    MNIST.batch.forEach {
+    batch.sortedBy { it.index }.forEach {
         val o = nw.activate(it.colorsMatrix)
         val result = o[it.index]
         if (result != o.max()) {
@@ -18,9 +18,9 @@ fun testNet(nw: Network): Double {
         }
         y += result
     }
-    y = (y*1000).toInt()/(MNIST.batch.size*10.0)
+    y = (y*1000).toInt()/(batch.size*10.0)
     println("средний успех: $y%")
-    println("$counter / ${MNIST.batch.size}")
+    println("$counter / ${batch.size}")
     return y
 }
 
@@ -38,6 +38,5 @@ fun testBest(): Boolean {
 }
 
 fun main(args: Array<String>) {
-    MNIST.createBatch(100)
-    testNet("nets/nw.net")
+    testNet("nets/nw.net", MNIST.buildBatch(1000))
 }

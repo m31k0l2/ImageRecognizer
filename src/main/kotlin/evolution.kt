@@ -29,7 +29,7 @@ class ImageNetEvolution(
     private val random = Random()
     var mutantRate = 1.0
     lateinit var mutantStrategy: (epoch: Int, epochSize: Int) -> Double
-    private var leader: Individual? = null
+    var leader: Individual? = null
     lateinit var batch: List<Image>
 
     init {
@@ -48,6 +48,7 @@ class ImageNetEvolution(
 
     fun evolute(epochSize: Int, initPopulation: List<Individual>, maxStagnation: Int=5): List<Individual> {
         var population = initPopulation
+        population.forEach { it.rate = 1.0 }
         var stagnation = 0
         var lastRate = 0.0
         (0 until epochSize).forEach {curEpoch ->
