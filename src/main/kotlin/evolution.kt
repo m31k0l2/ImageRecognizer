@@ -60,18 +60,22 @@ class ImageNetEvolution(
             val getRate = { pos: Int, population: List<Individual> -> ((population[pos].rate*1000000).toInt()/10000.0).toString()}
             val rateInfo = "${getRate(0, population)} < ${getRate(population.size/4-1, population)} < ${getRate(population.size/2-1, population)}"
             println("мутация ${(mutantRate*1000).toInt()/10.0} %")
-            println("Размер батча ${batch.size}")
             println("Рейтинг $rateInfo")
             println("Время: ${(fin-start)/1_000_000} мс\n")
             leader = population.first()
-            val median = population[population.size/2-1]
+            var median = population[population.size/2-1]
             if (lastRate == median.rate) {
                 stagnation++
+                if (stagnation % maxStagnation == 0) {
+                    ratePopulation(population)
+                    population = population.sortedBy { it.rate }
+                    median = population[population.size / 2 - 1]
+                    leader = population.first()
+                }
             } else {
                 lastRate = median.rate
-                stagnation = 0
             }
-            if (stagnation > maxStagnation || leader!!.rate > 0.999*median.rate || leader!!.rate < .01) return population
+            if (leader!!.rate > 0.999*median.rate || leader!!.rate < .01 || stagnation == 3*maxStagnation) return population
         }
         return population
     }
@@ -130,10 +134,8 @@ class ImageNetEvolution(
         return population.sortedBy { it.rate }
     }
 
-    private fun ratePopulation(population: List<Individual>) = population.parallelStream().forEach {
-        it.rate = 1 - batch.map { image ->
-            it.nw.activate(image.colorsMatrix)[image.index]
-        }.average()
+    private fun ratePopulation(population: List<Individual>) = population.parallelStream().forEach { individ ->
+        individ.rate = batch.shuffled().take(30).chunked(10).map { it.map { 1 - individ.nw.activate(it.colorsMatrix)[it.index] }.average() }.sorted()[1]
     }
 
     /**

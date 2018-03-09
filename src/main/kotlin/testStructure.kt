@@ -1,9 +1,3 @@
-fun testNet(name: String, batch: List<Image>): Double {
-    println("test $name")
-    val nw = NetworkIO().load(name)!!
-    return testNet(nw, batch)
-}
-
 fun testNet(nw: Network, batch: List<Image>): Double {
     var y = 0.0
     var counter = 0
@@ -24,19 +18,31 @@ fun testNet(nw: Network, batch: List<Image>): Double {
     return y
 }
 
-fun testBest(): Boolean {
-    val nw = NetworkIO().load("nets/nw.net")!!
-    val image = MNIST.next()
-    val result = nw.activate(image.colorsMatrix)
-    val isOk = image.index == result.indexOf(result.max())
-    println("[${image.index}] - $isOk")
-    result.forEachIndexed { index, r ->
-        val percent = (r*1000).toInt()/10.0
-        if (percent > 0) println("$index => $percent")
+fun testMedianNet(nw: Network, batch: List<Image>): Double {
+    val list = (0..9).map { i -> batch.filter { it.index == i } }.map {
+        if (it.isEmpty()) return@map null
+        it.map { nw.activate(it.colorsMatrix)[it.index] }.sorted()[it.size/2-1]
+    }.filterNotNull()
+    list.forEachIndexed { index, y ->
+        val o = (y*1000).toInt()/10.0
+        println("$index -> $o%")
     }
-    return isOk
+    val y = list.average()
+    println("средний успех: ${(y*1000).toInt()/10.0}%")
+    return y
 }
 
 fun main(args: Array<String>) {
-    testNet("nets/nw.net", MNIST.buildBatch(1000))
+    val batch = MNIST.buildBatch(1000)
+    val nw = NetworkIO().load("nets/nw.net")!!
+    testNet(nw, batch)
+    testMedianNet(nw, batch)
+    val rate = batch.shuffled().take(30).chunked(10).map { it.map { 1 - nw.activate(it.colorsMatrix)[it.index] }.average() }.sorted()[1]
+    println("${((1-rate)*1000).toInt()/10.0}%")
+//    val batchPairs = (0..9).map { batch.filter { i -> i.index == it } }
+//    val n = 5
+//    repeat(10, {
+//        val rate = (0..9).map { batchPairs[it].shuffled() }.map { it.take(n).map { 1 - nw.activate(it.colorsMatrix)[it.index]  }.max()!! }.average()
+//        println(1-rate)
+//    })
 }
