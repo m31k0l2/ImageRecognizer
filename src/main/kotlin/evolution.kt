@@ -135,7 +135,16 @@ class ImageNetEvolution(
     }
 
     private fun ratePopulation(population: List<Individual>) = population.parallelStream().forEach { individ ->
-        individ.rate = batch.shuffled().take(30).chunked(10).map { it.map { 1 - individ.nw.activate(it.colorsMatrix)[it.index] }.average() }.sorted()[1]
+        individ.rate = batch.shuffled().take(30).chunked(10).map { it.map {
+            val o = individ.nw.activate(it.colorsMatrix)
+            val y = o.max()!!
+            val r = o[it.index]
+            if (r != y) {
+                1 - r + y
+            } else {
+                1 - r
+            }
+        }.average() }.sorted()[1]
     }
 
     /**

@@ -1,13 +1,16 @@
 fun main(args: Array<String>) {
-    val net = ImageNetEvolution(listOf(8, 12, 160, 40, 10), 0.01)
+//    val net = ImageNetEvolution(listOf(8, 12, 160, 40, 10), 0.01)=3
+//    val net = ImageNetEvolution(listOf(8, 12, 160, 60, 10), 0.01)+4
+    val net = ImageNetEvolution(listOf(8, 14, 180, 60, 10), 0.01) //++5
+//    val net = ImageNetEvolution(listOf(10, 14, 180, 60, 10), 0.01)+++6
     val populationSize = 80
-    while (true) {
-        net.batch = MNIST.buildBatch(100).filter { it.index in listOf(0, 1, 2, 3) }
+    for (i in 1..10) {
+        net.batch = MNIST.buildBatch(100)//.filter { it.index in listOf(0, 1, 2, 3, 4, 5, 6) }
         evolute(net, populationSize)
         val r = testMedianNet(net.leader!!.nw, net.batch)
-        println("=>$r")
+        println("=>$r ($i)")
         //if (r > 0.7)
-            break
+//            break
     }
 }
 
@@ -41,7 +44,7 @@ private fun evolute1(net: ImageNetEvolution, population: List<Individual>, epoch
 
 private fun evolute0(net: ImageNetEvolution, populationSize: Int): List<Individual> {
     net.mutantStrategy = { epoch, epochSize -> (1.0 - epoch * 1.0 / epochSize) }
-    val population1 = net.evolute(50, populationSize)
+    val population1 = net.evolute(20, populationSize)
     testNet(population1.first().nw, net.batch)
     return population1
 }
