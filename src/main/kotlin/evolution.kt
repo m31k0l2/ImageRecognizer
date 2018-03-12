@@ -31,6 +31,7 @@ class ImageNetEvolution(
     lateinit var mutantStrategy: (epoch: Int, epochSize: Int) -> Double
     var leader: Individual? = null
     lateinit var batch: List<Image>
+    private val outputSize = layers.last()
 
     init {
         if (File("nets/").mkdir()) {
@@ -137,13 +138,8 @@ class ImageNetEvolution(
     private fun ratePopulation(population: List<Individual>) = population.parallelStream().forEach { individ ->
         individ.rate = batch.shuffled().take(30).chunked(10).map { it.map {
             val o = individ.nw.activate(it.colorsMatrix)
-            val y = o.max()!!
             val r = o[it.index]
-            if (r != y) {
-                1 - r + y
-            } else {
-                1 - r
-            }
+            1 - r
         }.average() }.sorted()[1]
     }
 
