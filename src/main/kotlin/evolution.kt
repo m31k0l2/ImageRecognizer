@@ -21,8 +21,7 @@ data class Individual(val nw: Network, var rate: Double=1.0)
  * [mutantRate] - вероятность мутации генов, не должно быть сильно большим значением, основную роль в эволюции
  * должно играть скрещивание
  */
-class ImageNetEvolution(
-        private val layers: List<Int>,
+abstract class NetEvolution(
         var mutantGenRate: Double=.005,
         private val scale: Int=1
 ) {
@@ -31,7 +30,6 @@ class ImageNetEvolution(
     lateinit var mutantStrategy: (epoch: Int, epochSize: Int) -> Double
     var leader: Individual? = null
     lateinit var batch: List<Image>
-    private val outputSize = layers.last()
 
     init {
         if (File("nets/").mkdir()) {
@@ -125,7 +123,7 @@ class ImageNetEvolution(
     /**
      * Задаётся топология сети
      */
-    private fun createNet() = Network(*layers.toIntArray())
+    abstract fun createNet(): Network
 
     /**
      * Проводит соревнование внутри популяции. На выходе вычисляет поколение
@@ -137,7 +135,7 @@ class ImageNetEvolution(
 
     private fun ratePopulation(population: List<Individual>) = population.parallelStream().forEach { individ ->
         individ.rate = batch.shuffled().take(30).chunked(10).map { it.map {
-            val o = individ.nw.activate(it.colorsMatrix)
+            val o = individ.nw.activate(it)
             val r = o[it.index]
             1 - r
         }.average() }.sorted()[1]

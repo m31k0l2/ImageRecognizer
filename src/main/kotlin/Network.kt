@@ -1,8 +1,14 @@
-class Network(vararg layerSize: Int) {
-    val layers = MutableList(layerSize.size, { i -> Layer(layerSize[i]) })
+interface Network {
+    fun activate(x: Image): List<Double>
+    fun clone(): Network
+    val layers: MutableList<Layer>
+}
 
-    fun activate(x: List<List<Double>>): List<Double> {
-        var y = layers[0].cnn(x, 5, 1)
+class CNetwork(vararg layerSize: Int): Network {
+    override val layers = MutableList(layerSize.size, { i -> Layer(layerSize[i]) })
+
+    override fun activate(x: Image): List<Double> {
+        var y = layers[0].cnn(x.colorsMatrix, 5, 1)
         y = y.map { Layer.relu(it) }
         y = y.map { Layer.pool(it) }
         y = layers[1].cnn(y, 5, 1)
@@ -15,5 +21,21 @@ class Network(vararg layerSize: Int) {
         return Layer.softmax(o)
     }
 
-    fun clone() =  Network().also { it.layers.addAll(layers.map { it.clone() }) }
+    override fun clone() = CNetwork().also { it.layers.addAll(layers.map { it.clone() }) }
+}
+
+class MNetwork(vararg layerSize: Int): Network {
+    override val layers = MutableList(layerSize.size, { i -> Layer(layerSize[i]) })
+
+    override fun activate(x: Image): List<Double> {
+        var y = x.netOutputs.value
+        layers.forEach {
+            y = it.activate(y)
+        }
+        return Layer.softmax(y)
+    }
+
+    override fun clone() =  MNetwork().also {
+        it.layers.addAll(layers.map { it.clone() })
+    }
 }

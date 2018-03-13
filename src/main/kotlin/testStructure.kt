@@ -2,7 +2,7 @@ fun testNet(nw: Network, batch: List<Image>): Double {
     var y = 0.0
     var counter = 0
     batch.sortedBy { it.index }.forEach {
-        val o = nw.activate(it.colorsMatrix)
+        val o = nw.activate(it)
         if (it.index >= o.size) return@forEach
         val result = o[it.index]
         if (result != o.max()) {
@@ -23,7 +23,7 @@ fun testMedianNet(nw: Network, batch: List<Image>): Double {
     val list = (0..9).map { i -> batch.filter { it.index == i } }.map {
         if (it.isEmpty()) return@map null
         it.map {
-            nw.activate(it.colorsMatrix)[it.index]
+            nw.activate(it)[it.index]
         }.sorted()[it.size/2-1]
     }.filterNotNull()
     list.forEachIndexed { index, y ->

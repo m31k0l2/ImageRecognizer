@@ -6,6 +6,19 @@ class Image(image: File) {
     val group = getGroup(image)
     val colorsMatrix = getColorBuffers(image)
     val index = group!!.toInt()
+    val netOutputs = lazy { getNetOutputs() }
+
+    companion object {
+        private val inputs: List<Network>
+        init {
+            var names = listOf("02", "13", "24", "35", "46", "57", "68", "79", "80", "91")
+            names = names.union(names.map { "${it}_1" }).toList()
+            inputs = names.map { "nets/nw$it.net" }.map {
+                NetworkIO().load(it)!!
+            }
+        }
+
+    }
 
     private fun getGroup(image: File): String? {
 //        val pattern = Pattern.compile("\\\\(\\d)\\\\")
@@ -36,4 +49,6 @@ class Image(image: File) {
         }
         return listOf(redBuffer)
     }
+
+    private fun getNetOutputs() = inputs.map { it.activate(this) }.flatMap { it }
 }
