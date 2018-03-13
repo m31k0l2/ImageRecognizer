@@ -10,21 +10,24 @@ class ImageRecognizerEvolution: NetEvolution(mutantGenRate = .01) {
 fun main(args: Array<String>) {
     val net = ImageNetEvolution()
     val populationSize = 80
-    val prefix = "1"
-    train(net, populationSize, "nets/nw02_$prefix.net", (0..2).toList())
-    train(net, populationSize, "nets/nw13_$prefix.net", (1..3).toList())
-    train(net, populationSize, "nets/nw24_$prefix.net", (2..4).toList())
-    train(net, populationSize, "nets/nw35_$prefix.net", (3..5).toList())
-    train(net, populationSize, "nets/nw46_$prefix.net", (4..6).toList())
-    train(net, populationSize, "nets/nw57_$prefix.net", (5..7).toList())
-    train(net, populationSize, "nets/nw68_$prefix.net", (6..8).toList())
-    train(net, populationSize, "nets/nw79_$prefix.net", (7..9).toList())
-    train(net, populationSize, "nets/nw80_$prefix.net", listOf(8, 9, 0))
-    train(net, populationSize, "nets/nw91_$prefix.net", listOf(9, 0, 1))
+    for (prefix in 0..2) {
+        train(net, populationSize, "nets/nw02_$prefix.net", (0..2).toList())
+        train(net, populationSize, "nets/nw13_$prefix.net", (1..3).toList())
+        train(net, populationSize, "nets/nw24_$prefix.net", (2..4).toList())
+        train(net, populationSize, "nets/nw35_$prefix.net", (3..5).toList())
+        train(net, populationSize, "nets/nw46_$prefix.net", (4..6).toList())
+        train(net, populationSize, "nets/nw57_$prefix.net", (5..7).toList())
+        train(net, populationSize, "nets/nw68_$prefix.net", (6..8).toList())
+        train(net, populationSize, "nets/nw79_$prefix.net", (7..9).toList())
+        train(net, populationSize, "nets/nw80_$prefix.net", listOf(8, 9, 0))
+        train(net, populationSize, "nets/nw91_$prefix.net", listOf(9, 0, 1))
+    }
 }
 
 private fun train(net: ImageNetEvolution, populationSize: Int, name: String, trainValues: List<Int>) {
-    while (true) {
+    net.name = name
+    for (i in 1..5) {
+        println("train $name")
         net.batch = MNIST.buildBatch(100).filter { it.index in trainValues }
         evolute(net, populationSize, name)
         val r = testMedianNet(net.leader!!.nw, net.batch)

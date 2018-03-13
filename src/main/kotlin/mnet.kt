@@ -1,14 +1,14 @@
 fun main(args: Array<String>) {
     val batch = MNIST.buildBatch(100)
     var names = listOf("02", "13", "24", "35", "46", "57", "68", "79", "80", "91")
-    names = names.union(names.map { "${it}_1" }).toList()
+    names = (0..2).flatMap { n -> names.map { "${it}_$n" } }.sorted()
     val nets = names.map { "nets/nw$it.net" }.map { NetworkIO().load(it)!! }
     var counter = 0
     batch.forEach {
         val results = nets.mapNotNull { nw ->
             val o = nw.activate(it)
             val x = o.max()!!
-            if (x > 0.5) {
+            if (x > 0.9) {
                 o.indexOf(x)
             } else {
                 null

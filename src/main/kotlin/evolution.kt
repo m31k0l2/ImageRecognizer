@@ -27,6 +27,7 @@ abstract class NetEvolution(
 ) {
     private val random = Random()
     var mutantRate = 1.0
+    var name: String = "nets/nw.net"
     lateinit var mutantStrategy: (epoch: Int, epochSize: Int) -> Double
     var leader: Individual? = null
     lateinit var batch: List<Image>
@@ -43,7 +44,7 @@ abstract class NetEvolution(
      * Создаём популяцию размером populationSize
      * Выполняем эволюцию популяции от эпохи к эпохе
      */
-    fun evolute (epochSize: Int, populationSize: Int) = evolute(epochSize, generatePopulation(populationSize, "nw"))
+    fun evolute (epochSize: Int, populationSize: Int) = evolute(epochSize, generatePopulation(populationSize, name))
 
     fun evolute(epochSize: Int, initPopulation: List<Individual>, maxStagnation: Int=5): List<Individual> {
         var population = initPopulation
@@ -109,8 +110,8 @@ abstract class NetEvolution(
             it.rate = 1.0
             return generatePopulation(size, it)
         }
-        if (!File("nets/$name.net").exists()) return generatePopulation(size)
-        val nw = NetworkIO().load("nets/$name.net")!!
+        if (!File(name).exists()) return generatePopulation(size)
+        val nw = NetworkIO().load(name)!!
         return generatePopulation(size, Individual(nw))
     }
 
@@ -137,7 +138,8 @@ abstract class NetEvolution(
         individ.rate = batch.shuffled().take(30).chunked(10).map { it.map {
             val o = individ.nw.activate(it)
             val r = o[it.index]
-            1 - r
+            if (r < 0.5 && o.max()!! > 0.5) 2*(1 - r)
+            else 1 - r
         }.average() }.sorted()[1]
     }
 
