@@ -11,28 +11,25 @@ fun main(args: Array<String>) {
     val net = ImageNetEvolution()
     val populationSize = 80
     for (prefix in 0..2) {
-        train(net, populationSize, "nets/nw02_$prefix.net", (0..2).toList())
-        train(net, populationSize, "nets/nw13_$prefix.net", (1..3).toList())
-        train(net, populationSize, "nets/nw24_$prefix.net", (2..4).toList())
-        train(net, populationSize, "nets/nw35_$prefix.net", (3..5).toList())
-        train(net, populationSize, "nets/nw46_$prefix.net", (4..6).toList())
-        train(net, populationSize, "nets/nw57_$prefix.net", (5..7).toList())
-        train(net, populationSize, "nets/nw68_$prefix.net", (6..8).toList())
-        train(net, populationSize, "nets/nw79_$prefix.net", (7..9).toList())
-        train(net, populationSize, "nets/nw80_$prefix.net", listOf(8, 9, 0))
-        train(net, populationSize, "nets/nw91_$prefix.net", listOf(9, 0, 1))
+        train(net, populationSize, "nets/nw012_$prefix.net", (0..2).toList())
+        train(net, populationSize, "nets/nw3456_$prefix.net", (3..6).toList())
+        train(net, populationSize, "nets/nw789_$prefix.net", (7..9).toList())
     }
 }
 
 private fun train(net: ImageNetEvolution, populationSize: Int, name: String, trainValues: List<Int>) {
     net.name = name
-    for (i in 1..5) {
+    for (i in 1..3) {
         println("train $name")
         net.batch = MNIST.buildBatch(100).filter { it.index in trainValues }
-        evolute(net, populationSize, name)
-        val r = testMedianNet(net.leader!!.nw, net.batch)
-        println("=>$r")
-        if (r > 0.95) break
+        (net.leader?.nw ?: NetworkIO().load(name))?.let {
+            val r = testMedianNet(it, net.batch)
+            if (r > 0.95) return
+        }
+        val population = evolute(net, populationSize)
+//        net.batch = MNIST.buildBatch(100).filter { it.index in trainValues }.union(MNIST.buildBatch(100).filter { it.index !in trainValues }.take(10)).toList()
+//        evolute1(net, population, 100)
+        NetworkIO().save(net.leader!!.nw, name)
     }
 }
 
@@ -48,11 +45,10 @@ private fun train(net: ImageNetEvolution, populationSize: Int, name: String, tra
 //    }
 //}
 
-private fun evolute(net: NetEvolution, populationSize: Int, name: String): List<Individual> {
+private fun evolute(net: NetEvolution, populationSize: Int): List<Individual> {
     var population = evolute0(net, populationSize)
     population = net.dropout(population, 0.01)
     evolute1(net, population, 100)
-    NetworkIO().save(net.leader!!.nw, name)
     return population
 }
 
