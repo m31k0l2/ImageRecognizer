@@ -1,3 +1,5 @@
+import java.util.*
+
 //fun main(args: Array<String>) {
 //    val batch = MNIST.buildBatch(100)
 //    var names = listOf("012", "3456", "789")
@@ -36,12 +38,20 @@
 fun main(args: Array<String>) {
     val batch = MNIST.buildBatch(100)
     val groups = listOf("012", "3456", "789").map {
-        (0..2).map { n -> "${it}_$n" }.map { "nets/nw$it.net" }.map { NetworkIO().load(it)!! }
+        (0..5).map { n -> "${it}_$n" }.map { "nets/nw$it.net" }.map { NetworkIO().load(it)!! }
     }
-    val image = batch[0]
-    print("${image.index} -> ")
+    val image = batch[Random().nextInt(batch.size)]
     val r = groups.map { it.map { it.activate(image) } }
-    println(r)
+    val getGroupResult = { pos: Int, size: Int -> r[pos].map { it.subList(0, size) }.reduce { acc, list -> (0 until acc.size).map { acc[it] + list[it]} }.map { it/r[0].size }}
+    val group1 = getGroupResult(0, 3)
+    val group2 = getGroupResult(1, 4)
+    val group3 = getGroupResult(2, 3)
+    var res = listOf(group1, group2, group3).flatMap { it }
+    res = res.map { (it/res.sum()*1000).toInt()/10.0 }
+    println("${image.index} = ${res.indexOf(res.max())} ")
+    res.forEachIndexed { i, d ->
+        println("$i -> $d")
+    }
 //    val nets = names.map { "nets/nw$it.net" }.map { NetworkIO().load(it)!! }
 //    var counter = 0
 //    batch.forEach {

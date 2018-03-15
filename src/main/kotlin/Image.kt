@@ -9,7 +9,7 @@ class Image(image: File) {
     val netOutputs = lazy { getNetOutputs() }
 
     companion object {
-       private val names = (0..2).flatMap { n -> listOf("012", "3456", "789").map { "${it}_$n" } }.sorted()
+       private val names = (0..5).flatMap { n -> listOf("012", "3456", "789").map { "${it}_$n" } }.sorted()
         private val inputs = lazy {  names.map { "nets/nw$it.net" }.map {
             NetworkIO().load(it)!!
         } }
