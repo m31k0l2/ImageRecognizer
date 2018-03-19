@@ -1,3 +1,5 @@
+import java.util.*
+
 class ImageNetEvolution: NetEvolution(mutantGenRate = .01) {
     override fun createNet() = CNetwork(8, 14, 180, 60, 10)
     // 10, 14, 180, 60, 10 - 6
@@ -9,26 +11,19 @@ class ImageRecognizerEvolution: NetEvolution(mutantGenRate = .01) {
 
 fun main(args: Array<String>) {
     val net = ImageNetEvolution()
-    val populationSize = 80
-    for (prefix in 0..2) {
-        train(net, populationSize, "nets/nw012_$prefix.net", (0..2).toList())
-        train(net, populationSize, "nets/nw3456_$prefix.net", (3..6).toList())
-        train(net, populationSize, "nets/nw789_$prefix.net", (7..9).toList())
-    }
+    train(net, settings.populationSize, "nets/nw34589_0.net", listOf(3, 4, 5, 8, 9))
 }
 
 private fun train(net: ImageNetEvolution, populationSize: Int, name: String, trainValues: List<Int>) {
     net.name = name
-    for (i in 1..3) {
+    for (i in 1..settings.trainCount) {
         println("train $name")
-        net.batch = MNIST.buildBatch(100).filter { it.index in trainValues }
+        net.batch = MNIST.buildBatch(settings.batchSize).filter { it.index in trainValues }
         (net.leader?.nw ?: NetworkIO().load(name))?.let {
             val r = testMedianNet(it, net.batch)
             if (r > 0.95) return
         }
-        val population = evolute(net, populationSize)
-//        net.batch = MNIST.buildBatch(100).filter { it.index in trainValues }.union(MNIST.buildBatch(100).filter { it.index !in trainValues }.take(10)).toList()
-//        evolute1(net, population, 100)
+        evolute(net, populationSize)
         NetworkIO().save(net.leader!!.nw, name)
     }
 }
@@ -48,12 +43,12 @@ private fun train(net: ImageNetEvolution, populationSize: Int, name: String, tra
 private fun evolute(net: NetEvolution, populationSize: Int): List<Individual> {
     var population = evolute0(net, populationSize)
     population = net.dropout(population, 0.01)
-    evolute1(net, population, 100)
+    evolute1(net, population, settings.epochSize)
     return population
 }
 
 private fun evolute1(net: NetEvolution, population: List<Individual>, epochSize: Int): List<Individual> {
-    net.mutantStrategy = { _, _ -> 0.1 }
+    net.mutantStrategy = { _, _ -> 0.2*Random().nextDouble() }
     net.mutantGenRate = 0.001
     val population1 = net.evolute(epochSize, population, 5)
     testNet(population1.first().nw, net.batch)

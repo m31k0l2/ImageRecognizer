@@ -75,7 +75,7 @@ abstract class NetEvolution(
             } else {
                 lastRate = median.rate
             }
-            if (leader!!.rate > 0.999*median.rate || leader!!.rate < .01 || stagnation == 3*maxStagnation) return population
+            if (leader!!.rate > 0.999*median.rate || leader!!.rate < .01 || stagnation == 5*maxStagnation) return population
         }
         return population
     }
