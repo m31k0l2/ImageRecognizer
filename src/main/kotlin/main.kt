@@ -11,7 +11,7 @@ class ImageRecognizerEvolution: NetEvolution(mutantGenRate = .01) {
 
 fun main(args: Array<String>) {
     val net = ImageNetEvolution()
-    train(net, settings.populationSize, "nets/nw34589_0.net", listOf(3, 4, 5, 8, 9))
+    train(net, settings.populationSize, "nets/nw589.net", listOf(5, 8, 9))
 }
 
 private fun train(net: ImageNetEvolution, populationSize: Int, name: String, trainValues: List<Int>) {

@@ -1,5 +1,5 @@
 fun main(args: Array<String>) {
-    val nw = NetworkIO().load("nets/nw34589_0.net")!!
+    val nw = NetworkIO().load("nets/nw589.net")!!
     val batch = MNIST.buildBatch(50)
     (0..9).forEach { n ->
         val r = batch.filter { it.index == n }.map { nw.activate(it) }.mapNotNull {
