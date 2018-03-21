@@ -10,8 +10,11 @@ class ImageRecognizerEvolution: NetEvolution(mutantGenRate = .01) {
 }
 
 fun main(args: Array<String>) {
-    val net = ImageNetEvolution()
-    train(net, settings.populationSize, "nets/nw589.net", listOf(5, 8, 9))
+    for (i in 0..2) {
+        (0..9).filter { it != i }.forEach {
+            train(ImageNetEvolution(), settings.populationSize, "nets/nw$i$it.net", listOf(i, it))
+        }
+    }
 }
 
 private fun train(net: ImageNetEvolution, populationSize: Int, name: String, trainValues: List<Int>) {
