@@ -9,10 +9,20 @@ class Image(image: File) {
     val netOutputs = lazy { getNetOutputs() }
 
     companion object {
-       private val names = (0..5).flatMap { n -> listOf("012", "3456", "789").map { "${it}_$n" } }.sorted()
-        private val inputs = lazy {  names.map { "nets/nw$it.net" }.map {
-            NetworkIO().load(it)!!
-        } }
+        private fun setup(): List<MutableSet<Network>> {
+            val nets = (1..20).map { mutableSetOf<Network>() }
+            for (n in 0..9) {
+                for (k in 0..9) {
+                    NetworkIO().load("nets/nw$n$k.net")?.let {
+                        nets[n].add(it)
+                        nets[10+k].add(it)
+                    }
+                }
+            }
+            return nets
+        }
+
+        private val inputs = lazy { setup() }
     }
 
     private fun getGroup(image: File): String? {
@@ -45,5 +55,17 @@ class Image(image: File) {
         return listOf(redBuffer)
     }
 
-    private fun getNetOutputs() = inputs.value.map { it.activate(this) }.flatMap { it }
+    private fun getNetOutputs(): List<Double> {
+        val nets = inputs.value
+        val t = (0..19).map { n ->
+            nets[n].map {
+                it.activate(this)[n % 10]
+            }
+        }
+        return (0..19).flatMap { n ->
+            nets[n].map {
+                it.activate(this)[n % 10]
+            }
+        }
+    }
 }
