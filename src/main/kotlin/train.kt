@@ -5,7 +5,7 @@ class ImageNetEvolution: NetEvolution(mutantGenRate = .01) {
 }
 
 class ImageRecognizerEvolution: NetEvolution(mutantGenRate = .01) {
-    override fun createNet() = MNetwork(15, 10)
+    override fun createNet() = MNetwork(10)
 }
 
 fun main(args: Array<String>) {
@@ -26,7 +26,8 @@ fun trainTotal() {
     val net = ImageRecognizerEvolution()
     val populationSize = 80
     net.name = "nets/nw.net"
-    net.batch = MNIST.buildBatch(100)
+    net.batch = MNIST.buildBatch(30)
+    net.leader = Individual(NetworkIO().load(net.name, false)!!)
     while(true) {
         Trainer.evolute(net, populationSize)
         val r = testMedianNet(net.leader!!.nw, net.batch)
