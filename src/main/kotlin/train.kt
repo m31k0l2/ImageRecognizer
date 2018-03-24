@@ -1,7 +1,7 @@
 import java.util.*
 
 class ImageNetEvolution: NetEvolution(mutantGenRate = .01) {
-    override fun createNet() = CNetwork(8, 14, 180, 60, 10)
+    override fun createNet() = CNetwork(2, 4, 30, 10)
 }
 
 class ImageRecognizerEvolution: NetEvolution(mutantGenRate = .01) {
@@ -10,8 +10,8 @@ class ImageRecognizerEvolution: NetEvolution(mutantGenRate = .01) {
 
 fun main(args: Array<String>) {
     while (true)
-//    trainFragments()
-    trainTotal()
+    trainFragments()
+//    trainTotal()
 }
 
 private fun trainFragments() {

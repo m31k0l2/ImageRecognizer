@@ -1,7 +1,7 @@
 val n = 9
 
 fun main(args: Array<String>) {
-    val batch = MNIST.buildBatch(100)
+    val batch = MNIST.buildBatch(100).filter { it.index in (0..n) }
     var err = 0
     val a = 7 // решение, если проголосовало больше a
     batch.filter { it.index in (0..n) }.forEach { image ->
@@ -20,6 +20,7 @@ fun main(args: Array<String>) {
         if (r != image.index) err++
     }
     println("Ошибочно распознано: $err / ${batch.size}")
+    println("Успех: ${((batch.size-err)*1000.0/batch.size).toInt()/10.0}%")
 }
 
 object Detectors {
