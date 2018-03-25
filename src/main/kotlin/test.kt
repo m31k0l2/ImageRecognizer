@@ -3,9 +3,12 @@ val n = 9
 fun main(args: Array<String>) {
     val batch = MNIST.buildBatch(100).filter { it.index in (0..n) }
     var err = 0
+    var err2 = 0
+    var err3 = 0
     val a = 7 // решение, если проголосовало больше a
     batch.filter { it.index in (0..n) }.forEach { image ->
         var res = (0..n).map { it to Detectors.detect(it, image) }.filter { it.second > a }
+        var isSure = true
         val r = when {
             res.size == 1 -> res.first().first
             res.size > 1 -> {
@@ -13,13 +16,19 @@ fun main(args: Array<String>) {
                res.maxBy { it.second }!!.first
             }
             else -> {
+                isSure = false
+                err2++
                 Detectors.detect3(image)
             }
         }
-        println("${image.index} -> $r")
-        if (r != image.index) err++
+        println("${image.index} -> $r${"?".takeIf { !isSure } ?: ""}")
+        if (r != image.index) {
+            err++
+            if (!isSure) err3++
+        }
     }
     println("Ошибочно распознано: $err / ${batch.size}")
+    println("Сомнения: $err2 из них ошибок: $err3")
     println("Успех: ${((batch.size-err)*1000.0/batch.size).toInt()/10.0}%")
 }
 
