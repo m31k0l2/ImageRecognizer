@@ -17,7 +17,7 @@ fun main(args: Array<String>) {
 private fun trainFragments() {
     for (i in 0..9) {
         (0..9).filter { it != i }.forEach {
-            Trainer.train(ImageNetEvolution(), settings.populationSize, "nets/nw$i$it.net", listOf(i, it))
+            Trainer.train(ImageNetEvolution(), settings.populationSize, "nets/nw$i${it}_1.net", listOf(i, it))
         }
     }
 }
