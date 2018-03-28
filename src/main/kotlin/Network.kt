@@ -24,6 +24,22 @@ class CNetwork(vararg layerSize: Int): Network {
     override fun clone() = CNetwork().also { it.layers.addAll(layers.map { it.clone() }) }
 }
 
+class FNetwork(vararg layerSize: Int): Network {
+    override val layers = MutableList(layerSize.size, { i -> Layer(layerSize[i]) })
+
+    override fun activate(x: Image): List<Double> {
+        var y = x.netOutputs.value
+        layers.forEach {
+            y = it.activate(y)
+        }
+        return Layer.softmax(y)
+    }
+
+    override fun clone() =  MNetwork().also {
+        it.layers.addAll(layers.map { it.clone() })
+    }
+}
+
 class MNetwork(vararg layerSize: Int): Network {
     override val layers = MutableList(layerSize.size, { i -> Layer(layerSize[i]) })
 

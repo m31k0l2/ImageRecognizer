@@ -5,44 +5,41 @@ class ImageNetEvolution: NetEvolution(mutantGenRate = .01) {
 }
 
 class ImageRecognizerEvolution: NetEvolution(mutantGenRate = .01) {
-    override fun createNet() = MNetwork(10)
+    override fun createNet() = FNetwork(10)
 }
 
 fun main(args: Array<String>) {
-    while (true)
+//    while (true)
     trainFragments()
 //    trainTotal()
 }
 
-private fun trainFragments() {
-    for (i in 0..9) {
-        (0..9).filter { it != i }.forEach {
-            Trainer.train(ImageNetEvolution(), settings.populationSize, "nets/nw$i${it}_1.net", listOf(i, it))
-        }
-    }
-}
-
 fun trainTotal() {
     val net = ImageRecognizerEvolution()
-    val populationSize = 80
-    net.name = "nets/nw.net"
     net.batch = MNIST.buildBatch(30)
-    net.leader = Individual(NetworkIO().load(net.name, false)!!)
-    while(true) {
-        Trainer.evolute(net, populationSize)
-        val r = testMedianNet(net.leader!!.nw, net.batch)
-        println("=>$r")
-        NetworkIO().save(net.leader!!.nw, net.name)
-        if (r > 0.95) break
+    net.name = "nets/total.net"
+    Trainer.evolute(net, 80)
+    NetworkIO().save(net.leader!!.nw, net.name)
+}
+
+private fun trainFragments() {
+    val trainSet = (102..987).mapNotNull {
+        val a = it % 10
+        val b = it/10 % 10
+        val c = it/100 % 10
+        listOf(a, b, c).sorted().takeIf { a != b && a != c && b != c }
+    }.toSet()
+    trainSet.forEach {
+        Trainer.train(ImageNetEvolution(), 80, "nets/${it[0]}${it[1]}${it[2]}.net", it)
     }
 }
 
 object Trainer {
     fun train(net: ImageNetEvolution, populationSize: Int, name: String, trainValues: List<Int>) {
         net.name = name
-        for (i in 1..settings.trainCount) {
+        for (i in 1..Settings.trainCount) {
             println("train $name")
-            net.batch = MNIST.buildBatch(settings.batchSize).filter { it.index in trainValues }
+            net.batch = MNIST.buildBatch(Settings.batchSize).filter { it.index in trainValues }
             (net.leader?.nw ?: NetworkIO().load(name))?.let {
                 val r = testMedianNet(it, net.batch)
                 if (r > 0.95) return
@@ -52,7 +49,7 @@ object Trainer {
         }
     }
 
-    fun evolute(net: NetEvolution, populationSize: Int, epochSize: Int = settings.epochSize): List<Individual> {
+    fun evolute(net: NetEvolution, populationSize: Int, epochSize: Int = Settings.epochSize): List<Individual> {
         var population = evolute0(net, populationSize)
         population = net.dropout(population, 0.01)
         evolute1(net, population, epochSize)
