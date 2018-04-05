@@ -1,3 +1,5 @@
+import java.util.*
+
 fun testNet(nw: Network, batch: List<Image>): Double {
     var y = 0.0
     var counter = 0
@@ -36,14 +38,11 @@ fun testMedianNet(nw: Network, batch: List<Image>): Double {
 }
 
 fun main(args: Array<String>) {
-    val batch = MNIST.buildBatch(1000)
-    val nw = NetworkIO().load("nets/nw.net")!!
-    testNet(nw, batch)
-    testMedianNet(nw, batch)
-//    val batchPairs = (0..9).map { batch.filter { i -> i.index == it } }
-//    val n = 5
-//    repeat(10, {
-//        val rate = (0..9).map { batchPairs[it].shuffled() }.map { it.take(n).map { 1 - nw.activate(it.colorsMatrix)[it.index]  }.max()!! }.average()
-//        println(1-rate)
-//    })
+    while (true) {
+        print("Размер батча: ")
+        val size = Scanner(System.`in`).nextInt()
+        testMedianNet(NetworkIO().load("nets/nw.net")!!, MNIST.buildBatch(size))
+        if (size < 30) return
+    }
+//    testNet(NetworkIO().load("nets/nw01234.net")!!, MNIST.buildBatch(1000))
 }

@@ -30,25 +30,22 @@ class Layer(size: Int=0) {
     val neurons = MutableList(size, { Neuron() })
     fun activate(input: List<Double>) = neurons.map { it.activate(input) }
 
-    fun cnn(input: List<List<Double>>, filterSize: Int, stride: Int): List<List<Double>> {
+    fun cnn(input: List<List<Double>>, matrixDivider: MatrixDivider): List<List<Double>> {
         val x = input.map {
-            Encoder.divideToMatrix(it, filterSize, stride)
+            matrixDivider.divide(it)
         }
-        val y = (0 until x.first().size).map { i->
-            (0 until x.size).flatMap { j ->
-                x[j][i]
-            }
+        return x.flatMap { l ->
+            neurons.map { kernel -> l.map {
+                if (kernel.weights.size != it.size) kernel.setRandomWeights(it.size)
+                kernel.sum(it)
+            } }
         }
-        return neurons.map { kernel -> y.map {
-            if (kernel.weights.size != it.size) kernel.setRandomWeights(it.size)
-            kernel.sum(it)
-        } }
     }
 
     companion object {
         fun relu(x: List<Double>) = x.map { max(it, 0.0) }
 
-        fun pool(x: List<Double>) =  Encoder.divideToMatrix(x, 2, 2).map { it.max()!! }
+        fun pool(x: List<Double>, matrixDivider: MatrixDivider) =  matrixDivider.divide(x).map { it.max()!! }
 
         fun softmax(x: List<Double>): List<Double> {
             val sum = x.sum()
@@ -60,14 +57,15 @@ class Layer(size: Int=0) {
     fun clone() = Layer().also { it.neurons.addAll(neurons.map { it.clone() }.toMutableList()) }
 }
 
-object Encoder {
-    private fun <T> conv(input: List<T>, x0: Int, side: Int, matrixSize: Int) = List(side, { i: Int -> List(side, { input[x0 + it + matrixSize * i] }) }).flatMap { it }
-
-    fun <T>divideToMatrix(x: List<T>, size: Int, shift: Int): List<List<T>> {
-        val inputSide = Math.sqrt(x.size.toDouble()).toInt()
-        return (0..inputSide-size step shift).map {row ->
-            (0..inputSide - size step shift)
-                    .map { conv(x, it +row*inputSide, size, inputSide) }
-        }.flatMap { it }
+class MatrixDivider(side: Int, size: Int, stride: Int) {
+    private val positions: List<List<Int>>
+    init {
+        positions = (0..side-size step stride).flatMap { posY ->
+            (0..side-size step stride).map { posX ->
+                (0 until size).flatMap { i -> (0 until size).map { posY*side + posX + it + i * side } }
+            }
+        }
     }
+
+    fun <E>divide(x: List<E>) = positions.map { it.map { x[it] } }
 }

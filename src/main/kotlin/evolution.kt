@@ -1,5 +1,4 @@
 import java.io.File
-import java.io.FileWriter
 import java.util.*
 import java.util.stream.Collectors
 import kotlin.math.max
@@ -23,6 +22,7 @@ data class Individual(val nw: Network, var rate: Double=1.0)
  */
 abstract class NetEvolution(
         var mutantGenRate: Double=.005,
+        private val rateCount: Int = 3,
         private val scale: Int=1
 ) {
     private val random = Random()
@@ -31,6 +31,8 @@ abstract class NetEvolution(
     lateinit var mutantStrategy: (epoch: Int, epochSize: Int) -> Double
     var leader: Individual? = null
     lateinit var batch: List<Image>
+    var trainLayers = emptyList<Int>()
+    private var mutateRate = 0.1
 
     init {
         if (File("nets/").mkdir()) {
@@ -44,13 +46,15 @@ abstract class NetEvolution(
      * Создаём популяцию размером populationSize
      * Выполняем эволюцию популяции от эпохи к эпохе
      */
-    fun evolute (epochSize: Int, populationSize: Int) = evolute(epochSize, generatePopulation(populationSize, name))
+    fun evolute (epochSize: Int, populationSize: Int, maxStagnation: Int=5) = evolute(epochSize, generatePopulation(populationSize, name), maxStagnation)
 
     fun evolute(epochSize: Int, initPopulation: List<Individual>, maxStagnation: Int=5): List<Individual> {
+        if (trainLayers.isEmpty()) trainLayers = (0 until initPopulation.first().nw.layers.size).toList()
         var population = initPopulation
         population.forEach { it.rate = 1.0 }
         var stagnation = 0
         var lastRate = 0.0
+        mutateRate = max((Random().nextDouble()*mutantGenRate*100).toInt()/100.0, 0.005)
         (0 until epochSize).forEach {curEpoch ->
             println("эпоха $curEpoch")
             val start = System.nanoTime()
@@ -59,7 +63,7 @@ abstract class NetEvolution(
             val fin = System.nanoTime()
             val getRate = { pos: Int, population: List<Individual> -> ((population[pos].rate*1000000).toInt()/10000.0).toString()}
             val rateInfo = "${getRate(0, population)} < ${getRate(population.size/4-1, population)} < ${getRate(population.size/2-1, population)}"
-            println("мутация ${(mutantRate*1000).toInt()/10.0} %")
+            println("мутация ${(mutantRate*1000).toInt()/10.0} % / $mutateRate")
             println("Рейтинг $rateInfo")
             println("Время: ${(fin-start)/1_000_000} мс\n")
             leader = population.first()
@@ -90,14 +94,6 @@ abstract class NetEvolution(
     private fun evoluteEpoch(initPopulation: List<Individual>): List<Individual> {
         val population = competition(initPopulation)
         return nextGeneration(population)
-    }
-
-    private fun writeToFile(text: String) {
-        FileWriter("stat.txt", true).use { writer ->
-            // запись всей строки
-            writer.write(text + '\n')
-            writer.flush()
-        }
     }
 
     /**
@@ -135,12 +131,13 @@ abstract class NetEvolution(
     }
 
     private fun ratePopulation(population: List<Individual>) = population.parallelStream().forEach { individ ->
-        individ.rate = batch.shuffled().take(30).chunked(10).map { it.map {
+        val b = (1..rateCount).map { (0..9).mapNotNull { i -> batch.filter { it.index == i }.shuffled().firstOrNull()} }
+        individ.rate = b.map { it.map {
             val o = individ.nw.activate(it)
             val r = o[it.index]
             if (r < 0.5 && o.max()!! > 0.5) 2*(1 - r)
             else 1 - r
-        }.average() }.sorted()[1]
+        }.average() }.sorted()[rateCount/2]
     }
 
     /**
@@ -206,6 +203,7 @@ abstract class NetEvolution(
             crossoverRate -= 0.2*random.nextDouble()
         }
         val childGens = firstParentGens.mapIndexed { l, layer ->
+            if (l !in trainLayers) layer else
             layer.mapIndexed { n, neuron -> neuron.mapIndexed { w, gen ->
                 gen.takeIf { random.nextDouble() < crossoverRate } ?: secondParentGens[l][n][w] }
             }
@@ -214,13 +212,13 @@ abstract class NetEvolution(
     }
 
     private fun mutate(individual: Individual): Individual? {
-        val genMutateRate = max(random.nextDouble()*0.1, mutantGenRate)
         val parentGens = extractWeights(individual.nw)
         var isMutate = false
-        val childGens = parentGens.map { layer ->
+        val childGens = parentGens.mapIndexed { l, layer ->
+            if (l !in trainLayers) layer else
             layer.map { neuron ->
                 neuron.map { gen ->
-                    if (random.nextDouble() < genMutateRate) {
+                    if (random.nextDouble() < mutateRate) {
                         isMutate = true
                         (1 - 2 * random.nextDouble()) * scale
                     } else gen
@@ -248,24 +246,6 @@ abstract class NetEvolution(
 
     /** Извлекаем веса нейронной сети и упаковываем их специальным образом */
     private fun extractWeights(nw: Network) = nw.layers.map { it.neurons.map { it.weights.toList() } }
-
-    /** определяет усреднённое различие между сетями **/
-    private fun netsDifferent(nets: List<Network>): Double {
-        val extractWeights: (Network) -> List<Double> = {
-            nw: Network -> nw.layers.flatMap { it.neurons }.flatMap { it.weights }
-        }
-        val bestWeights = extractWeights(nets.first())
-        val difs = mutableListOf<Double>()
-        (1 until nets.size).map { nets[it] }.forEach {
-            val weights = extractWeights(it)
-            var difsCount = 0
-            weights.forEachIndexed { i, w ->
-                if (w != bestWeights[i]) difsCount++
-            }
-            difs.add(difsCount*1.0/bestWeights.size)
-        }
-        return difs.average()
-    }
 
     fun dropout(population: List<Individual>, p: Double): List<Individual> {
         val generation = population.map { it.nw }.map { it.clone() }.map { Individual(it) }

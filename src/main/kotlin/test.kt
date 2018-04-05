@@ -1,7 +1,7 @@
 import java.io.File
 
 fun main(args: Array<String>) {
-    val batch = MNIST.buildBatch(100)
+    val batch = MNIST.buildBatch(1000)
     var err = 0
     val dir = File("nets")
     val nets = dir.listFiles().mapNotNull {

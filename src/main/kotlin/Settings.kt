@@ -1,7 +1,8 @@
 object Settings {
     const val populationSize = 80
-    const val batchSize = 100
-    const val trainCount = 100
-    const val epochSize = 150
-    const val detectorChainCount = 3
+    var batchSize = 50
+    const val trainCount = 10
+    const val epochSize = 1000
+    const val pretrainEpochSize = 10
+    var waitingResult = 0.5
 }

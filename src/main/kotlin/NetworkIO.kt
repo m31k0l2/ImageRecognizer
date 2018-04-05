@@ -16,13 +16,13 @@ class NetworkIO {
         file.close()
     }
 
-    fun load(name: String, isCNN: Boolean=true): Network? {
+    fun load(name: String): Network? {
         val f = File(name)
         if (!f.exists()) return null
         val file = FileReader(f)
         val lines = file.readLines()
         file.close()
-        val nw = if (isCNN) CNetwork() else MNetwork()
+        val nw = CNetwork()
         var layer: Layer? = null
         var neuron: Neuron? = null
         lines.forEach { line ->
