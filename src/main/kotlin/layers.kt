@@ -6,8 +6,10 @@ class Neuron {
 
     // активационная функция
     fun activate(input: List<Double>): Double {
-        if (input.size + 1 != weights.size) { // инициализация весов в случае изменения топологии сети
-            setRandomWeights(input.size + 1)
+        if (weights.isEmpty()) {
+            initWeightsByNull(input.size + 1)
+        } else if (input.size + 1 != weights.size) { // инициализация весов в случае изменения топологии сети
+            weights = MutableList(input.size + 1, { if (it < weights.size) weights[it] else 0.0 })
         }
         val x = listOf(1.0, *input.toTypedArray()) // добавляем вход 1 для смещения
         return max(0.0, sum(x))
@@ -15,6 +17,10 @@ class Neuron {
 
     fun setRandomWeights(size: Int) {
         weights = initWeights(size)
+    }
+
+    fun initWeightsByNull(size: Int) {
+        weights = MutableList(size, { 0.0 })
     }
 
     // сумматор
