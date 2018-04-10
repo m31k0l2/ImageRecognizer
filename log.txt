@@ -1,0 +1,20 @@
+апр 10, 2018 10:43:46 AM TrainKt train
+INFO: trainLayers: [0], rateCount: 3
+апр 10, 2018 10:47:08 AM TrainKt train
+INFO: NO SAVE
+апр 10, 2018 10:47:08 AM TrainKt train
+INFO: trainLayers: [1], rateCount: 3
+апр 10, 2018 10:50:28 AM TrainKt train
+INFO: SAVE
+апр 10, 2018 10:53:46 AM TrainKt train
+INFO: NO SAVE
+апр 10, 2018 10:53:46 AM TrainKt train
+INFO: trainLayers: [2], rateCount: 3
+апр 10, 2018 10:57:05 AM TrainKt train
+INFO: NO SAVE
+апр 10, 2018 10:57:05 AM TrainKt train
+INFO: trainLayers: [3], rateCount: 3
+апр 10, 2018 11:00:25 AM TrainKt train
+INFO: NO SAVE
+апр 10, 2018 11:00:25 AM TrainKt train
+INFO: trainLayers: [4], rateCount: 3
