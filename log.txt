@@ -1,20 +1,12 @@
-апр 10, 2018 10:43:46 AM TrainKt train
-INFO: trainLayers: [0], rateCount: 3
-апр 10, 2018 10:47:08 AM TrainKt train
-INFO: NO SAVE
-апр 10, 2018 10:47:08 AM TrainKt train
-INFO: trainLayers: [1], rateCount: 3
-апр 10, 2018 10:50:28 AM TrainKt train
-INFO: SAVE
-апр 10, 2018 10:53:46 AM TrainKt train
-INFO: NO SAVE
-апр 10, 2018 10:53:46 AM TrainKt train
-INFO: trainLayers: [2], rateCount: 3
-апр 10, 2018 10:57:05 AM TrainKt train
-INFO: NO SAVE
-апр 10, 2018 10:57:05 AM TrainKt train
-INFO: trainLayers: [3], rateCount: 3
-апр 10, 2018 11:00:25 AM TrainKt train
-INFO: NO SAVE
-апр 10, 2018 11:00:25 AM TrainKt train
-INFO: trainLayers: [4], rateCount: 3
+апр 12, 2018 12:15:33 AM TrainKt train
+INFO: trainLayers: [], rateCount: 3
+апр 12, 2018 12:17:33 AM TrainKt train
+WARNING: NO SAVE, batch: 250, res = 0.48146583622494116 [old 0.48146583622494116]
+апр 12, 2018 12:19:15 AM TrainKt train
+INFO: SAVE, batch: 250, res = 0.48767534721932276 [old 0.48146583622494116]
+апр 12, 2018 12:21:06 AM TrainKt train
+WARNING: NO SAVE, batch: 250, res = 0.48767534721932276 [old 0.48767534721932276]
+апр 12, 2018 12:22:17 AM TrainKt train
+WARNING: NO SAVE, batch: 250, res = 0.47109776110826473 [old 0.48767534721932276]
+апр 12, 2018 12:23:23 AM TrainKt train
+WARNING: NO SAVE, batch: 250, res = 0.4560458838811135 [old 0.48767534721932276]
