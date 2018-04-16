@@ -6,13 +6,13 @@ fun main(args: Array<String>) {
 
 fun changeStructure(from: String, to: String) {
     val nw = NetworkIO().load(from)!!
-    val net = CNetwork(0, 0, 4, 0, 0, 0)
-    net.layers[0].neurons.addAll(nw.layers[0].neurons)
-    net.layers[1].neurons.addAll(nw.layers[1].neurons)
-//    net.layers[2].neurons.addAll(nw.layers[2].neurons)
-    net.layers[3].neurons.addAll(nw.layers[3].neurons)
-    net.layers[4].neurons.addAll(nw.layers[4].neurons)
-    net.layers[5].neurons.addAll(nw.layers[5].neurons)
+    val net = ImageNetEvolution().createNet()
+    changeNeurons(0, net, nw)
     net.activate(image)
     NetworkIO().save(net, to)
+}
+
+private fun changeNeurons(layerNumber: Int, net: CNetwork, nw: Network) {
+    net.layers[layerNumber].neurons.clear()
+    net.layers[layerNumber].neurons.addAll(nw.layers[layerNumber].neurons)
 }

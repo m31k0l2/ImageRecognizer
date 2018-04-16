@@ -6,6 +6,7 @@ interface Network {
 
 class CNetwork(vararg layerSize: Int): Network {
     override val layers = MutableList(layerSize.size, { i -> Layer(layerSize[i]) })
+    private val calcImages = mutableMapOf<Image, List<Double>>()
 
     companion object {
         val dividers = listOf(
@@ -19,6 +20,7 @@ class CNetwork(vararg layerSize: Int): Network {
     }
 
     override fun activate(x: Image): List<Double> {
+        if (calcImages.containsKey(x)) return calcImages[x]!!
         var y = layers[0].cnn(x.colorsMatrix, dividers[0])
         y = y.map { Layer.relu(it) }
         y = y.map { Layer.pool(it, dividers[1]) }
@@ -32,7 +34,9 @@ class CNetwork(vararg layerSize: Int): Network {
         layers.subList(4, layers.size).forEach {
             o = it.activate(o)
         }
-        return Layer.softmax(o)
+        val result = Layer.softmax(o)
+        calcImages[x] = result
+        return result
     }
 
     override fun clone() = CNetwork().also { it.layers.addAll(layers.map { it.clone() }) }
