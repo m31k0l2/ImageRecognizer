@@ -8,12 +8,12 @@ val fh = FileHandler("log.txt")
 fun main(args: Array<String>) {
     log.addHandler(fh)
     fh.formatter = SimpleFormatter()
-    val testNumbers = (0..6).toList()
+    val testNumbers = (0..5).toList()
     val testBatch = MNIST.buildBatch(1000).filter { it.index in testNumbers }
-    val trainLayers: List<Int> = listOf()
-    train(100, testNumbers, trainLayers, 3, testBatch, 30, 30, false, false)
-//    train(testNumbers, trainLayers, 3, testBatch, 90, 0, true, false)
-//    train(1, testNumbers, trainLayers, 3, testBatch, 500, 0, false, false)
+    val trainLayers: List<Int> = (2..4).toList()
+    train(20, testNumbers, trainLayers, 3, testBatch, 30, 30)
+    train(20, testNumbers, trainLayers, 3, testBatch, 500, 0, true)
+    train(10, testNumbers, trainLayers, 5, testBatch, 500, 0, true)
 }
 
 private fun train(count: Int, testNumbers: List<Int>, trainLayers: List<Int>, rateCount: Int, testBatch: List<Image>, initBatchSize: Int, addBatchSize: Int=0, isUpdated: Boolean = false, exitIfError: Boolean=false) {
@@ -30,7 +30,7 @@ private fun train(count: Int, testNumbers: List<Int>, trainLayers: List<Int>, ra
     net.batch = MNIST.buildBatch(initBatchSize).filter { it.index in testNumbers }
     var res2 = NetworkIO().load(net.name)?.let { testMedianNet(it, testBatch) } ?: 0.0
     for (i in 1..count) {
-        net.evolute(500, 80, 10)
+        net.evolute(500, 60, 10)
         val res = testMedianNet(net.leader!!.nw, testBatch)
         if (res > res2) {
             NetworkIO().save(net.leader!!.nw, net.name)
@@ -41,7 +41,8 @@ private fun train(count: Int, testNumbers: List<Int>, trainLayers: List<Int>, ra
             NetworkIO().save(net.leader!!.nw, "nets/_nw.net")
             if (exitIfError) return
         }
+        if (res > 0.98) return
         if (addBatchSize > 0) net.batch = net.batch.union(MNIST.buildBatch(addBatchSize).filter { it.index in testNumbers }).toList()
-        else if (isUpdated) net.batch = MNIST.buildBatch(addBatchSize).filter { it.index in testNumbers }
+        else if (isUpdated) net.batch = MNIST.buildBatch(initBatchSize).filter { it.index in testNumbers }
     }
 }
