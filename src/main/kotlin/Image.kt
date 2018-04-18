@@ -8,6 +8,7 @@ class Image(image: File) {
     val index = group!!.toInt()
     val netOutputs = lazy { getNetOutputs() }
     var y: List<List<Double>>? = null
+    var o: List<Double>? = null
 
     companion object {
         private val inputs = lazy { (0..9).map { n -> (0..9).mapNotNull { NetworkIO().load("nets/nw$n${it}_0.net") } } }

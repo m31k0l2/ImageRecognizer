@@ -41,24 +41,30 @@ class CNetwork(vararg layerSize: Int): Network {
         return layers[3].cnn(x, dividers[5])
     }
 
-    override fun activate(image: Image): List<Double> {
-        if (calcImages.containsKey(image)) return calcImages[image]!!
-        var y = if (teachFromLayer > 0 && image.y != null) image.y!! else activateLayer0(image.colorsMatrix)
-        if (image.y == null && teachFromLayer == 1) image.y = y
-        if (image.y == null || teachFromLayer <= 1) y = activateLayer1(y)
-        if (image.y == null && teachFromLayer == 2) image.y = y
-        if (image.y == null || teachFromLayer <= 2) y = activateLayer2(y)
-        if (image.y == null && teachFromLayer == 3) image.y = y
-        if (image.y == null || teachFromLayer <= 3) y = activateLayer3(y)
-        if (image.y == null && teachFromLayer == 4) {
-            image.y = y
+    override fun activate(x: Image): List<Double> {
+        if (calcImages.containsKey(x)) return calcImages[x]!!
+        var o: List<Double>
+        if (x.o == null) {
+            var y = if (teachFromLayer > 0 && x.y != null) x.y!! else activateLayer0(x.colorsMatrix)
+            if (x.y == null && teachFromLayer == 1) x.y = y
+            if (x.y == null || teachFromLayer <= 1) y = activateLayer1(y)
+            if (x.y == null && teachFromLayer == 2) x.y = y
+            if (x.y == null || teachFromLayer <= 2) y = activateLayer2(y)
+            if (x.y == null && teachFromLayer == 3) x.y = y
+            if (x.y == null || teachFromLayer <= 3) y = activateLayer3(y)
+            if (x.y == null && teachFromLayer == 4) x.y = y
+            o = y.flatMap { it }
+        } else {
+            o = x.o!!
         }
-        var o = y.flatMap { it }
-        layers.subList(4, layers.size).forEach {
-            o = it.activate(o)
-        }
+        if (x.o == null && teachFromLayer == 4) x.o = o
+        if (x.o == null || teachFromLayer <= 4) o = layers[4].activate(o)
+        if (x.o == null && teachFromLayer == 5) x.o = o
+        if (x.o == null || teachFromLayer <= 5) o = layers[5].activate(o)
+        if (x.o == null && teachFromLayer == 6) x.o = o
+        if (x.o == null || teachFromLayer <= 6) o = layers[6].activate(o)
         val result = Layer.softmax(o)
-        calcImages[image] = result
+        calcImages[x] = result
         return result
     }
 

@@ -7,15 +7,19 @@ val fh = FileHandler("log.txt")
 
 class TrainSettings {
     var trainLayers = listOf<Int>()
+        set(value) {
+            field = value
+            CNetwork.teachFromLayer = value.min() ?: 0
+        }
     var testNumbers = (0..9).toList()
         set(value) {
             field = value
             testBatch = testBatch.filter { it.index in testNumbers }
         }
     var rateCount = 3
-    var count = 1
+    var count = 10
     var initBatchSize = 30
-    var addBatchSize = 0
+    var addBatchSize = 30
     var isUpdated = false
     var exitIfError = false
     var testBatch = MNIST.buildBatch(1000)
@@ -25,17 +29,15 @@ class TrainSettings {
 fun main(args: Array<String>) {
     log.addHandler(fh)
     fh.formatter = SimpleFormatter()
-    CNetwork.teachFromLayer = 4
-    val settings = TrainSettings().also {
-        it.count = 20
-        it.addBatchSize = 30
-        it.populationSize = 200
-        it.trainLayers = (4..5).toList()
-        it.testNumbers = (0..5).toList()
-    }
-    train(settings)
-//    train(TrainSettings().also { it.count = 20; it.initBatchSize = 500; it.isUpdated = true })
-//    train(TrainSettings().also { it.count = 10; it.initBatchSize = 500; it.isUpdated = true; it.rateCount = 5 })
+    train(TrainSettings().apply {
+        trainLayers = listOf(4, 5, 6)
+        initBatchSize = 2000
+        addBatchSize = 500
+        isUpdated = false
+        rateCount = 3
+        populationSize = 80
+        testNumbers = (0..7).toList()
+    })
 }
 
 fun train(settings: TrainSettings) = with(settings) {
@@ -57,10 +59,10 @@ fun train(settings: TrainSettings) = with(settings) {
         val res = testMedianNet(net.leader!!.nw, testBatch)
         if (res > res2) {
             NetworkIO().save(net.leader!!.nw, net.name)
-            log.info("SAVE, batch: ${net.batch.size}, res = $res [old $res2]")
+            log.info("$i) SAVE, batch: ${net.batch.size}, res = $res [old $res2]")
             res2 = res
         } else {
-            log.warning("NO SAVE, batch: ${net.batch.size}, res = $res [old $res2]")
+            log.warning("$i) NO SAVE, batch: ${net.batch.size}, res = $res [old $res2]")
             NetworkIO().save(net.leader!!.nw, "nets/_nw.net")
             if (exitIfError) return
         }

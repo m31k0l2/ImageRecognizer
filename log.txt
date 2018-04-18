@@ -1,4 +1,0 @@
-апр 18, 2018 9:17:19 AM TrainKt train
-INFO: trainLayers: [4, 5], rateCount: 3
-апр 18, 2018 9:17:21 AM TrainKt train
-INFO: init result: 0.85, testBatchSize: 600
