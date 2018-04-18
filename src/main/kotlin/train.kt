@@ -5,18 +5,40 @@ import java.util.logging.SimpleFormatter
 val log = Logger.getLogger("logger")
 val fh = FileHandler("log.txt")
 
+class TrainSettings {
+    var trainLayers = listOf<Int>()
+    var testNumbers = (0..9).toList()
+        set(value) {
+            field = value
+            testBatch = testBatch.filter { it.index in testNumbers }
+        }
+    var rateCount = 3
+    var count = 1
+    var initBatchSize = 30
+    var addBatchSize = 0
+    var isUpdated = false
+    var exitIfError = false
+    var testBatch = MNIST.buildBatch(1000)
+    var populationSize = 80
+}
+
 fun main(args: Array<String>) {
     log.addHandler(fh)
     fh.formatter = SimpleFormatter()
-    val testNumbers = (0..5).toList()
-    val testBatch = MNIST.buildBatch(1000).filter { it.index in testNumbers }
-    val trainLayers: List<Int> = (2..4).toList()
-    train(20, testNumbers, trainLayers, 3, testBatch, 30, 30)
-    train(20, testNumbers, trainLayers, 3, testBatch, 500, 0, true)
-    train(10, testNumbers, trainLayers, 5, testBatch, 500, 0, true)
+    CNetwork.teachFromLayer = 4
+    val settings = TrainSettings().also {
+        it.count = 20
+        it.addBatchSize = 30
+        it.populationSize = 200
+        it.trainLayers = (4..5).toList()
+        it.testNumbers = (0..5).toList()
+    }
+    train(settings)
+//    train(TrainSettings().also { it.count = 20; it.initBatchSize = 500; it.isUpdated = true })
+//    train(TrainSettings().also { it.count = 10; it.initBatchSize = 500; it.isUpdated = true; it.rateCount = 5 })
 }
 
-private fun train(count: Int, testNumbers: List<Int>, trainLayers: List<Int>, rateCount: Int, testBatch: List<Image>, initBatchSize: Int, addBatchSize: Int=0, isUpdated: Boolean = false, exitIfError: Boolean=false) {
+fun train(settings: TrainSettings) = with(settings) {
     log.info("trainLayers: $trainLayers, rateCount: $rateCount")
     val net = ImageNetEvolution(rateCount)
     net.trainLayers = trainLayers
@@ -29,8 +51,9 @@ private fun train(count: Int, testNumbers: List<Int>, trainLayers: List<Int>, ra
     }
     net.batch = MNIST.buildBatch(initBatchSize).filter { it.index in testNumbers }
     var res2 = NetworkIO().load(net.name)?.let { testMedianNet(it, testBatch) } ?: 0.0
+    log.info("init result: $res2, testBatchSize: ${testBatch.size}")
     for (i in 1..count) {
-        net.evolute(500, 60, 10)
+        net.evolute(500, populationSize, 10)
         val res = testMedianNet(net.leader!!.nw, testBatch)
         if (res > res2) {
             NetworkIO().save(net.leader!!.nw, net.name)
@@ -41,7 +64,7 @@ private fun train(count: Int, testNumbers: List<Int>, trainLayers: List<Int>, ra
             NetworkIO().save(net.leader!!.nw, "nets/_nw.net")
             if (exitIfError) return
         }
-        if (res > 0.98) return
+        if (res2 > 0.98) return
         if (addBatchSize > 0) net.batch = net.batch.union(MNIST.buildBatch(addBatchSize).filter { it.index in testNumbers }).toList()
         else if (isUpdated) net.batch = MNIST.buildBatch(initBatchSize).filter { it.index in testNumbers }
     }

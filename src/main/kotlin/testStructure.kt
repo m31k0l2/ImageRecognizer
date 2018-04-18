@@ -38,11 +38,12 @@ fun testMedianNet(nw: Network, batch: List<Image>): Double {
 }
 
 fun main(args: Array<String>) {
+    CNetwork.teachFromLayer = 4
     while (true) {
         print("Размер батча: ")
         val size = Scanner(System.`in`).nextInt()
-        testMedianNet(NetworkIO().load("nets/nw.net")!!, MNIST.buildBatch(size))
         if (size < 30) return
+        NetworkIO().load("nets/nw.net")?.let { testMedianNet(it, MNIST.buildBatch(size)) }
     }
 //    testNet(NetworkIO().load("nets/nw01234.net")!!, MNIST.buildBatch(1000))
 }
