@@ -202,13 +202,19 @@ abstract class NetEvolution(
         } else {
             crossoverRate -= 0.2*random.nextDouble()
         }
-        val childGens = firstParentGens.mapIndexed { l, layer ->
-            if (l !in trainLayers) layer else
-            layer.mapIndexed { n, neuron -> neuron.mapIndexed { w, gen ->
-                gen.takeIf { random.nextDouble() < crossoverRate } ?: secondParentGens[l][n][w] }
+        return try {
+            val childGens = firstParentGens.mapIndexed { l, layer ->
+                if (l !in trainLayers) layer else
+                    layer.mapIndexed { n, neuron ->
+                        neuron.mapIndexed { w, gen ->
+                            gen.takeIf { random.nextDouble() < crossoverRate } ?: secondParentGens[l][n][w]
+                        }
+                    }
             }
+            Individual(generateNet(childGens))
+        } catch (e: Exception) {
+            mutate(pair.first)!!
         }
-        return Individual(generateNet(childGens))
     }
 
     private fun mutate(individual: Individual): Individual? {

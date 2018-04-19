@@ -30,12 +30,12 @@ fun main(args: Array<String>) {
     log.addHandler(fh)
     fh.formatter = SimpleFormatter()
     train(TrainSettings().apply {
-        trainLayers = listOf(4, 5, 6)
-        initBatchSize = 2000
-        addBatchSize = 500
-        isUpdated = false
-        rateCount = 3
-        populationSize = 80
+        trainLayers = listOf(4, 5)
+//        initBatchSize = 2000
+//        addBatchSize = 500
+//        isUpdated = false
+//        rateCount = 3
+        populationSize = 60
         testNumbers = (0..7).toList()
     })
 }

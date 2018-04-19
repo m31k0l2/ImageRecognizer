@@ -38,7 +38,6 @@ fun testMedianNet(nw: Network, batch: List<Image>): Double {
 }
 
 fun main(args: Array<String>) {
-    CNetwork.teachFromLayer = 6
     while (true) {
         print("nw.net? (y/n): ")
         val yesNo = Scanner(System.`in`).next()

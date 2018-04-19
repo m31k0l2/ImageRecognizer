@@ -1,0 +1,6 @@
+апр 19, 2018 8:55:03 AM TrainKt train
+INFO: trainLayers: [4, 5], rateCount: 3
+апр 19, 2018 8:55:06 AM TrainKt train
+INFO: init result: 0.6818475605906591, testBatchSize: 800
+апр 19, 2018 8:59:00 AM TrainKt train
+WARNING: 1) NO SAVE, batch: 24, res = 0.6238613422476172 [old 0.6818475605906591]
