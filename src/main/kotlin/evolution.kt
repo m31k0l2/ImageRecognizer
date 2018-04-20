@@ -183,87 +183,40 @@ abstract class NetEvolution(
         }
     }
 
-    /**
-     * Выполняем скрещивание.
-     * Гены потомка получаются либо путём мутации, либо путём скрещивания (определяется случайностью)
-     * Если гены формируются мутацией, то значение гена выбирается случайно в диапазоне [-scale; scale]
-     * Если гены формируются скрещиванием, то ген наследуется случайно от одного из родителей
-     * Шанс передачи гена от родителя определяется параметром crossoverRate
-     * Гены нейронной сети - это веса её нейронов
-     */
-    private fun cross(pair: Pair<Individual, Individual>): Individual {
-        val firstParent = pair.first.nw
-        val secondParent = pair.second.nw
-        val firstParentGens = extractWeights(firstParent)
-        val secondParentGens = extractWeights(secondParent)
-        var crossoverRate = .5
-        if (pair.first.rate < pair.second.rate) {
-            crossoverRate += 0.2*random.nextDouble()
-        } else {
-            crossoverRate -= 0.2*random.nextDouble()
-        }
-        return try {
-            val childGens = firstParentGens.mapIndexed { l, layer ->
-                if (l !in trainLayers) layer else
-                    layer.mapIndexed { n, neuron ->
-                        neuron.mapIndexed { w, gen ->
-                            gen.takeIf { random.nextDouble() < crossoverRate } ?: secondParentGens[l][n][w]
-                        }
-                    }
+    private fun getCrossoverRate(parents: Pair<Individual, Individual>) = if (parents.first.rate < parents.second.rate) {
+        0.5 + 0.2*random.nextDouble()
+    } else {
+        0.5 - 0.2*random.nextDouble()
+    }
+
+    private fun cross(parents: Pair<Individual, Individual>): Individual {
+        val crossoverRate = getCrossoverRate(parents)
+        val nw = parents.first.nw.clone()
+        trainLayers.forEach { l ->
+            val layer = nw.layers[l]
+            val neurons = layer.neurons
+            for (i in 0 until neurons.size) {
+                if (random.nextDouble() > crossoverRate) {
+                    neurons[i] = parents.second.nw.layers[l].neurons[i]
+                }
             }
-            Individual(generateNet(childGens))
-        } catch (e: Exception) {
-            mutate(pair.first)!!
         }
+        return Individual(nw)
     }
 
     private fun mutate(individual: Individual): Individual? {
-        val parentGens = extractWeights(individual.nw)
         var isMutate = false
-        val childGens = parentGens.mapIndexed { l, layer ->
-            if (l !in trainLayers) layer else
-            layer.map { neuron ->
-                neuron.map { gen ->
-                    if (random.nextDouble() < mutateRate) {
-                        isMutate = true
-                        (1 - 2 * random.nextDouble()) * scale
-                    } else gen
+        val nw = individual.nw.clone()
+        for (l in trainLayers) {
+            val layer = nw.layers[l]
+            for (neuron in layer.neurons) {
+                if (random.nextDouble() < mutateRate) {
+                    isMutate = true
+                    val weights = neuron.weights
+                    weights[Random().nextInt(weights.size)] = (1 - 2 * random.nextDouble()) * scale
                 }
             }
         }
-        return Individual(generateNet(childGens)).takeIf { isMutate }
-    }
-
-    /**
-     * Создаёт нейронную сеть на основе списка весов, упакованных следующим образом:
-     * [ уровень_слоя [ уровень_нейрона [ уровень_веса ] ]
-     * Проходим по каждому уровню и заполняем сеть
-     */
-    private fun generateNet(layerWeights: List<List<List<Double>>>): Network {
-        val nw = createNet()
-        layerWeights.forEachIndexed { layerPosition, neuronsWeights ->
-            val layer = nw.layers[layerPosition]
-            layer.neurons.forEachIndexed { index, neuron ->
-                neuron.weights = neuronsWeights[index].toMutableList()
-            }
-        }
-        return nw
-    }
-
-    /** Извлекаем веса нейронной сети и упаковываем их специальным образом */
-    private fun extractWeights(nw: Network) = nw.layers.map { it.neurons.map { it.weights.toList() } }
-
-    fun dropout(population: List<Individual>, p: Double): List<Individual> {
-        val generation = population.map { it.nw }.map { it.clone() }.map { Individual(it) }
-        generation.parallelStream().forEach {
-            it.nw.layers.forEach {
-                it.neurons.forEach {
-                    it.weights.forEachIndexed { index, d ->
-                        it.weights[index] = if (random.nextDouble() < p) .0 else d
-                    }
-                }
-            }
-        }
-        return competition(generation.union(population).toList()).take(population.size/2)
+        return Individual(nw).takeIf { isMutate }
     }
 }

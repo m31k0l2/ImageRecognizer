@@ -57,12 +57,10 @@ class CNetwork(vararg layerSize: Int): Network {
         } else {
             o = x.o!!
         }
-        if (x.o == null && teachFromLayer == 4) x.o = o
-        if (x.o == null || teachFromLayer <= 4) o = layers[4].activate(o)
-        if (x.o == null && teachFromLayer == 5) x.o = o
-        if (x.o == null || teachFromLayer <= 5) o = layers[5].activate(o)
-//        if (x.o == null && teachFromLayer == 6) x.o = o
-//        if (x.o == null || teachFromLayer <= 6) o = layers[6].activate(o)
+        for (l in 4 until layers.size) {
+            if (x.o == null && teachFromLayer == l) x.o = o
+            if (x.o == null || teachFromLayer <= l) o = layers[l].activate(o)
+        }
         val result = Layer.softmax(o)
         calcImages[x] = result
         return result

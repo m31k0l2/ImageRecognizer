@@ -6,7 +6,7 @@ val log = Logger.getLogger("logger")
 val fh = FileHandler("log.txt")
 
 class TrainSettings {
-    var trainLayers = listOf<Int>()
+    var trainLayers = (0..5).toList()
         set(value) {
             field = value
             CNetwork.teachFromLayer = value.min() ?: 0
@@ -24,19 +24,22 @@ class TrainSettings {
     var exitIfError = false
     var testBatch = MNIST.buildBatch(1000)
     var populationSize = 80
+    var epochSize = 500
 }
 
 fun main(args: Array<String>) {
     log.addHandler(fh)
     fh.formatter = SimpleFormatter()
     train(TrainSettings().apply {
-        trainLayers = listOf(4, 5)
-//        initBatchSize = 2000
-//        addBatchSize = 500
-//        isUpdated = false
+        trainLayers = listOf(4,5,6)
+        initBatchSize = 500
+        addBatchSize = 50
+        count = 100
+//        isUpdated = true
 //        rateCount = 3
+//        epochSize = 200
         populationSize = 60
-        testNumbers = (0..7).toList()
+        testNumbers = (0..5).toList()
     })
 }
 
@@ -55,7 +58,7 @@ fun train(settings: TrainSettings) = with(settings) {
     var res2 = NetworkIO().load(net.name)?.let { testMedianNet(it, testBatch) } ?: 0.0
     log.info("init result: $res2, testBatchSize: ${testBatch.size}")
     for (i in 1..count) {
-        net.evolute(500, populationSize, 10)
+        net.evolute(epochSize, populationSize, 10)
         val res = testMedianNet(net.leader!!.nw, testBatch)
         if (res > res2) {
             NetworkIO().save(net.leader!!.nw, net.name)

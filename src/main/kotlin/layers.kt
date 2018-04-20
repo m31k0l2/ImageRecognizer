@@ -24,7 +24,13 @@ class Neuron {
     }
 
     // сумматор
-    fun sum(input: List<Double>) = weights.mapIndexed { i, w -> input[i] * w }.sum()
+    fun sum(input: List<Double>): Double {
+        var sum = 0.0
+        for (i in 0 until input.size) {
+            sum += weights[i] * input[i]
+        }
+        return sum
+    }
 
     // инициализация весов случайными значениями
     private fun initWeights(inputSize: Int) = MutableList(inputSize, { 0.5 - Random().nextDouble() })

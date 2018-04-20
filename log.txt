@@ -1,6 +1,20 @@
-апр 19, 2018 8:55:03 AM TrainKt train
-INFO: trainLayers: [4, 5], rateCount: 3
-апр 19, 2018 8:55:06 AM TrainKt train
-INFO: init result: 0.6818475605906591, testBatchSize: 800
-апр 19, 2018 8:59:00 AM TrainKt train
-WARNING: 1) NO SAVE, batch: 24, res = 0.6238613422476172 [old 0.6818475605906591]
+апр 20, 2018 11:29:48 AM TrainKt train
+INFO: trainLayers: [4, 5, 6], rateCount: 3
+апр 20, 2018 11:29:54 AM TrainKt train
+INFO: init result: 0.8448912986812814, testBatchSize: 600
+апр 20, 2018 11:30:16 AM TrainKt train
+WARNING: 1) NO SAVE, batch: 300, res = 0.8333333333333334 [old 0.8448912986812814]
+апр 20, 2018 11:30:41 AM TrainKt train
+INFO: 2) SAVE, batch: 330, res = 0.85 [old 0.8448912986812814]
+апр 20, 2018 11:31:03 AM TrainKt train
+WARNING: 3) NO SAVE, batch: 360, res = 0.7376904165260237 [old 0.85]
+апр 20, 2018 11:31:29 AM TrainKt train
+WARNING: 4) NO SAVE, batch: 390, res = 0.8333333333333334 [old 0.85]
+апр 20, 2018 11:31:54 AM TrainKt train
+WARNING: 5) NO SAVE, batch: 420, res = 0.7986556653973201 [old 0.85]
+апр 20, 2018 11:32:18 AM TrainKt train
+WARNING: 6) NO SAVE, batch: 450, res = 0.85 [old 0.85]
+апр 20, 2018 11:32:41 AM TrainKt train
+WARNING: 7) NO SAVE, batch: 480, res = 0.8068684418674988 [old 0.85]
+апр 20, 2018 11:33:09 AM TrainKt train
+WARNING: 8) NO SAVE, batch: 510, res = 0.85 [old 0.85]
