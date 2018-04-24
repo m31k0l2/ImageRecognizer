@@ -21,24 +21,27 @@ class TrainSettings {
     var initBatchSize = 30
     var addBatchSize = 30
     var isUpdated = false
-    var exitIfError = false
+    var exitIfError = 10
     var testBatch = MNIST.buildBatch(1000)
     var populationSize = 80
     var epochSize = 500
+    var dropout = 0.0
 }
 
 fun main(args: Array<String>) {
     log.addHandler(fh)
     fh.formatter = SimpleFormatter()
     train(TrainSettings().apply {
-        trainLayers = listOf(4,5,6)
+        trainLayers = listOf(1)
         initBatchSize = 500
         addBatchSize = 50
         count = 100
 //        isUpdated = true
-//        rateCount = 3
-//        epochSize = 200
-        populationSize = 60
+        rateCount = 7
+        epochSize = 200
+        exitIfError = 3
+        populationSize = 80
+//        dropout = 0.2
         testNumbers = (0..5).toList()
     })
 }
@@ -55,10 +58,16 @@ fun train(settings: TrainSettings) = with(settings) {
         }
     }
     net.batch = MNIST.buildBatch(initBatchSize).filter { it.index in testNumbers }
+    if (dropout != 0.0) {
+        var nw = NetworkIO().load(net.name)!!
+        NetworkIO().save(nw, net.name + ".back")
+        nw = nw.dropout(trainLayers, dropout)
+        NetworkIO().save(nw, net.name)
+    }
     var res2 = NetworkIO().load(net.name)?.let { testMedianNet(it, testBatch) } ?: 0.0
     log.info("init result: $res2, testBatchSize: ${testBatch.size}")
     for (i in 1..count) {
-        net.evolute(epochSize, populationSize, 10)
+        net.evolute(epochSize, populationSize, 3)
         val res = testMedianNet(net.leader!!.nw, testBatch)
         if (res > res2) {
             NetworkIO().save(net.leader!!.nw, net.name)
@@ -67,7 +76,7 @@ fun train(settings: TrainSettings) = with(settings) {
         } else {
             log.warning("$i) NO SAVE, batch: ${net.batch.size}, res = $res [old $res2]")
             NetworkIO().save(net.leader!!.nw, "nets/_nw.net")
-            if (exitIfError) return
+            if (--exitIfError == 0) return
         }
         if (res2 > 0.98) return
         if (addBatchSize > 0) net.batch = net.batch.union(MNIST.buildBatch(addBatchSize).filter { it.index in testNumbers }).toList()

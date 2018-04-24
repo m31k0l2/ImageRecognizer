@@ -67,19 +67,18 @@ abstract class NetEvolution(
             println("Рейтинг $rateInfo")
             println("Время: ${(fin-start)/1_000_000} мс\n")
             leader = population.first()
-            var median = population[population.size/2-1]
+            val median = population[population.size/2-1]
             if (lastRate == median.rate) {
                 stagnation++
                 if (stagnation % maxStagnation == 0) {
                     ratePopulation(population)
                     population = population.sortedBy { it.rate }
-                    median = population[population.size / 2 - 1]
                     leader = population.first()
                 }
             } else {
                 lastRate = median.rate
             }
-            if (leader!!.rate > 0.999*median.rate || leader!!.rate < .01 || stagnation == 5*maxStagnation) return population
+            if (leader!!.rate < .01 || stagnation == 5*maxStagnation) return population
         }
         return population
     }
@@ -112,7 +111,7 @@ abstract class NetEvolution(
     }
 
     private fun generatePopulation(size: Int, individual: Individual) = (0 until size).map {
-        if (it == 0) individual else mutate(individual) ?: createIndividual()
+        if (it == 0) individual else Individual(individual.nw.clone().dropout(trainLayers, 0.5, true))
     }
 
     private fun createIndividual() = Individual(createNet())
@@ -132,12 +131,12 @@ abstract class NetEvolution(
 
     private fun ratePopulation(population: List<Individual>) = population.parallelStream().forEach { individ ->
         val b = (1..rateCount).map { (0..9).mapNotNull { i -> batch.filter { it.index == i }.shuffled().firstOrNull()} }
-        individ.rate = b.map { it.map {
+        individ.rate = try { b.map { it.map {
             val o = individ.nw.activate(it)
             val r = o[it.index]
             if (r < 0.5 && o.max()!! > 0.5) 2*(1 - r)
             else 1 - r
-        }.average() }.sorted()[rateCount/2]
+        }.average() }.sorted()[rateCount/2] } catch (e: Exception) { 1.0 }
     }
 
     /**
