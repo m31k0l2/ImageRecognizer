@@ -8,7 +8,17 @@ import kotlin.math.max
  * Модель особи.
  * [nw] - нейронная сеть, [rate] - рейтинг выживаемости
  */
-data class Individual(val nw: Network, var rate: Double=1.0)
+data class Individual(val nw: Network, var rate: Double=1.0) {
+    fun rate(batch: List<Image>, rateCount: Int) {
+        val b = (1..rateCount).map { (0..9).mapNotNull { i -> batch.filter { it.index == i }.shuffled().firstOrNull()} }
+        rate = try { b.map { it.map {
+            val o = nw.activate(it)
+            val r = o[it.index]
+            if (r < 0.5 && o.max()!! > 0.5) 2*(1 - r)
+            else 1 - r
+        }.average() }.sorted()[rateCount/2] } catch (e: Exception) { 1.0 }
+    }
+}
 
 /**
  * [populationSize] - размер популяции
@@ -22,7 +32,7 @@ data class Individual(val nw: Network, var rate: Double=1.0)
  */
 abstract class NetEvolution(
         var mutantGenRate: Double=.005,
-        private val rateCount: Int = 3,
+        private var rateCount: Int = 3,
         private val scale: Int=1
 ) {
     private val random = Random()
@@ -64,21 +74,27 @@ abstract class NetEvolution(
             val getRate = { pos: Int, population: List<Individual> -> ((population[pos].rate*1000000).toInt()/10000.0).toString()}
             val rateInfo = "${getRate(0, population)} < ${getRate(population.size/4-1, population)} < ${getRate(population.size/2-1, population)}"
             println("мутация ${(mutantRate*1000).toInt()/10.0} % / $mutateRate")
-            println("Рейтинг $rateInfo")
+            println("популяция ${population.size}")
+            println("Рейтинг [$rateCount]: $rateInfo")
             println("Время: ${(fin-start)/1_000_000} мс\n")
             leader = population.first()
             val median = population[population.size/2-1]
             if (lastRate == median.rate) {
                 stagnation++
-                if (stagnation % maxStagnation == 0) {
-                    ratePopulation(population)
-                    population = population.sortedBy { it.rate }
-                    leader = population.first()
-                }
+                population = population.union(List(4, { createIndividual() })).toList()
+                ratePopulation(population)
+                population = population.sortedBy { it.rate }
+                leader = population.first()
             } else {
                 lastRate = median.rate
             }
-            if (leader!!.rate < .01 || stagnation == 5*maxStagnation) return population
+            if (leader!!.rate < 0.03) {
+                rateCount += 2
+                ratePopulation(population.filter { it.rate < 0.3 })
+            } else if (leader!!.rate > 0.2) {
+                rateCount = 3
+            }
+            if (rateCount > 10 || stagnation == 5*maxStagnation) return population
         }
         return population
     }
@@ -130,13 +146,7 @@ abstract class NetEvolution(
     }
 
     private fun ratePopulation(population: List<Individual>) = population.parallelStream().forEach { individ ->
-        val b = (1..rateCount).map { (0..9).mapNotNull { i -> batch.filter { it.index == i }.shuffled().firstOrNull()} }
-        individ.rate = try { b.map { it.map {
-            val o = individ.nw.activate(it)
-            val r = o[it.index]
-            if (r < 0.5 && o.max()!! > 0.5) 2*(1 - r)
-            else 1 - r
-        }.average() }.sorted()[rateCount/2] } catch (e: Exception) { 1.0 }
+        individ.rate(batch, rateCount)
     }
 
     /**

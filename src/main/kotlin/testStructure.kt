@@ -22,30 +22,23 @@ fun testNet(nw: Network, batch: List<Image>): Double {
 }
 
 fun testMedianNet(nw: Network, batch: List<Image>): Double {
-    val list = (0..9).map { i -> batch.filter { it.index == i } }.map {
-        if (it.isEmpty()) return@map null
-        it.map {
-            nw.activate(it)[it.index]
-        }.sorted()[it.size/2-1]
-    }.filterNotNull()
-    list.forEachIndexed { index, y ->
-        val o = (y*1000).toInt()/10.0
-        println("$index -> $o%")
+    val b = (0..9).mapNotNull { i -> batch.filter { it.index == i }.map { nw.activate(it)[i] }.let {
+        if (it.isNotEmpty()) it.sorted()[it.size / 2] else null
+    } }
+    b.forEachIndexed { index, y ->
+        println("$index -> ${(y * 1000).toInt() / 10.0}%")
     }
-    val y = list.average()
+    val y = b.average()
     println("средний успех: ${(y*1000).toInt()/10.0}%")
     return y
 }
 
 fun main(args: Array<String>) {
     while (true) {
-        print("nw.net? (y/n): ")
-        val yesNo = Scanner(System.`in`).next()
-        val name = "nw.net".takeIf { yesNo == "y" } ?: "_nw.net"
         print("Размер батча: ")
         val size = Scanner(System.`in`).nextInt()
         if (size < 30) return
+        val name = "nw.net".takeIf { size > 0 } ?: "_nw.net"
         NetworkIO().load("nets/$name")?.let { testMedianNet(it, MNIST.buildBatch(size)) }
     }
-//    testNet(NetworkIO().load("nets/nw01234.net")!!, MNIST.buildBatch(1000))
 }
