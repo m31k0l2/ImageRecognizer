@@ -37,10 +37,9 @@ fun main(args: Array<String>) {
         count = 10
         testNumbers = listOf(0, 1, 2, 3, 4, 5)
     }
-    val to = 4
 //    NetworkIO().load("nets/nw.net")?.dropout(listOf(0, 1, 2, 3, 4, 5), 0.2)?.let {NetworkIO().save(it, "nets/nw.net") }
-    (5 downTo 0).forEach { trainLayer(to, settings, 80, it, 200, 0.0 ) }
-    train(settings.apply { populationSize = 60; trainLayers = listOf(0,1,2,3,4,5); epochSize = 200; exitIfError=2; dropout=0.0 })
+//    (3 downTo 2).forEach { trainLayer(4, settings, 80, it, 200, 0.0 ) }
+    train(settings.apply { populationSize = 60; trainLayers = listOf(3); epochSize = 150; exitIfError=2; dropout=0.0 })
 }
 
 private fun trainLayer(toClassNumber: Int, settings: TrainSettings, popSize: Int, lNum: Int, epSize: Int, drop: Double=0.0) {

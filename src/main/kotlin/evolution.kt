@@ -31,18 +31,20 @@ data class Individual(val nw: Network, var rate: Double=1.0) {
  * должно играть скрещивание
  */
 abstract class NetEvolution(
-        var mutantGenRate: Double=.005,
+        var maxMutateRate: Double=.005,
         private var rateCount: Int = 3,
         private val scale: Int=1
 ) {
     private val random = Random()
     var mutantRate = 1.0
+    var genMutateRate = 0.05
     var name: String = "nets/nw.net"
     lateinit var mutantStrategy: (epoch: Int, epochSize: Int) -> Double
     var leader: Individual? = null
     lateinit var batch: List<Image>
     var trainLayers = emptyList<Int>()
     private var mutateRate = 0.1
+    private val populationAdder = 10
 
     init {
         if (File("nets/").mkdir()) {
@@ -64,7 +66,7 @@ abstract class NetEvolution(
         population.forEach { it.rate = 1.0 }
         var stagnation = 0
         var lastRate = 0.0
-        mutateRate = max((Random().nextDouble()*mutantGenRate*100).toInt()/100.0, 0.005)
+        mutateRate = max((Random().nextDouble()*maxMutateRate*100).toInt()/100.0, 0.005)
         (0 until epochSize).forEach {curEpoch ->
             println("эпоха $curEpoch")
             val start = System.nanoTime()
@@ -81,7 +83,7 @@ abstract class NetEvolution(
             val median = population[population.size/2-1]
             if (lastRate == median.rate) {
                 stagnation++
-                population = population.union(List(4, { createIndividual() })).toList()
+                population = population.union(List(populationAdder, { createIndividual() })).toList()
                 ratePopulation(population)
                 population = population.sortedBy { it.rate }
                 leader = population.first()
@@ -222,7 +224,10 @@ abstract class NetEvolution(
                 if (random.nextDouble() < mutateRate) {
                     isMutate = true
                     val weights = neuron.weights
-                    weights[Random().nextInt(weights.size)] = (1 - 2 * random.nextDouble()) * scale
+                    val n = Random().nextInt(max(1.0, genMutateRate * weights.size).toInt())
+                    for (i in (0..n)) {
+                        weights[Random().nextInt(weights.size)] = (1 - 2 * random.nextDouble()) * scale
+                    }
                 }
             }
         }
