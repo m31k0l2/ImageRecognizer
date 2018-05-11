@@ -174,7 +174,7 @@ class CNetwork(vararg layerSize: Int): Network {
         } else {
             o = x.o!!
         }
-        o = layers[4].activate(o)
+        o = layers[5].activate(o)
         val result = Layer.softmax(o)
         calcImages[x] = result
         return result
@@ -185,7 +185,7 @@ class CNetwork(vararg layerSize: Int): Network {
             x.o = null
             x.y = null
         }
-        return activate4layers(x)
+        return activate5layers(x)
     }
 
     override fun clone() = CNetwork().also { it.layers.addAll(layers.map { it.clone() }) }

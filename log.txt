@@ -1,16 +1,32 @@
-мая 07, 2018 8:36:43 AM TrainKt train
-INFO: trainLayers: [3]
-мая 07, 2018 8:36:43 AM TrainKt train
-INFO: testNumbers: [0, 1, 2, 3, 4, 5]
-мая 07, 2018 8:36:48 AM TrainKt train
-INFO: init result: 0.203023025428514, testBatchSize: 600
-мая 07, 2018 8:38:21 AM TrainKt train
-INFO: 1) SAVE, batch: 300, res = 0.3020111454253991 [old 0.203023025428514]
-мая 07, 2018 8:39:48 AM TrainKt train
-INFO: 2) SAVE, batch: 450, res = 0.4812792013997538 [old 0.3020111454253991]
-мая 07, 2018 8:41:31 AM TrainKt train
-INFO: 3) SAVE, batch: 600, res = 0.4925421130733014 [old 0.4812792013997538]
-мая 07, 2018 8:43:18 AM TrainKt train
-INFO: 4) SAVE, batch: 750, res = 0.5287043847025806 [old 0.4925421130733014]
-мая 07, 2018 8:44:53 AM TrainKt train
-INFO: 5) SAVE, batch: 900, res = 0.556156424103648 [old 0.5287043847025806]
+мая 11, 2018 8:20:20 AM TrainKt train
+INFO: trainLayers: [0, 1, 2, 3, 4, 5]
+мая 11, 2018 8:20:20 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+мая 11, 2018 8:20:24 AM TrainKt train
+INFO: init result: 0.0, testBatchSize: 1000
+мая 11, 2018 8:20:50 AM TrainKt train
+INFO: 1) SAVE, batch: 500, res = 0.09999999999999999 [old 0.0]
+мая 11, 2018 8:22:49 AM TrainKt train
+INFO: 2) SAVE, batch: 700, res = 0.18688976289574372 [old 0.09999999999999999]
+мая 11, 2018 8:24:53 AM TrainKt train
+INFO: 3) SAVE, batch: 900, res = 0.2657424217319443 [old 0.18688976289574372]
+мая 11, 2018 8:27:12 AM TrainKt train
+INFO: 4) SAVE, batch: 1100, res = 0.2733229212511148 [old 0.2657424217319443]
+мая 11, 2018 8:29:34 AM TrainKt train
+INFO: 5) SAVE, batch: 1300, res = 0.2919663428091058 [old 0.2733229212511148]
+мая 11, 2018 8:31:55 AM TrainKt train
+WARNING: 6) NO SAVE, batch: 1500, res = 0.28838337536675296 [old 0.2919663428091058]
+мая 11, 2018 8:31:55 AM TrainKt train
+INFO: trainLayers: [5]
+мая 11, 2018 8:31:55 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+мая 11, 2018 8:32:00 AM TrainKt train
+INFO: init result: 0.2919576716201448, testBatchSize: 1000
+мая 11, 2018 8:34:09 AM TrainKt train
+INFO: 1) SAVE, batch: 500, res = 0.29449073607970616 [old 0.2919576716201448]
+мая 11, 2018 8:36:08 AM TrainKt train
+WARNING: 2) NO SAVE, batch: 700, res = 0.2794124874490361 [old 0.29449073607970616]
+мая 11, 2018 8:38:23 AM TrainKt train
+INFO: 3) SAVE, batch: 900, res = 0.31997199382763974 [old 0.29449073607970616]
+мая 11, 2018 8:40:31 AM TrainKt train
+WARNING: 4) NO SAVE, batch: 1100, res = 0.31997199382763974 [old 0.31997199382763974]

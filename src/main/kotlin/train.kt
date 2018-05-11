@@ -17,29 +17,36 @@ class TrainSettings {
             field = value
             testBatch = initTestBatch.filter { it.index in testNumbers }
         }
-    var count = 10
-    var initBatchSize = 30
-    var addBatchSize = 30
+    var count = 100
+    var initBatchSize = 500
+    var addBatchSize = 200
     var isUpdated = false
-    var exitIfError = 10
+    var exitIfError = 1
     var testBatch = initTestBatch
-    var populationSize = 80
-    var epochSize = 500
+    var populationSize = 60
+    var epochSize = 200
     var dropout = 0.0
 }
 
 fun main(args: Array<String>) {
     log.addHandler(fh)
     fh.formatter = SimpleFormatter()
+    /*
     val settings = TrainSettings().apply {
         initBatchSize = 500
         addBatchSize = 250
-        count = 10
+        count = 5
         testNumbers = listOf(0, 1, 2, 3, 4, 5)
     }
 //    NetworkIO().load("nets/nw.net")?.dropout(listOf(0, 1, 2, 3, 4, 5), 0.2)?.let {NetworkIO().save(it, "nets/nw.net") }
 //    (3 downTo 2).forEach { trainLayer(4, settings, 80, it, 200, 0.0 ) }
-    train(settings.apply { populationSize = 60; trainLayers = listOf(3); epochSize = 150; exitIfError=2; dropout=0.0 })
+    train(settings.apply { populationSize = 60; trainLayers = listOf(2,3); epochSize = 150; exitIfError=2; dropout=0.0 })
+    */
+    val settings = TrainSettings()
+    train(settings)
+    settings.exitIfError = 2
+    settings.trainLayers = listOf(5)
+    train(settings)
 }
 
 private fun trainLayer(toClassNumber: Int, settings: TrainSettings, popSize: Int, lNum: Int, epSize: Int, drop: Double=0.0) {
