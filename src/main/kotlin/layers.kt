@@ -60,9 +60,10 @@ class Layer(size: Int=0) {
         fun pool(x: List<Double>, matrixDivider: MatrixDivider) =  matrixDivider.divide(x).map { it.max()!! }
 
         fun softmax(x: List<Double>): List<Double> {
+            val y = x.map { if (it < 0) 0.0 else it }
             val sum = x.sum()
             if (sum == 0.0) return List(x.size, { 1.0/x.size })
-            return x.map { it/x.sum() }
+            return y.map { it/y.sum() }
         }
     }
 

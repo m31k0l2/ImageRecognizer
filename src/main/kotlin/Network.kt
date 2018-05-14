@@ -170,12 +170,41 @@ class CNetwork(vararg layerSize: Int): Network {
             }
             o = y.flatMap { it }
             if (teachFromLayer == 4) x.o = o
-            o = layers[4].activate(o)
         } else {
             o = x.o!!
         }
-        o = layers[5].activate(o)
+        o = layers[4].activate(o)
         val result = Layer.softmax(o)
+        calcImages[x] = result
+        return result
+    }
+
+    private fun activateCNNLayers(x: Image): List<Double> {
+        if (calcImages.containsKey(x)) return calcImages[x]!!
+        var y: List<List<Double>>
+        if (x.y == null) {
+            y = activateLayer0(x.colorsMatrix)
+            if (teachFromLayer == 1) x.y = y
+            y = activateLayer1(y)
+            if (teachFromLayer == 2) x.y = y
+            y = activateLayer2(y)
+            if (teachFromLayer == 3) x.y = y
+            y = activateLayer3(y)
+        } else {
+            when (teachFromLayer) {
+                1 -> {
+                    y = activateLayer1(x.y!!)
+                    y = activateLayer2(y)
+                    y = activateLayer3(y)
+                }
+                2 -> {
+                    y = activateLayer2(x.y!!)
+                    y = activateLayer3(y)
+                }
+                else -> y = activateLayer3(x.y!!)
+            }
+        }
+        val result = Layer.softmax(y.flatten())
         calcImages[x] = result
         return result
     }
@@ -185,7 +214,7 @@ class CNetwork(vararg layerSize: Int): Network {
             x.o = null
             x.y = null
         }
-        return activate5layers(x)
+        return activate6layers(x)
     }
 
     override fun clone() = CNetwork().also { it.layers.addAll(layers.map { it.clone() }) }

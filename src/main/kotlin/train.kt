@@ -1,3 +1,4 @@
+import java.awt.Toolkit
 import java.util.logging.FileHandler
 import java.util.logging.Logger
 import java.util.logging.SimpleFormatter
@@ -6,12 +7,12 @@ val log = Logger.getLogger("logger")
 val fh = FileHandler("log.txt")
 
 class TrainSettings {
-    var trainLayers = (0..5).toList()
+    var trainLayers = (0..3).toList()
         set(value) {
             field = value
             CNetwork.teachFromLayer = value.min() ?: 0
         }
-    val initTestBatch = MNIST.buildBatch(1000)
+    val initTestBatch = MNIST.buildBatch(500)
     var testNumbers = (0..9).toList()
         set(value) {
             field = value
@@ -28,6 +29,13 @@ class TrainSettings {
     var dropout = 0.0
 }
 
+fun beep() {
+    for (i in 1..60) {
+        Toolkit.getDefaultToolkit().beep()
+        Thread.sleep(1000)
+    }
+}
+
 fun main(args: Array<String>) {
     log.addHandler(fh)
     fh.formatter = SimpleFormatter()
@@ -42,11 +50,15 @@ fun main(args: Array<String>) {
 //    (3 downTo 2).forEach { trainLayer(4, settings, 80, it, 200, 0.0 ) }
     train(settings.apply { populationSize = 60; trainLayers = listOf(2,3); epochSize = 150; exitIfError=2; dropout=0.0 })
     */
-    val settings = TrainSettings()
-    train(settings)
-    settings.exitIfError = 2
-    settings.trainLayers = listOf(5)
-    train(settings)
+    for (e in 1..10) {
+        for (i in 5 downTo 0) {
+            train(TrainSettings().apply { testNumbers = listOf(0, 1, 2, 3, 4);exitIfError = 1;trainLayers = listOf(i) })
+        }
+        train(TrainSettings().apply { testNumbers = listOf(0, 1, 2, 3, 4);exitIfError = 1;trainLayers = listOf() })
+    }
+
+//    trainGroup()
+//    beep()
 }
 
 private fun trainLayer(toClassNumber: Int, settings: TrainSettings, popSize: Int, lNum: Int, epSize: Int, drop: Double=0.0) {
@@ -69,6 +81,22 @@ private fun trainLayer(toClassNumber: Int, settings: TrainSettings, popSize: Int
     } else {
         log.info("$r1 > $r0")
     }
+}
+
+fun trainGroup() {
+    val net = ImageNetEvolution()
+    net.name = "nets/nw.net"
+    net.mutantStrategy = { e, _ ->
+        when {
+            e < 50 -> ((50 - e) / 50.0)
+            else -> 0.2
+        }
+    }
+    net.batch = MNIST.buildBatch(1000).filter { it.index in (0..3) }
+    println(net.batch.size)
+    val population = List(2, { Individual(NetworkIO().load("nets/nw$it.net")!!) })
+    net.evolute(500, population)
+    NetworkIO().save(net.leader!!.nw, net.name)
 }
 
 fun train(settings: TrainSettings): Double = with(settings) {

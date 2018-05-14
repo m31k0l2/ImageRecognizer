@@ -1,32 +1,656 @@
-мая 11, 2018 8:20:20 AM TrainKt train
-INFO: trainLayers: [0, 1, 2, 3, 4, 5]
-мая 11, 2018 8:20:20 AM TrainKt train
-INFO: testNumbers: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-мая 11, 2018 8:20:24 AM TrainKt train
-INFO: init result: 0.0, testBatchSize: 1000
-мая 11, 2018 8:20:50 AM TrainKt train
-INFO: 1) SAVE, batch: 500, res = 0.09999999999999999 [old 0.0]
-мая 11, 2018 8:22:49 AM TrainKt train
-INFO: 2) SAVE, batch: 700, res = 0.18688976289574372 [old 0.09999999999999999]
-мая 11, 2018 8:24:53 AM TrainKt train
-INFO: 3) SAVE, batch: 900, res = 0.2657424217319443 [old 0.18688976289574372]
-мая 11, 2018 8:27:12 AM TrainKt train
-INFO: 4) SAVE, batch: 1100, res = 0.2733229212511148 [old 0.2657424217319443]
-мая 11, 2018 8:29:34 AM TrainKt train
-INFO: 5) SAVE, batch: 1300, res = 0.2919663428091058 [old 0.2733229212511148]
-мая 11, 2018 8:31:55 AM TrainKt train
-WARNING: 6) NO SAVE, batch: 1500, res = 0.28838337536675296 [old 0.2919663428091058]
-мая 11, 2018 8:31:55 AM TrainKt train
+мая 14, 2018 8:14:35 AM TrainKt train
 INFO: trainLayers: [5]
-мая 11, 2018 8:31:55 AM TrainKt train
-INFO: testNumbers: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-мая 11, 2018 8:32:00 AM TrainKt train
-INFO: init result: 0.2919576716201448, testBatchSize: 1000
-мая 11, 2018 8:34:09 AM TrainKt train
-INFO: 1) SAVE, batch: 500, res = 0.29449073607970616 [old 0.2919576716201448]
-мая 11, 2018 8:36:08 AM TrainKt train
-WARNING: 2) NO SAVE, batch: 700, res = 0.2794124874490361 [old 0.29449073607970616]
-мая 11, 2018 8:38:23 AM TrainKt train
-INFO: 3) SAVE, batch: 900, res = 0.31997199382763974 [old 0.29449073607970616]
-мая 11, 2018 8:40:31 AM TrainKt train
-WARNING: 4) NO SAVE, batch: 1100, res = 0.31997199382763974 [old 0.31997199382763974]
+мая 14, 2018 8:14:35 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:14:39 AM TrainKt train
+INFO: init result: 0.0, testBatchSize: 250
+мая 14, 2018 8:14:40 AM TrainKt train
+INFO: 1) SAVE, batch: 250, res = 0.1 [old 0.0]
+мая 14, 2018 8:14:42 AM TrainKt train
+INFO: 2) SAVE, batch: 350, res = 0.18008413503979442 [old 0.1]
+мая 14, 2018 8:14:44 AM TrainKt train
+INFO: 3) SAVE, batch: 450, res = 0.2 [old 0.18008413503979442]
+мая 14, 2018 8:14:46 AM TrainKt train
+WARNING: 4) NO SAVE, batch: 550, res = 0.2 [old 0.2]
+мая 14, 2018 8:14:49 AM TrainKt train
+INFO: trainLayers: [4]
+мая 14, 2018 8:14:49 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:14:53 AM TrainKt train
+INFO: init result: 0.2, testBatchSize: 250
+мая 14, 2018 8:14:55 AM TrainKt train
+INFO: 1) SAVE, batch: 250, res = 0.3082976507098138 [old 0.2]
+мая 14, 2018 8:14:59 AM TrainKt train
+INFO: 2) SAVE, batch: 350, res = 0.3438344797137577 [old 0.3082976507098138]
+мая 14, 2018 8:15:03 AM TrainKt train
+INFO: 3) SAVE, batch: 450, res = 0.35423392153303146 [old 0.3438344797137577]
+мая 14, 2018 8:15:07 AM TrainKt train
+WARNING: 4) NO SAVE, batch: 550, res = 0.29475497564345926 [old 0.35423392153303146]
+мая 14, 2018 8:15:12 AM TrainKt train
+INFO: trainLayers: [3]
+мая 14, 2018 8:15:12 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:15:16 AM TrainKt train
+INFO: init result: 0.3607767355651563, testBatchSize: 250
+мая 14, 2018 8:15:18 AM TrainKt train
+WARNING: 1) NO SAVE, batch: 250, res = 0.35509888518478266 [old 0.3607767355651563]
+мая 14, 2018 8:15:22 AM TrainKt train
+INFO: trainLayers: [2]
+мая 14, 2018 8:15:22 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:15:26 AM TrainKt train
+INFO: init result: 0.36292063442788514, testBatchSize: 250
+мая 14, 2018 8:15:29 AM TrainKt train
+INFO: 1) SAVE, batch: 250, res = 0.3745740272436563 [old 0.36292063442788514]
+мая 14, 2018 8:15:33 AM TrainKt train
+WARNING: 2) NO SAVE, batch: 350, res = 0.3526136346101124 [old 0.3745740272436563]
+мая 14, 2018 8:15:36 AM TrainKt train
+INFO: trainLayers: [1]
+мая 14, 2018 8:15:36 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:15:40 AM TrainKt train
+INFO: init result: 0.3714234683319135, testBatchSize: 250
+мая 14, 2018 8:15:48 AM TrainKt train
+WARNING: 1) NO SAVE, batch: 250, res = 0.3550829567234802 [old 0.3714234683319135]
+мая 14, 2018 8:15:52 AM TrainKt train
+INFO: trainLayers: [0]
+мая 14, 2018 8:15:52 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:15:55 AM TrainKt train
+INFO: init result: 0.36399550475822107, testBatchSize: 250
+мая 14, 2018 8:16:32 AM TrainKt train
+WARNING: 1) NO SAVE, batch: 250, res = 0.35818769401410255 [old 0.36399550475822107]
+мая 14, 2018 8:16:36 AM TrainKt train
+INFO: trainLayers: []
+мая 14, 2018 8:16:36 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:16:40 AM TrainKt train
+INFO: init result: 0.33735050129448413, testBatchSize: 250
+мая 14, 2018 8:17:14 AM TrainKt train
+INFO: 1) SAVE, batch: 250, res = 0.3549287440734368 [old 0.33735050129448413]
+мая 14, 2018 8:17:52 AM TrainKt train
+INFO: 2) SAVE, batch: 350, res = 0.3706518878221724 [old 0.3549287440734368]
+мая 14, 2018 8:18:26 AM TrainKt train
+INFO: 3) SAVE, batch: 450, res = 0.3797476316014038 [old 0.3706518878221724]
+мая 14, 2018 8:19:03 AM TrainKt train
+INFO: 4) SAVE, batch: 550, res = 0.38851257557546803 [old 0.3797476316014038]
+мая 14, 2018 8:19:39 AM TrainKt train
+INFO: 5) SAVE, batch: 650, res = 0.3984352891486369 [old 0.38851257557546803]
+мая 14, 2018 8:20:17 AM TrainKt train
+WARNING: 6) NO SAVE, batch: 750, res = 0.3796397707083784 [old 0.3984352891486369]
+мая 14, 2018 8:20:21 AM TrainKt train
+INFO: trainLayers: [5]
+мая 14, 2018 8:20:21 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:20:24 AM TrainKt train
+INFO: init result: 0.3926090910310305, testBatchSize: 250
+мая 14, 2018 8:20:26 AM TrainKt train
+INFO: 1) SAVE, batch: 250, res = 0.41277240450102415 [old 0.3926090910310305]
+мая 14, 2018 8:20:30 AM TrainKt train
+WARNING: 2) NO SAVE, batch: 350, res = 0.378886940325179 [old 0.41277240450102415]
+мая 14, 2018 8:20:34 AM TrainKt train
+INFO: trainLayers: [4]
+мая 14, 2018 8:20:34 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:20:38 AM TrainKt train
+INFO: init result: 0.44138514687103003, testBatchSize: 250
+мая 14, 2018 8:20:39 AM TrainKt train
+WARNING: 1) NO SAVE, batch: 250, res = 0.43493769744069377 [old 0.44138514687103003]
+мая 14, 2018 8:20:43 AM TrainKt train
+INFO: trainLayers: [3]
+мая 14, 2018 8:20:43 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:20:48 AM TrainKt train
+INFO: init result: 0.41465970418342035, testBatchSize: 250
+мая 14, 2018 8:20:50 AM TrainKt train
+WARNING: 1) NO SAVE, batch: 250, res = 0.41465970418342035 [old 0.41465970418342035]
+мая 14, 2018 8:20:53 AM TrainKt train
+INFO: trainLayers: [2]
+мая 14, 2018 8:20:53 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:20:57 AM TrainKt train
+INFO: init result: 0.3936387326576237, testBatchSize: 250
+мая 14, 2018 8:21:01 AM TrainKt train
+INFO: 1) SAVE, batch: 250, res = 0.400032346637848 [old 0.3936387326576237]
+мая 14, 2018 8:21:07 AM TrainKt train
+WARNING: 2) NO SAVE, batch: 350, res = 0.2593700941294065 [old 0.400032346637848]
+мая 14, 2018 8:21:10 AM TrainKt train
+INFO: trainLayers: [1]
+мая 14, 2018 8:21:10 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:21:14 AM TrainKt train
+INFO: init result: 0.4154854701560131, testBatchSize: 250
+мая 14, 2018 8:21:22 AM TrainKt train
+WARNING: 1) NO SAVE, batch: 250, res = 0.4025884262171833 [old 0.4154854701560131]
+мая 14, 2018 8:21:25 AM TrainKt train
+INFO: trainLayers: [0]
+мая 14, 2018 8:21:25 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:21:29 AM TrainKt train
+INFO: init result: 0.40970193352428697, testBatchSize: 250
+мая 14, 2018 8:21:59 AM TrainKt train
+WARNING: 1) NO SAVE, batch: 250, res = 0.40788004347212786 [old 0.40970193352428697]
+мая 14, 2018 8:22:03 AM TrainKt train
+INFO: trainLayers: []
+мая 14, 2018 8:22:03 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:22:06 AM TrainKt train
+INFO: init result: 0.3778163719938644, testBatchSize: 250
+мая 14, 2018 8:22:39 AM TrainKt train
+INFO: 1) SAVE, batch: 250, res = 0.38768913614733963 [old 0.3778163719938644]
+мая 14, 2018 8:23:13 AM TrainKt train
+INFO: 2) SAVE, batch: 350, res = 0.3992086721647222 [old 0.38768913614733963]
+мая 14, 2018 8:23:50 AM TrainKt train
+WARNING: 3) NO SAVE, batch: 450, res = 0.3992086721647222 [old 0.3992086721647222]
+мая 14, 2018 8:23:56 AM TrainKt train
+INFO: trainLayers: [5]
+мая 14, 2018 8:23:56 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:24:00 AM TrainKt train
+INFO: init result: 0.4450551811665999, testBatchSize: 250
+мая 14, 2018 8:24:01 AM TrainKt train
+INFO: 1) SAVE, batch: 250, res = 0.46724457789202656 [old 0.4450551811665999]
+мая 14, 2018 8:24:04 AM TrainKt train
+INFO: 2) SAVE, batch: 350, res = 0.48635220985732275 [old 0.46724457789202656]
+мая 14, 2018 8:24:07 AM TrainKt train
+WARNING: 3) NO SAVE, batch: 450, res = 0.45931279796329416 [old 0.48635220985732275]
+мая 14, 2018 8:24:11 AM TrainKt train
+INFO: trainLayers: [4]
+мая 14, 2018 8:24:11 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:24:15 AM TrainKt train
+INFO: init result: 0.42685372105189623, testBatchSize: 250
+мая 14, 2018 8:24:17 AM TrainKt train
+WARNING: 1) NO SAVE, batch: 250, res = 0.36502958051264567 [old 0.42685372105189623]
+мая 14, 2018 8:24:20 AM TrainKt train
+INFO: trainLayers: [3]
+мая 14, 2018 8:24:20 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:24:24 AM TrainKt train
+INFO: init result: 0.4535436308432109, testBatchSize: 250
+мая 14, 2018 8:24:26 AM TrainKt train
+INFO: 1) SAVE, batch: 250, res = 0.5329298496308248 [old 0.4535436308432109]
+мая 14, 2018 8:24:30 AM TrainKt train
+WARNING: 2) NO SAVE, batch: 350, res = 0.5265497006968407 [old 0.5329298496308248]
+мая 14, 2018 8:24:35 AM TrainKt train
+INFO: trainLayers: [2]
+мая 14, 2018 8:24:35 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:24:39 AM TrainKt train
+INFO: init result: 0.5125857944522162, testBatchSize: 250
+мая 14, 2018 8:24:43 AM TrainKt train
+WARNING: 1) NO SAVE, batch: 250, res = 0.4661450488586006 [old 0.5125857944522162]
+мая 14, 2018 8:24:46 AM TrainKt train
+INFO: trainLayers: [1]
+мая 14, 2018 8:24:46 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:24:50 AM TrainKt train
+INFO: init result: 0.5369055206498968, testBatchSize: 250
+мая 14, 2018 8:24:58 AM TrainKt train
+WARNING: 1) NO SAVE, batch: 250, res = 0.5332246164558269 [old 0.5369055206498968]
+мая 14, 2018 8:25:01 AM TrainKt train
+INFO: trainLayers: [0]
+мая 14, 2018 8:25:01 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:25:05 AM TrainKt train
+INFO: init result: 0.5243146652884078, testBatchSize: 250
+мая 14, 2018 8:25:34 AM TrainKt train
+WARNING: 1) NO SAVE, batch: 250, res = 0.453461905678141 [old 0.5243146652884078]
+мая 14, 2018 8:25:38 AM TrainKt train
+INFO: trainLayers: []
+мая 14, 2018 8:25:38 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:25:41 AM TrainKt train
+INFO: init result: 0.4985779145087214, testBatchSize: 250
+мая 14, 2018 8:26:16 AM TrainKt train
+WARNING: 1) NO SAVE, batch: 250, res = 0.4792826800683215 [old 0.4985779145087214]
+мая 14, 2018 8:26:20 AM TrainKt train
+INFO: trainLayers: [5]
+мая 14, 2018 8:26:20 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:26:23 AM TrainKt train
+INFO: init result: 0.5255115488019358, testBatchSize: 250
+мая 14, 2018 8:26:25 AM TrainKt train
+INFO: 1) SAVE, batch: 250, res = 0.5597239298577279 [old 0.5255115488019358]
+мая 14, 2018 8:26:28 AM TrainKt train
+INFO: 2) SAVE, batch: 350, res = 0.5708907537109008 [old 0.5597239298577279]
+мая 14, 2018 8:26:31 AM TrainKt train
+WARNING: 3) NO SAVE, batch: 450, res = 0.5033964990680216 [old 0.5708907537109008]
+мая 14, 2018 8:26:35 AM TrainKt train
+INFO: trainLayers: [4]
+мая 14, 2018 8:26:35 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:26:39 AM TrainKt train
+INFO: init result: 0.5390343226762063, testBatchSize: 250
+мая 14, 2018 8:26:40 AM TrainKt train
+WARNING: 1) NO SAVE, batch: 250, res = 0.5361654508790139 [old 0.5390343226762063]
+мая 14, 2018 8:26:44 AM TrainKt train
+INFO: trainLayers: [3]
+мая 14, 2018 8:26:44 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:26:48 AM TrainKt train
+INFO: init result: 0.5390596347131151, testBatchSize: 250
+мая 14, 2018 8:26:49 AM TrainKt train
+WARNING: 1) NO SAVE, batch: 250, res = 0.5119895733834214 [old 0.5390596347131151]
+мая 14, 2018 8:26:53 AM TrainKt train
+INFO: trainLayers: [2]
+мая 14, 2018 8:26:53 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:26:57 AM TrainKt train
+INFO: init result: 0.5339324685224308, testBatchSize: 250
+мая 14, 2018 8:26:59 AM TrainKt train
+WARNING: 1) NO SAVE, batch: 250, res = 0.4892851892051249 [old 0.5339324685224308]
+мая 14, 2018 8:27:03 AM TrainKt train
+INFO: trainLayers: [1]
+мая 14, 2018 8:27:03 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:27:07 AM TrainKt train
+INFO: init result: 0.5685629765707751, testBatchSize: 250
+мая 14, 2018 8:27:15 AM TrainKt train
+WARNING: 1) NO SAVE, batch: 250, res = 0.5563337468869071 [old 0.5685629765707751]
+мая 14, 2018 8:27:19 AM TrainKt train
+INFO: trainLayers: [0]
+мая 14, 2018 8:27:19 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:27:22 AM TrainKt train
+INFO: init result: 0.5555149785049857, testBatchSize: 250
+мая 14, 2018 8:27:31 AM TrainKt train
+WARNING: 1) NO SAVE, batch: 250, res = 0.1 [old 0.5555149785049857]
+мая 14, 2018 8:27:34 AM TrainKt train
+INFO: trainLayers: []
+мая 14, 2018 8:27:34 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:27:38 AM TrainKt train
+INFO: init result: 0.5825865530392895, testBatchSize: 250
+мая 14, 2018 8:28:10 AM TrainKt train
+INFO: 1) SAVE, batch: 250, res = 0.5845752860143987 [old 0.5825865530392895]
+мая 14, 2018 8:28:46 AM TrainKt train
+INFO: 2) SAVE, batch: 350, res = 0.6501354792534835 [old 0.5845752860143987]
+мая 14, 2018 8:29:21 AM TrainKt train
+WARNING: 3) NO SAVE, batch: 450, res = 0.6453766859866661 [old 0.6501354792534835]
+мая 14, 2018 8:29:24 AM TrainKt train
+INFO: trainLayers: [5]
+мая 14, 2018 8:29:24 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:29:28 AM TrainKt train
+INFO: init result: 0.6099662322782929, testBatchSize: 250
+мая 14, 2018 8:29:29 AM TrainKt train
+WARNING: 1) NO SAVE, batch: 250, res = 0.4999603638531676 [old 0.6099662322782929]
+мая 14, 2018 8:29:33 AM TrainKt train
+INFO: trainLayers: [4]
+мая 14, 2018 8:29:33 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:29:36 AM TrainKt train
+INFO: init result: 0.5870051213706157, testBatchSize: 250
+мая 14, 2018 8:29:38 AM TrainKt train
+WARNING: 1) NO SAVE, batch: 250, res = 0.5657395138700402 [old 0.5870051213706157]
+мая 14, 2018 8:29:41 AM TrainKt train
+INFO: trainLayers: [3]
+мая 14, 2018 8:29:41 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:29:45 AM TrainKt train
+INFO: init result: 0.5153329649454952, testBatchSize: 250
+мая 14, 2018 8:29:47 AM TrainKt train
+INFO: 1) SAVE, batch: 250, res = 0.5626725310730117 [old 0.5153329649454952]
+мая 14, 2018 8:29:50 AM TrainKt train
+WARNING: 2) NO SAVE, batch: 350, res = 0.5594988823351615 [old 0.5626725310730117]
+мая 14, 2018 8:29:54 AM TrainKt train
+INFO: trainLayers: [2]
+мая 14, 2018 8:29:54 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:29:57 AM TrainKt train
+INFO: init result: 0.6001701688205417, testBatchSize: 250
+мая 14, 2018 8:30:00 AM TrainKt train
+WARNING: 1) NO SAVE, batch: 250, res = 0.6001701688205417 [old 0.6001701688205417]
+мая 14, 2018 8:30:03 AM TrainKt train
+INFO: trainLayers: [1]
+мая 14, 2018 8:30:03 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:30:07 AM TrainKt train
+INFO: init result: 0.605450061104307, testBatchSize: 250
+мая 14, 2018 8:30:15 AM TrainKt train
+WARNING: 1) NO SAVE, batch: 250, res = 0.48865283140981697 [old 0.605450061104307]
+мая 14, 2018 8:30:19 AM TrainKt train
+INFO: trainLayers: [0]
+мая 14, 2018 8:30:19 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:30:23 AM TrainKt train
+INFO: init result: 0.5532246751909886, testBatchSize: 250
+мая 14, 2018 8:30:55 AM TrainKt train
+INFO: 1) SAVE, batch: 250, res = 0.5824831685224734 [old 0.5532246751909886]
+мая 14, 2018 8:31:29 AM TrainKt train
+INFO: 2) SAVE, batch: 350, res = 0.584861086615942 [old 0.5824831685224734]
+мая 14, 2018 8:32:02 AM TrainKt train
+INFO: 3) SAVE, batch: 450, res = 0.6197477165142454 [old 0.584861086615942]
+мая 14, 2018 8:32:35 AM TrainKt train
+WARNING: 4) NO SAVE, batch: 550, res = 0.5949181168855306 [old 0.6197477165142454]
+мая 14, 2018 8:32:38 AM TrainKt train
+INFO: trainLayers: []
+мая 14, 2018 8:32:38 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:32:42 AM TrainKt train
+INFO: init result: 0.6327411955144941, testBatchSize: 250
+мая 14, 2018 8:33:14 AM TrainKt train
+WARNING: 1) NO SAVE, batch: 250, res = 0.6134209377672747 [old 0.6327411955144941]
+мая 14, 2018 8:33:17 AM TrainKt train
+INFO: trainLayers: [5]
+мая 14, 2018 8:33:17 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:33:21 AM TrainKt train
+INFO: init result: 0.6079051938307745, testBatchSize: 250
+мая 14, 2018 8:33:22 AM TrainKt train
+WARNING: 1) NO SAVE, batch: 250, res = 0.6007840162898999 [old 0.6079051938307745]
+мая 14, 2018 8:33:25 AM TrainKt train
+INFO: trainLayers: [4]
+мая 14, 2018 8:33:25 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:33:29 AM TrainKt train
+INFO: init result: 0.5388346177173035, testBatchSize: 250
+мая 14, 2018 8:33:30 AM TrainKt train
+INFO: 1) SAVE, batch: 250, res = 0.5408540099737487 [old 0.5388346177173035]
+мая 14, 2018 8:33:34 AM TrainKt train
+INFO: 2) SAVE, batch: 350, res = 0.5567658080180452 [old 0.5408540099737487]
+мая 14, 2018 8:33:37 AM TrainKt train
+WARNING: 3) NO SAVE, batch: 450, res = 0.4667139225002318 [old 0.5567658080180452]
+мая 14, 2018 8:33:40 AM TrainKt train
+INFO: trainLayers: [3]
+мая 14, 2018 8:33:40 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:33:44 AM TrainKt train
+INFO: init result: 0.563519342209245, testBatchSize: 250
+мая 14, 2018 8:33:45 AM TrainKt train
+WARNING: 1) NO SAVE, batch: 250, res = 0.5569669111951273 [old 0.563519342209245]
+мая 14, 2018 8:33:49 AM TrainKt train
+INFO: trainLayers: [2]
+мая 14, 2018 8:33:49 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:33:52 AM TrainKt train
+INFO: init result: 0.5534480829660182, testBatchSize: 250
+мая 14, 2018 8:33:55 AM TrainKt train
+WARNING: 1) NO SAVE, batch: 250, res = 0.5534480829660182 [old 0.5534480829660182]
+мая 14, 2018 8:33:58 AM TrainKt train
+INFO: trainLayers: [1]
+мая 14, 2018 8:33:58 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:34:02 AM TrainKt train
+INFO: init result: 0.5897833744868147, testBatchSize: 250
+мая 14, 2018 8:34:09 AM TrainKt train
+WARNING: 1) NO SAVE, batch: 250, res = 0.5652492589140982 [old 0.5897833744868147]
+мая 14, 2018 8:34:13 AM TrainKt train
+INFO: trainLayers: [0]
+мая 14, 2018 8:34:13 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:34:16 AM TrainKt train
+INFO: init result: 0.6282791045341065, testBatchSize: 250
+мая 14, 2018 8:34:46 AM TrainKt train
+WARNING: 1) NO SAVE, batch: 250, res = 0.5784322960400629 [old 0.6282791045341065]
+мая 14, 2018 8:34:49 AM TrainKt train
+INFO: trainLayers: []
+мая 14, 2018 8:34:49 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:34:53 AM TrainKt train
+INFO: init result: 0.5772579981653221, testBatchSize: 250
+мая 14, 2018 8:35:24 AM TrainKt train
+INFO: 1) SAVE, batch: 250, res = 0.6016131449126625 [old 0.5772579981653221]
+мая 14, 2018 8:35:57 AM TrainKt train
+WARNING: 2) NO SAVE, batch: 350, res = 0.5739337692342995 [old 0.6016131449126625]
+мая 14, 2018 8:36:00 AM TrainKt train
+INFO: trainLayers: [5]
+мая 14, 2018 8:36:00 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:36:04 AM TrainKt train
+INFO: init result: 0.6168362999620146, testBatchSize: 250
+мая 14, 2018 8:36:05 AM TrainKt train
+INFO: 1) SAVE, batch: 250, res = 0.6443250463186468 [old 0.6168362999620146]
+мая 14, 2018 8:36:07 AM TrainKt train
+WARNING: 2) NO SAVE, batch: 350, res = 0.6350289888695 [old 0.6443250463186468]
+мая 14, 2018 8:36:11 AM TrainKt train
+INFO: trainLayers: [4]
+мая 14, 2018 8:36:11 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:36:15 AM TrainKt train
+INFO: init result: 0.6208447881638294, testBatchSize: 250
+мая 14, 2018 8:36:16 AM TrainKt train
+WARNING: 1) NO SAVE, batch: 250, res = 0.47637743352391676 [old 0.6208447881638294]
+мая 14, 2018 8:36:19 AM TrainKt train
+INFO: trainLayers: [3]
+мая 14, 2018 8:36:19 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:36:23 AM TrainKt train
+INFO: init result: 0.6431755498944599, testBatchSize: 250
+мая 14, 2018 8:36:25 AM TrainKt train
+INFO: 1) SAVE, batch: 250, res = 0.648066870459747 [old 0.6431755498944599]
+мая 14, 2018 8:36:28 AM TrainKt train
+INFO: 2) SAVE, batch: 350, res = 0.6632584748847726 [old 0.648066870459747]
+мая 14, 2018 8:36:31 AM TrainKt train
+WARNING: 3) NO SAVE, batch: 450, res = 0.6332995288346129 [old 0.6632584748847726]
+мая 14, 2018 8:36:35 AM TrainKt train
+INFO: trainLayers: [2]
+мая 14, 2018 8:36:35 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:36:38 AM TrainKt train
+INFO: init result: 0.6641002912138958, testBatchSize: 250
+мая 14, 2018 8:36:41 AM TrainKt train
+INFO: 1) SAVE, batch: 250, res = 0.6666096577832127 [old 0.6641002912138958]
+мая 14, 2018 8:36:44 AM TrainKt train
+INFO: 2) SAVE, batch: 350, res = 0.6796867471646918 [old 0.6666096577832127]
+мая 14, 2018 8:36:48 AM TrainKt train
+WARNING: 3) NO SAVE, batch: 450, res = 0.5807193436912186 [old 0.6796867471646918]
+мая 14, 2018 8:36:52 AM TrainKt train
+INFO: trainLayers: [1]
+мая 14, 2018 8:36:52 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:36:55 AM TrainKt train
+INFO: init result: 0.6703697032242302, testBatchSize: 250
+мая 14, 2018 8:37:02 AM TrainKt train
+WARNING: 1) NO SAVE, batch: 250, res = 0.6289896389328623 [old 0.6703697032242302]
+мая 14, 2018 8:37:06 AM TrainKt train
+INFO: trainLayers: [0]
+мая 14, 2018 8:37:06 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:37:09 AM TrainKt train
+INFO: init result: 0.6664506871928834, testBatchSize: 250
+мая 14, 2018 8:37:41 AM TrainKt train
+WARNING: 1) NO SAVE, batch: 250, res = 0.6664506871928834 [old 0.6664506871928834]
+мая 14, 2018 8:37:44 AM TrainKt train
+INFO: trainLayers: []
+мая 14, 2018 8:37:44 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:37:48 AM TrainKt train
+INFO: init result: 0.643762086103407, testBatchSize: 250
+мая 14, 2018 8:38:20 AM TrainKt train
+INFO: 1) SAVE, batch: 250, res = 0.6442022073777774 [old 0.643762086103407]
+мая 14, 2018 8:38:52 AM TrainKt train
+INFO: 2) SAVE, batch: 350, res = 0.7046472972225069 [old 0.6442022073777774]
+мая 14, 2018 8:39:23 AM TrainKt train
+INFO: 3) SAVE, batch: 450, res = 0.7526775101255021 [old 0.7046472972225069]
+мая 14, 2018 8:39:58 AM TrainKt train
+WARNING: 4) NO SAVE, batch: 550, res = 0.7286282828789653 [old 0.7526775101255021]
+мая 14, 2018 8:40:01 AM TrainKt train
+INFO: trainLayers: [5]
+мая 14, 2018 8:40:01 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:40:05 AM TrainKt train
+INFO: init result: 0.7258943156638933, testBatchSize: 250
+мая 14, 2018 8:40:06 AM TrainKt train
+WARNING: 1) NO SAVE, batch: 250, res = 0.6294832221567376 [old 0.7258943156638933]
+мая 14, 2018 8:40:09 AM TrainKt train
+INFO: trainLayers: [4]
+мая 14, 2018 8:40:09 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:40:14 AM TrainKt train
+INFO: init result: 0.7710221804701572, testBatchSize: 250
+мая 14, 2018 8:40:15 AM TrainKt train
+INFO: 1) SAVE, batch: 250, res = 0.791389853692961 [old 0.7710221804701572]
+мая 14, 2018 8:40:18 AM TrainKt train
+WARNING: 2) NO SAVE, batch: 350, res = 0.7761328603991441 [old 0.791389853692961]
+мая 14, 2018 8:40:22 AM TrainKt train
+INFO: trainLayers: [3]
+мая 14, 2018 8:40:22 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:40:25 AM TrainKt train
+INFO: init result: 0.6831675345711427, testBatchSize: 250
+мая 14, 2018 8:40:27 AM TrainKt train
+INFO: 1) SAVE, batch: 250, res = 0.6839332522959587 [old 0.6831675345711427]
+мая 14, 2018 8:40:31 AM TrainKt train
+WARNING: 2) NO SAVE, batch: 350, res = 0.6782819640198882 [old 0.6839332522959587]
+мая 14, 2018 8:40:35 AM TrainKt train
+INFO: trainLayers: [2]
+мая 14, 2018 8:40:35 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:40:39 AM TrainKt train
+INFO: init result: 0.6832430392909459, testBatchSize: 250
+мая 14, 2018 8:40:42 AM TrainKt train
+WARNING: 1) NO SAVE, batch: 250, res = 0.6717320413250637 [old 0.6832430392909459]
+мая 14, 2018 8:40:45 AM TrainKt train
+INFO: trainLayers: [1]
+мая 14, 2018 8:40:45 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:40:49 AM TrainKt train
+INFO: init result: 0.7213425429374895, testBatchSize: 250
+мая 14, 2018 8:40:58 AM TrainKt train
+WARNING: 1) NO SAVE, batch: 250, res = 0.7185695458010402 [old 0.7213425429374895]
+мая 14, 2018 8:41:02 AM TrainKt train
+INFO: trainLayers: [0]
+мая 14, 2018 8:41:02 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:41:05 AM TrainKt train
+INFO: init result: 0.8043156123525528, testBatchSize: 250
+мая 14, 2018 8:41:38 AM TrainKt train
+WARNING: 1) NO SAVE, batch: 250, res = 0.8043156123525528 [old 0.8043156123525528]
+мая 14, 2018 8:41:41 AM TrainKt train
+INFO: trainLayers: []
+мая 14, 2018 8:41:41 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:41:45 AM TrainKt train
+INFO: init result: 0.7652580376999281, testBatchSize: 250
+мая 14, 2018 8:42:20 AM TrainKt train
+WARNING: 1) NO SAVE, batch: 250, res = 0.6795947107433289 [old 0.7652580376999281]
+мая 14, 2018 8:42:24 AM TrainKt train
+INFO: trainLayers: [5]
+мая 14, 2018 8:42:24 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:42:27 AM TrainKt train
+INFO: init result: 0.7229406312097765, testBatchSize: 250
+мая 14, 2018 8:42:29 AM TrainKt train
+INFO: 1) SAVE, batch: 250, res = 0.7258708740046366 [old 0.7229406312097765]
+мая 14, 2018 8:42:31 AM TrainKt train
+WARNING: 2) NO SAVE, batch: 350, res = 0.6093959607235565 [old 0.7258708740046366]
+мая 14, 2018 8:42:35 AM TrainKt train
+INFO: trainLayers: [4]
+мая 14, 2018 8:42:35 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:42:38 AM TrainKt train
+INFO: init result: 0.7076077376304992, testBatchSize: 250
+мая 14, 2018 8:42:40 AM TrainKt train
+WARNING: 1) NO SAVE, batch: 250, res = 0.650191165900754 [old 0.7076077376304992]
+мая 14, 2018 8:42:43 AM TrainKt train
+INFO: trainLayers: [3]
+мая 14, 2018 8:42:43 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:42:47 AM TrainKt train
+INFO: init result: 0.7233056056894822, testBatchSize: 250
+мая 14, 2018 8:42:49 AM TrainKt train
+INFO: 1) SAVE, batch: 250, res = 0.8081804815369249 [old 0.7233056056894822]
+мая 14, 2018 8:42:53 AM TrainKt train
+INFO: 2) SAVE, batch: 350, res = 0.8134035228762547 [old 0.8081804815369249]
+мая 14, 2018 8:42:56 AM TrainKt train
+WARNING: 3) NO SAVE, batch: 450, res = 0.7501056670281272 [old 0.8134035228762547]
+мая 14, 2018 8:43:00 AM TrainKt train
+INFO: trainLayers: [2]
+мая 14, 2018 8:43:00 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:43:03 AM TrainKt train
+INFO: init result: 0.8300862040978491, testBatchSize: 250
+мая 14, 2018 8:43:06 AM TrainKt train
+WARNING: 1) NO SAVE, batch: 250, res = 0.7896307226868845 [old 0.8300862040978491]
+мая 14, 2018 8:43:09 AM TrainKt train
+INFO: trainLayers: [1]
+мая 14, 2018 8:43:09 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:43:13 AM TrainKt train
+INFO: init result: 0.8175874304249302, testBatchSize: 250
+мая 14, 2018 8:43:21 AM TrainKt train
+WARNING: 1) NO SAVE, batch: 250, res = 0.6684435049399464 [old 0.8175874304249302]
+мая 14, 2018 8:43:25 AM TrainKt train
+INFO: trainLayers: [0]
+мая 14, 2018 8:43:25 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:43:28 AM TrainKt train
+INFO: init result: 0.7147531247260942, testBatchSize: 250
+мая 14, 2018 8:44:03 AM TrainKt train
+INFO: 1) SAVE, batch: 250, res = 0.7215241064210671 [old 0.7147531247260942]
+мая 14, 2018 8:44:37 AM TrainKt train
+INFO: 2) SAVE, batch: 350, res = 0.7818111863037324 [old 0.7215241064210671]
+мая 14, 2018 8:45:08 AM TrainKt train
+WARNING: 3) NO SAVE, batch: 450, res = 0.7818111863037324 [old 0.7818111863037324]
+мая 14, 2018 8:45:11 AM TrainKt train
+INFO: trainLayers: []
+мая 14, 2018 8:45:11 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:45:15 AM TrainKt train
+INFO: init result: 0.8126224909250777, testBatchSize: 250
+мая 14, 2018 8:45:50 AM TrainKt train
+WARNING: 1) NO SAVE, batch: 250, res = 0.7989482147128882 [old 0.8126224909250777]
+мая 14, 2018 8:45:54 AM TrainKt train
+INFO: trainLayers: [5]
+мая 14, 2018 8:45:54 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:45:58 AM TrainKt train
+INFO: init result: 0.7975378840067859, testBatchSize: 250
+мая 14, 2018 8:45:59 AM TrainKt train
+WARNING: 1) NO SAVE, batch: 250, res = 0.6654190462434996 [old 0.7975378840067859]
+мая 14, 2018 8:46:03 AM TrainKt train
+INFO: trainLayers: [4]
+мая 14, 2018 8:46:03 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:46:06 AM TrainKt train
+INFO: init result: 0.806328754706308, testBatchSize: 250
+мая 14, 2018 8:46:08 AM TrainKt train
+WARNING: 1) NO SAVE, batch: 250, res = 0.7963562151837539 [old 0.806328754706308]
+мая 14, 2018 8:46:11 AM TrainKt train
+INFO: trainLayers: [3]
+мая 14, 2018 8:46:11 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:46:15 AM TrainKt train
+INFO: init result: 0.825069628388323, testBatchSize: 250
+мая 14, 2018 8:46:17 AM TrainKt train
+WARNING: 1) NO SAVE, batch: 250, res = 0.7879260063402539 [old 0.825069628388323]
+мая 14, 2018 8:46:20 AM TrainKt train
+INFO: trainLayers: [2]
+мая 14, 2018 8:46:20 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:46:24 AM TrainKt train
+INFO: init result: 0.8329915760425628, testBatchSize: 250
+мая 14, 2018 8:46:27 AM TrainKt train
+INFO: 1) SAVE, batch: 250, res = 0.8372401386640709 [old 0.8329915760425628]
+мая 14, 2018 8:46:32 AM TrainKt train
+WARNING: 2) NO SAVE, batch: 350, res = 0.8372401386640709 [old 0.8372401386640709]
+мая 14, 2018 8:46:35 AM TrainKt train
+INFO: trainLayers: [1]
+мая 14, 2018 8:46:35 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:46:39 AM TrainKt train
+INFO: init result: 0.7896910091746241, testBatchSize: 250
+мая 14, 2018 8:46:47 AM TrainKt train
+WARNING: 1) NO SAVE, batch: 250, res = 0.7443140092542324 [old 0.7896910091746241]
+мая 14, 2018 8:46:50 AM TrainKt train
+INFO: trainLayers: [0]
+мая 14, 2018 8:46:50 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:46:53 AM TrainKt train
+INFO: init result: 0.8159001683118575, testBatchSize: 250
+мая 14, 2018 8:47:23 AM TrainKt train
+INFO: 1) SAVE, batch: 250, res = 0.817275561902709 [old 0.8159001683118575]
+мая 14, 2018 8:47:52 AM TrainKt train
+WARNING: 2) NO SAVE, batch: 350, res = 0.779058864839553 [old 0.817275561902709]
+мая 14, 2018 8:47:55 AM TrainKt train
+INFO: trainLayers: []
+мая 14, 2018 8:47:55 AM TrainKt train
+INFO: testNumbers: [0, 1, 2, 3, 4]
+мая 14, 2018 8:47:59 AM TrainKt train
+INFO: init result: 0.6334352991402958, testBatchSize: 250
+мая 14, 2018 8:48:29 AM TrainKt train
+INFO: 1) SAVE, batch: 250, res = 0.7244263160551361 [old 0.6334352991402958]
+мая 14, 2018 8:49:02 AM TrainKt train
+WARNING: 2) NO SAVE, batch: 350, res = 0.7035163305655777 [old 0.7244263160551361]

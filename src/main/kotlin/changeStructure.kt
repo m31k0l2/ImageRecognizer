@@ -7,7 +7,7 @@ fun main(args: Array<String>) {
 fun changeStructure(from: String, to: String) {
     val nw = NetworkIO().load(from)!!
     val net = ImageNetEvolution().createNet()
-    changeNeurons(0, 1, net, nw)
+    changeNeurons(0, 4, net, nw)
     net.activate(image)
     NetworkIO().save(net, to)
 }

@@ -45,6 +45,7 @@ abstract class NetEvolution(
     var trainLayers = emptyList<Int>()
     private var mutateRate = 0.1
     private val populationAdder = 10
+    var minPopulationSize = 60
 
     init {
         if (File("nets/").mkdir()) {
@@ -74,10 +75,14 @@ abstract class NetEvolution(
             population = evoluteEpoch(population)
             val fin = System.nanoTime()
             val getRate = { pos: Int, population: List<Individual> -> ((population[pos].rate*1000000).toInt()/10000.0).toString()}
-            val rateInfo = "${getRate(0, population)} < ${getRate(population.size/4-1, population)} < ${getRate(population.size/2-1, population)}"
             println("мутация ${(mutantRate*1000).toInt()/10.0} % / $mutateRate")
             println("популяция ${population.size}")
-            println("Рейтинг [$rateCount]: $rateInfo")
+            if (population.size > minPopulationSize) {
+                val rateInfo = "${getRate(0, population)} < ${getRate(population.size / 4 - 1, population)} < ${getRate(population.size / 2 - 1, population)}"
+                println("Рейтинг [$rateCount]: $rateInfo")
+            } else {
+                println("Рейтинг [$rateCount]: ${getRate(0, population)}")
+            }
             println("Время: ${(fin-start)/1_000_000} мс\n")
             leader = population.first()
             val median = population[population.size/2-1]
@@ -166,7 +171,7 @@ abstract class NetEvolution(
      * Этот оптимальный шаблон сохраним, для дальнейшего сравнения и использования
      */
     private fun nextGeneration(population: List<Individual>): List<Individual> {
-        val survivors = population.take(population.size/2)
+        val survivors = if (population.size < minPopulationSize) population else population.take(population.size/2)
         val mutants = survivors.mapNotNull { if (random.nextDouble() < mutantRate) mutate(it) else null }.take(population.size/2)
         val parents = selection(survivors, population.size/2-mutants.size)
         val offspring = createChildren(parents)
