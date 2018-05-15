@@ -27,6 +27,7 @@ class TrainSettings {
     var populationSize = 60
     var epochSize = 200
     var dropout = 0.0
+    var exitIfBest = true
 }
 
 fun beep() {
@@ -39,48 +40,34 @@ fun beep() {
 fun main(args: Array<String>) {
     log.addHandler(fh)
     fh.formatter = SimpleFormatter()
-    /*
-    val settings = TrainSettings().apply {
-        initBatchSize = 500
-        addBatchSize = 250
-        count = 5
-        testNumbers = listOf(0, 1, 2, 3, 4, 5)
-    }
-//    NetworkIO().load("nets/nw.net")?.dropout(listOf(0, 1, 2, 3, 4, 5), 0.2)?.let {NetworkIO().save(it, "nets/nw.net") }
-//    (3 downTo 2).forEach { trainLayer(4, settings, 80, it, 200, 0.0 ) }
-    train(settings.apply { populationSize = 60; trainLayers = listOf(2,3); epochSize = 150; exitIfError=2; dropout=0.0 })
-    */
-    for (e in 1..10) {
+    val settings = TrainSettings().apply { exitIfError = 1 }
+    var r0 = 0.0
+    while (true) {
+        log.info("init result -> $r0")
         for (i in 5 downTo 0) {
-            train(TrainSettings().apply { testNumbers = listOf(0, 1, 2, 3, 4);exitIfError = 1;trainLayers = listOf(i) })
+            var drop = 0.0
+            var exitIfErr = 1
+            while (true) {
+                train(settings.apply { trainLayers = listOf(i); dropout=drop; exitIfError = exitIfErr })
+                val r1 = testMedianNet(NetworkIO().load("nets/nw.net")!!, settings.initTestBatch)
+                if ((r1*10000).toInt() > (r0*10000).toInt()) {
+                    r0 = r1
+                    break
+                }
+                drop += 0.001
+                if (drop == 0.2) drop = 0.0
+                exitIfErr = 2
+            }
         }
-        train(TrainSettings().apply { testNumbers = listOf(0, 1, 2, 3, 4);exitIfError = 1;trainLayers = listOf() })
+        val r1 = train(settings.apply { trainLayers = listOf() })
+        if (r1 > r0) r0 = r1
+        log.info("new result -> $r0")
+        if (r0 == 0.98) break
+//        settings.testBatch = settings.testBatch.takeLast(settings.testBatch.size/2).union(MNIST.buildBatch(settings.initBatchSize).filter { it.index in settings.testNumbers }).toList()
+//        r0 = testMedianNet(NetworkIO().load("nets/nw.net")!!, settings.testBatch)
     }
-
 //    trainGroup()
-//    beep()
-}
-
-private fun trainLayer(toClassNumber: Int, settings: TrainSettings, popSize: Int, lNum: Int, epSize: Int, drop: Double=0.0) {
-    var nw = NetworkIO().load("nets/nw.net")
-    val r0 = nw?.let {
-//        NetworkIO().save(it, "nets/nw.net.back.layer")
-        testMedianNet(it, settings.initTestBatch)
-    } ?: 0.0
-    log.info("r0 = $r0")
-    val numbers = (0..toClassNumber).shuffled()
-    (1..toClassNumber).forEach {
-        train(settings.apply { populationSize = popSize; trainLayers = listOf(lNum); epochSize = epSize; exitIfError = 1; dropout = if (it == 1 ) drop else 0.0; testNumbers = (0..it).map { numbers[it] } })
-    }
-    nw = NetworkIO().load("nets/nw.net")!!
-    val r1 = testMedianNet(nw, settings.initTestBatch)
-    if (r1 < r0) {
-//        nw = NetworkIO().load("nets/nw.net.back.layer")!!
-//        NetworkIO().save(nw, "nets/nw.net")
-        log.info("roll back ($r1 < $r0")
-    } else {
-        log.info("$r1 > $r0")
-    }
+    beep()
 }
 
 fun trainGroup() {
@@ -132,10 +119,11 @@ fun train(settings: TrainSettings): Double = with(settings) {
         val res = testMedianNet(net.leader!!.nw, testBatch)
         if (res > res2) {
             NetworkIO().save(net.leader!!.nw, net.name)
-            log.info("$i) SAVE, batch: ${net.batch.size}, res = $res [old $res2]")
+            log.warning("$i) SAVE, batch: ${net.batch.size}, res = $res [old $res2]")
             res2 = res
+            if (settings.exitIfBest) break
         } else {
-            log.warning("$i) NO SAVE, batch: ${net.batch.size}, res = $res [old $res2]")
+            log.info("$i) NO SAVE, batch: ${net.batch.size}, res = $res [old $res2]")
             NetworkIO().save(net.leader!!.nw, "nets/_nw.net")
             if (--exitIfError == 0) break
         }
