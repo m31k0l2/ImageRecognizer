@@ -6,6 +6,6 @@ fun main(args: Array<String>) {
         nw.layers[i].neurons.addAll(nw1.layers[i].neurons)
         nw.layers[i].neurons.addAll(nw2.layers[i].neurons)
     }
-    nw.activate(image)
+    nw.activate(MNIST.buildBatch(10).first())
     NetworkIO().save(nw, "nets/nw.net")
 }

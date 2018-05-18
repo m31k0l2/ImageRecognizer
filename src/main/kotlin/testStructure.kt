@@ -22,7 +22,8 @@ fun testNet(nw: Network, batch: List<Image>): Double {
 }
 
 fun testMedianNet(nw: Network, batch: List<Image>): Double {
-    val b = (0..9).mapNotNull { i -> batch.filter { it.index == i }.map { nw.activate(it)[i] }.let {
+    val indexSet = batch.map { it.index }.toSet()
+    val b = indexSet.mapNotNull { i -> batch.filter { it.index == i }.map { nw.activate(it)[i] }.let {
         if (it.isNotEmpty()) it.sorted()[it.size / 2] else null
     } }
     b.forEachIndexed { index, y ->

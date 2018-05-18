@@ -214,7 +214,7 @@ class CNetwork(vararg layerSize: Int): Network {
             x.o = null
             x.y = null
         }
-        return activate6layers(x)
+        return activate5layers(x)
     }
 
     override fun clone() = CNetwork().also { it.layers.addAll(layers.map { it.clone() }) }
