@@ -95,7 +95,7 @@ abstract class NetEvolution(
             } else {
                 lastRate = median.rate
             }
-            if (leader!!.rate < 0.03) {
+            if (leader!!.rate < 0.05) {
                 rateCount += 2
                 ratePopulation(population.filter { it.rate < 0.3 })
             } else if (leader!!.rate > 0.2) {
