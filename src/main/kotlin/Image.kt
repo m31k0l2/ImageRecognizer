@@ -38,7 +38,7 @@ class Image(image: File) {
                         //                val b = rgb and 0xff
                     }
                     .mapTo(redBuffer) {
-                        it.toDouble()
+                        it / 255.0
                     }
         }
         return listOf(redBuffer)

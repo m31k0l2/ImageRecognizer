@@ -1,8 +1,13 @@
 import kotlin.math.min
 
 fun main(args: Array<String>) {
-    changeStructure("nets/nw4-9.net", "nets/nw.net", listOf(0,1,2,3), mapOf())
+    changeStructure("nets/nwx.net", "nets/nw.net", listOf(0,1,2,3,5), mapOf(
+//            0 to listOf(0, 1, 3),
+//            1 to listOf(0, 2),
+//            3 to listOf(1)
+    ))
 }
+//0-0,1;1-0,1,2,3;2-0,2;3-2,3,5
 
 fun changeStructure(from: String, to: String, layers: List<Int>, filters: Map<Int, List<Int>>) {
     val nw = NetworkIO().load(from)!!

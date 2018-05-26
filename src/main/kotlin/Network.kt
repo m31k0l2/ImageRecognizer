@@ -128,14 +128,16 @@ class CNetwork(vararg layerSize: Int): Network {
                 }
             }
             o = y.flatMap { it }
+            o = Layer.relu(o)
+            o = Layer.norm(o)
             if (teachFromLayer == 4) x.o = o
             o = layers[4].activate(o)
             if (teachFromLayer == 5) x.o = o
         } else {
             o = x.o!!
-            if (teachFromLayer == 4) o = layers[4].activate(o)
+            if (teachFromLayer == 4) o = layers[4].activateSigma(o)
         }
-        o = layers[5].activate(o)
+        o = layers[5].activateSigma(o)
         val result = Layer.softmax(o)
         calcImages[x] = result
         return result
@@ -214,7 +216,7 @@ class CNetwork(vararg layerSize: Int): Network {
             x.o = null
             x.y = null
         }
-        return activate5layers(x)
+        return activate6layers(x)
     }
 
     override fun clone() = CNetwork().also { it.layers.addAll(layers.map { it.clone() }) }

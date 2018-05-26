@@ -1,5 +1,7 @@
 import java.util.*
+import kotlin.math.exp
 import kotlin.math.max
+import kotlin.math.sqrt
 
 class Neuron {
     var weights = mutableListOf<Double>()
@@ -13,6 +15,17 @@ class Neuron {
         }
         val x = listOf(1.0, *input.toTypedArray()) // добавляем вход 1 для смещения
         return max(0.0, sum(x))
+    }
+
+    // активационная функция
+    fun activateSigma(input: List<Double>): Double {
+        if (weights.isEmpty()) {
+            initWeightsByNull(input.size + 1)
+        } else if (input.size + 1 != weights.size) { // инициализация весов в случае изменения топологии сети
+            weights = MutableList(input.size + 1, { if (it < weights.size) weights[it] else 0.0 })
+        }
+        val x = listOf(1.0, *input.toTypedArray()) // добавляем вход 1 для смещения
+        return 1/(1 + exp(-0.5*sum(x)))
     }
 
     fun setRandomWeights(size: Int) {
@@ -41,6 +54,7 @@ class Neuron {
 class Layer(size: Int=0) {
     val neurons = MutableList(size, { Neuron() })
     fun activate(input: List<Double>) = neurons.map { it.activate(input) }
+    fun activateSigma(input: List<Double>) = neurons.map { it.activateSigma(input) }
 
     fun cnn(input: List<List<Double>>, matrixDivider: MatrixDivider): List<List<Double>> {
         val x = input.map {
@@ -64,6 +78,11 @@ class Layer(size: Int=0) {
             val sum = x.sum()
             if (sum == 0.0) return List(x.size, { 1.0/x.size })
             return y.map { it/y.sum() }
+        }
+
+        fun norm(x: List<Double>): List<Double> {
+            val l = sqrt(x.map { it*it }.sum())
+            return x.map { it / l }
         }
     }
 

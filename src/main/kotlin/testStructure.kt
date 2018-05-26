@@ -27,7 +27,7 @@ fun testMedianNet(nw: Network, batch: List<Image>): Double {
         if (it.isNotEmpty()) it.sorted()[it.size / 2] else null
     } }
     b.forEachIndexed { index, y ->
-        println("$index -> ${(y * 1000).toInt() / 10.0}%")
+        println("${teachNumbers[index]} -> ${(y * 1000).toInt() / 10.0}%")
     }
     val y = b.average()
     println("средний успех: ${(y*1000).toInt()/10.0}%")
@@ -40,6 +40,6 @@ fun main(args: Array<String>) {
         val size = Scanner(System.`in`).nextInt()
         if (size < 30) return
         val name = "nw.net".takeIf { size > 0 } ?: "_nw.net"
-        NetworkIO().load("nets/$name")?.let { testMedianNet(it, MNIST.buildBatch(size).filter { it.index in (3..9) }) }
+        NetworkIO().load("nets/$name")?.let { testMedianNet(it, MNIST.buildBatch(size).filter { it.index in teachNumbers }) }
     }
 }

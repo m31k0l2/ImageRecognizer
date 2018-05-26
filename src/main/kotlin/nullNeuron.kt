@@ -1,13 +1,15 @@
+import java.util.logging.FileHandler
 import java.util.logging.SimpleFormatter
 
 fun main(args: Array<String>) {
+    val fh = FileHandler("log.txt")
     log.addHandler(fh)
     fh.formatter = SimpleFormatter()
     val net = ImageNetEvolution().createNet()
-    val nw = NetworkIO().load("nets/nw4-9.net")!!
-    val testBatch = MNIST.buildBatch(500).filter { it.index in (4..9) }
+    val nw = NetworkIO().load("nets/nwx.net")!!
+    val testBatch = MNIST.buildBatch(500).filter { it.index in teachNumbers }
     net.layers.forEachIndexed { layerNumber, layer ->
-        if (layerNumber == 4) return@forEachIndexed
+        if (layerNumber >= 4) return@forEachIndexed
         layer.neurons.forEachIndexed { neuronNumber, _ ->
             val test = nw.clone()
             nullNeuron(test, "nets/nw.net", layerNumber, neuronNumber)

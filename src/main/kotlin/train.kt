@@ -3,9 +3,6 @@ import java.util.logging.FileHandler
 import java.util.logging.Logger
 import java.util.logging.SimpleFormatter
 
-val log = Logger.getLogger("logger")
-val fh = FileHandler("log.txt")
-
 class TrainSettings {
     var trainLayers = (0..4).toList()
         set(value) {
@@ -24,10 +21,10 @@ class TrainSettings {
     var addBatchSize = 100
     var exitIfError = 1
     var populationSize = 60
-    var epochSize = 120
+    var epochSize = 300
 }
-
-val skipLayers: List<Int> = listOf(1,2,3)
+val log = Logger.getLogger("logger")
+val teachNumbers: List<Int> = (0..3).toList()
 
 fun beep() {
     for (i in 1..60) {
@@ -36,31 +33,52 @@ fun beep() {
     }
 }
 
+//fun main(args: Array<String>) {
+//    val fh = FileHandler("log.txt")
+//    log.addHandler(fh)
+//    fh.formatter = SimpleFormatter()
+//    val settings = TrainSettings().apply { exitIfError = 1; testNumbers = teachNumbers }
+//    val nw = NetworkIO().load("nets/nw.net")
+//    var r0 = if (nw == null) 0.0 else testMedianNet(nw, settings.testBatch)
+//    val lastLayerIndex = ImageNetEvolution().createNet().layers.count() - 1
+//    for (k in 5 downTo -1) {
+//        val skipLayers = (0..5).filter { it != k }
+//        log.info("skipLayers -> $skipLayers")
+//        while (true) {
+//            val r = r0
+//            log.info("init result -> $r0")
+//            for (i in lastLayerIndex downTo 0) {
+//                if (i in skipLayers) continue
+//                var r1 = train(settings.apply { trainLayers = listOf(i) }, r0)
+//                if (r1 > r0) r0 = r1
+//                else if (i != lastLayerIndex) r1 = train(settings.apply { trainLayers = listOf(i, lastLayerIndex) }, r0)
+//                if (r1 > 0.98) return
+//            }
+//            val r1 = train(settings.apply { trainLayers = (0..lastLayerIndex).toList() }, r0)
+//            if (r1 > r0) r0 = r1
+//            if (r == r0) break
+//        }
+//    }
+//}
+
+val train_layers: List<Int> = listOf(4)
+val epoch_size = 500
+
 fun main(args: Array<String>) {
+    val fh = FileHandler("log.txt")
     log.addHandler(fh)
     fh.formatter = SimpleFormatter()
-    val settings = TrainSettings().apply { exitIfError = 1; testNumbers = (3..9).toList() }
+    val settings = TrainSettings().apply { exitIfError = 5; testNumbers = teachNumbers; epochSize = epoch_size }
+    settings.trainLayers = train_layers
     val nw = NetworkIO().load("nets/nw.net")
     var r0 = if (nw == null) 0.0 else testMedianNet(nw, settings.testBatch)
-    val lastLayerIndex = ImageNetEvolution().createNet().layers.count() - 1
-//    var counter = 0
+    log.info("init result: $r0")
     while (true) {
-        val r = r0
-        log.info("init result -> $r0")
-        for (i in lastLayerIndex downTo 0) {
-            if (i in skipLayers) continue
-            var r1 = train(settings.apply { trainLayers = listOf(i) }, r0)
-            if (r1 > r0) r0 = r1
-            else if (i != lastLayerIndex) r1 = train(settings.apply { trainLayers = listOf(i, lastLayerIndex) }, r0)
-            if (r1 > 0.98) return
-        }
-        val r1 = train(settings.apply { trainLayers = (0..lastLayerIndex).toList() }, r0)
-        if (r1 > r0) r0 = r1
-        if (r == r0) break
-//        else counter = 0
+        val r = train(settings, r0)
+        log.info("result: $r")
+        if (r > 0.95 || r <= r0) break
+        r0 = r
     }
-//    trainGroup()
-//    beep()
 }
 
 fun trainGroup() {
