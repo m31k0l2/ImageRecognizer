@@ -1,12 +1,8 @@
-мая 20, 2018 11:32:40 PM TrainKt main
-INFO: init result -> 0.36291093156144927
-мая 20, 2018 11:32:40 PM TrainKt train
-INFO: trainLayers: [4]
-мая 20, 2018 11:32:40 PM TrainKt train
-INFO: testNumbers: [3, 4, 5, 6, 7, 8, 9]
-мая 20, 2018 11:32:47 PM TrainKt train
-INFO: -
-мая 20, 2018 11:32:47 PM TrainKt train
-INFO: trainLayers: [0]
-мая 20, 2018 11:32:47 PM TrainKt train
-INFO: testNumbers: [3, 4, 5, 6, 7, 8, 9]
+мая 29, 2018 8:54:26 AM TrainKt main
+INFO: init result: 0.7454895752871297
+мая 29, 2018 8:54:27 AM TrainKt train
+INFO: trainLayers: [1, 2, 3, 4, 5]
+мая 29, 2018 8:54:27 AM TrainKt train
+INFO: testNumbers: [0, 1, 2]
+мая 29, 2018 8:54:47 AM TrainKt train
+WARNING: ok, 0.8050261619511528

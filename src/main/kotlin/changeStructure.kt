@@ -1,10 +1,19 @@
 import kotlin.math.min
-
+/*
+INFO: 0: 1 -> 0.3619117315100169
+INFO: 0: 2 -> 0.9379234557125509
+INFO: 1: 0 -> 0.6648372459771883
+INFO: 1: 1 -> 0.6824134179675411
+INFO: 1: 3 -> 0.665910143603202
+INFO: 2: 3 -> 0.3342745406933549
+INFO: 3: 0 -> NaN
+ */
 fun main(args: Array<String>) {
-    changeStructure("nets/nwx.net", "nets/nw.net", listOf(0,1,2,3,5), mapOf(
-//            0 to listOf(0, 1, 3),
-//            1 to listOf(0, 2),
-//            3 to listOf(1)
+    changeStructure("nets/nw345.net", "nets/nw.net", listOf(0,1,2,3), mapOf(
+        0 to listOf(1,2),
+        1 to listOf(0,1,3),
+        2 to listOf(3),
+        3 to listOf(0)
     ))
 }
 //0-0,1;1-0,1,2,3;2-0,2;3-2,3,5

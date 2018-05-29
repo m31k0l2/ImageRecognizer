@@ -35,6 +35,8 @@ fun testMedianNet(nw: Network, batch: List<Image>): Double {
 }
 
 fun main(args: Array<String>) {
+    Network.useSigma = true
+    Neuron.alpha = 5.0
     while (true) {
         print("Размер батча: ")
         val size = Scanner(System.`in`).nextInt()

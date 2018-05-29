@@ -6,6 +6,10 @@ import kotlin.math.sqrt
 class Neuron {
     var weights = mutableListOf<Double>()
 
+    companion object {
+        var alpha = 1.0
+    }
+
     // активационная функция
     fun activate(input: List<Double>): Double {
         if (weights.isEmpty()) {
@@ -25,7 +29,7 @@ class Neuron {
             weights = MutableList(input.size + 1, { if (it < weights.size) weights[it] else 0.0 })
         }
         val x = listOf(1.0, *input.toTypedArray()) // добавляем вход 1 для смещения
-        return 1/(1 + exp(-0.5*sum(x)))
+        return 1/(1 + exp(-Neuron.alpha*sum(x)))
     }
 
     fun setRandomWeights(size: Int) {

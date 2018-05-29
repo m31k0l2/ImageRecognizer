@@ -9,7 +9,7 @@ class TrainSettings {
             field = value
             CNetwork.teachFromLayer = value.min() ?: 0
         }
-    val initTestBatch = MNIST.buildBatch(500)
+    val initTestBatch = MNIST.buildBatch(100)
     lateinit var testBatch: List<Image>
     var testNumbers: List<Int> = (0..9).toList()
         set(value) {
@@ -24,7 +24,7 @@ class TrainSettings {
     var epochSize = 300
 }
 val log = Logger.getLogger("logger")
-val teachNumbers: List<Int> = (0..3).toList()
+val teachNumbers: List<Int> = listOf(0,1,2)
 
 fun beep() {
     for (i in 1..60) {
@@ -33,42 +33,16 @@ fun beep() {
     }
 }
 
-//fun main(args: Array<String>) {
-//    val fh = FileHandler("log.txt")
-//    log.addHandler(fh)
-//    fh.formatter = SimpleFormatter()
-//    val settings = TrainSettings().apply { exitIfError = 1; testNumbers = teachNumbers }
-//    val nw = NetworkIO().load("nets/nw.net")
-//    var r0 = if (nw == null) 0.0 else testMedianNet(nw, settings.testBatch)
-//    val lastLayerIndex = ImageNetEvolution().createNet().layers.count() - 1
-//    for (k in 5 downTo -1) {
-//        val skipLayers = (0..5).filter { it != k }
-//        log.info("skipLayers -> $skipLayers")
-//        while (true) {
-//            val r = r0
-//            log.info("init result -> $r0")
-//            for (i in lastLayerIndex downTo 0) {
-//                if (i in skipLayers) continue
-//                var r1 = train(settings.apply { trainLayers = listOf(i) }, r0)
-//                if (r1 > r0) r0 = r1
-//                else if (i != lastLayerIndex) r1 = train(settings.apply { trainLayers = listOf(i, lastLayerIndex) }, r0)
-//                if (r1 > 0.98) return
-//            }
-//            val r1 = train(settings.apply { trainLayers = (0..lastLayerIndex).toList() }, r0)
-//            if (r1 > r0) r0 = r1
-//            if (r == r0) break
-//        }
-//    }
-//}
-
-val train_layers: List<Int> = listOf(4)
-val epoch_size = 500
+val train_layers: List<Int> = listOf(1,2,3,4,5)
+val epoch_size = 200
 
 fun main(args: Array<String>) {
     val fh = FileHandler("log.txt")
     log.addHandler(fh)
     fh.formatter = SimpleFormatter()
-    val settings = TrainSettings().apply { exitIfError = 5; testNumbers = teachNumbers; epochSize = epoch_size }
+    val settings = TrainSettings().apply { exitIfError = 1; testNumbers = teachNumbers; epochSize = epoch_size }
+    Network.useSigma = true
+    Neuron.alpha = 2.0
     settings.trainLayers = train_layers
     val nw = NetworkIO().load("nets/nw.net")
     var r0 = if (nw == null) 0.0 else testMedianNet(nw, settings.testBatch)
@@ -79,22 +53,6 @@ fun main(args: Array<String>) {
         if (r > 0.95 || r <= r0) break
         r0 = r
     }
-}
-
-fun trainGroup() {
-    val net = ImageNetEvolution()
-    net.name = "nets/nw.net"
-    net.mutantStrategy = { e, _ ->
-        when {
-            e < 50 -> ((50 - e) / 50.0)
-            else -> 0.2
-        }
-    }
-    net.batch = MNIST.buildBatch(1000).filter { it.index in (0..3) }
-    println(net.batch.size)
-    val population = List(2, { Individual(NetworkIO().load("nets/nw$it.net")!!) })
-    net.evolute(500, population)
-    NetworkIO().save(net.leader!!.nw, net.name)
 }
 
 fun train(settings: TrainSettings, res: Double): Double = with(settings) {

@@ -5,6 +5,9 @@ interface Network {
     fun clone(): Network
     val layers: MutableList<Layer>
     fun dropout(layersNumbers: List<Int>, dropoutRate: Double, isRandom: Boolean=false): Network
+    companion object {
+        var useSigma = true
+    }
 }
 
 class CNetwork(vararg layerSize: Int): Network {
@@ -44,63 +47,11 @@ class CNetwork(vararg layerSize: Int): Network {
         return layers[3].cnn(x, dividers[5])
     }
 
-    private fun activate2layers(x: Image): List<Double> {
-        if (calcImages.containsKey(x)) return calcImages[x]!!
-        val y = activateLayer0(x.colorsMatrix)
-        val o = layers[1].activate(y.flatten())
-        val result = Layer.softmax(o)
-        calcImages[x] = result
-        return result
-    }
-
-    private fun activate3layers(x: Image): List<Double> {
-        if (calcImages.containsKey(x)) return calcImages[x]!!
-        var y: List<List<Double>>
-        if (x.y == null) {
-            y = activateLayer0(x.colorsMatrix)
-            if (teachFromLayer == 1) x.y = y
-            y = activateLayer1(y)
-        } else {
-            y = activateLayer1(x.y!!)
+    override fun activate(x: Image): List<Double> {
+        layers.find { it.neurons.first().weights.size == 0 }?.let {
+            x.o = null
+            x.y = null
         }
-        val o = layers[2].activate(y.flatten())
-        val result = Layer.softmax(o)
-        calcImages[x] = result
-        return result
-    }
-
-    private fun activate4layers(x: Image): List<Double> {
-        if (calcImages.containsKey(x)) return calcImages[x]!!
-        var o: List<Double>
-        if (x.o == null) {
-            var y: List<List<Double>>
-            if (x.y == null) {
-                y = activateLayer0(x.colorsMatrix)
-                if (teachFromLayer == 1) x.y = y
-                y = activateLayer1(y)
-                if (teachFromLayer == 2) x.y = y
-                y = activateLayer2(y)
-            } else {
-                when (teachFromLayer) {
-                    1 -> {
-                        y = activateLayer1(x.y!!)
-                        y = activateLayer2(y)
-                    }
-                    else -> y = activateLayer2(x.y!!)
-                }
-            }
-            o = y.flatMap { it }
-            if (teachFromLayer == 2) x.o = o
-        } else {
-            o = x.o!!
-        }
-        o = layers[3].activate(o)
-        val result = Layer.softmax(o)
-        calcImages[x] = result
-        return result
-    }
-
-    private fun activate6layers(x: Image): List<Double> {
         if (calcImages.containsKey(x)) return calcImages[x]!!
         var o: List<Double>
         if (x.o == null) {
@@ -131,92 +82,24 @@ class CNetwork(vararg layerSize: Int): Network {
             o = Layer.relu(o)
             o = Layer.norm(o)
             if (teachFromLayer == 4) x.o = o
-            o = layers[4].activate(o)
+            o = if (Network.useSigma) {
+                layers[4].activateSigma(o)
+            } else {
+                layers[4].activate(o)
+            }
             if (teachFromLayer == 5) x.o = o
         } else {
             o = x.o!!
-            if (teachFromLayer == 4) o = layers[4].activateSigma(o)
+            if (teachFromLayer == 4) o = if (Network.useSigma) {
+                layers[4].activateSigma(o)
+            } else {
+                layers[4].activate(o)
+            }
         }
         o = layers[5].activateSigma(o)
         val result = Layer.softmax(o)
         calcImages[x] = result
         return result
-    }
-
-    private fun activate5layers(x: Image): List<Double> {
-        if (calcImages.containsKey(x)) return calcImages[x]!!
-        var o: List<Double>
-        if (x.o == null) {
-            var y: List<List<Double>>
-            if (x.y == null) {
-                y = activateLayer0(x.colorsMatrix)
-                if (teachFromLayer == 1) x.y = y
-                y = activateLayer1(y)
-                if (teachFromLayer == 2) x.y = y
-                y = activateLayer2(y)
-                if (teachFromLayer == 3) x.y = y
-                y = activateLayer3(y)
-            } else {
-                when (teachFromLayer) {
-                    1 -> {
-                        y = activateLayer1(x.y!!)
-                        y = activateLayer2(y)
-                        y = activateLayer3(y)
-                    }
-                    2 -> {
-                        y = activateLayer2(x.y!!)
-                        y = activateLayer3(y)
-                    }
-                    else -> y = activateLayer3(x.y!!)
-                }
-            }
-            o = y.flatMap { it }
-            if (teachFromLayer == 4) x.o = o
-        } else {
-            o = x.o!!
-        }
-        o = layers[4].activate(o)
-        val result = Layer.softmax(o)
-        calcImages[x] = result
-        return result
-    }
-
-    private fun activateCNNLayers(x: Image): List<Double> {
-        if (calcImages.containsKey(x)) return calcImages[x]!!
-        var y: List<List<Double>>
-        if (x.y == null) {
-            y = activateLayer0(x.colorsMatrix)
-            if (teachFromLayer == 1) x.y = y
-            y = activateLayer1(y)
-            if (teachFromLayer == 2) x.y = y
-            y = activateLayer2(y)
-            if (teachFromLayer == 3) x.y = y
-            y = activateLayer3(y)
-        } else {
-            when (teachFromLayer) {
-                1 -> {
-                    y = activateLayer1(x.y!!)
-                    y = activateLayer2(y)
-                    y = activateLayer3(y)
-                }
-                2 -> {
-                    y = activateLayer2(x.y!!)
-                    y = activateLayer3(y)
-                }
-                else -> y = activateLayer3(x.y!!)
-            }
-        }
-        val result = Layer.softmax(y.flatten())
-        calcImages[x] = result
-        return result
-    }
-
-    override fun activate(x: Image): List<Double> {
-        layers.find { it.neurons.first().weights.size == 0 }?.let {
-            x.o = null
-            x.y = null
-        }
-        return activate6layers(x)
     }
 
     override fun clone() = CNetwork().also { it.layers.addAll(layers.map { it.clone() }) }
