@@ -1,8 +1,14 @@
-мая 29, 2018 8:54:26 AM TrainKt main
-INFO: init result: 0.7454895752871297
-мая 29, 2018 8:54:27 AM TrainKt train
-INFO: trainLayers: [1, 2, 3, 4, 5]
-мая 29, 2018 8:54:27 AM TrainKt train
-INFO: testNumbers: [0, 1, 2]
-мая 29, 2018 8:54:47 AM TrainKt train
-WARNING: ok, 0.8050261619511528
+мая 30, 2018 12:20:40 AM NullNeuronKt main
+INFO: 0: 0 -> NaN
+мая 30, 2018 12:20:40 AM NullNeuronKt main
+INFO: 1: 0 -> 0.5995278247081017
+мая 30, 2018 12:20:40 AM NullNeuronKt main
+INFO: 1: 1 -> NaN
+мая 30, 2018 12:20:40 AM NullNeuronKt main
+INFO: 2: 0 -> 0.42643475179666634
+мая 30, 2018 12:20:41 AM NullNeuronKt main
+INFO: 2: 1 -> 0.5999999777755372
+мая 30, 2018 12:20:41 AM NullNeuronKt main
+INFO: 3: 0 -> 0.5889947116166686
+мая 30, 2018 12:20:41 AM NullNeuronKt main
+INFO: 3: 1 -> 0.4000546531052054

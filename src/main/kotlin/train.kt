@@ -32,16 +32,16 @@ fun beep() {
     }
 }
 
-val train_layers: List<Int> = listOf(4,5)
+val train_layers: List<Int> = listOf()
 val epoch_size = 200
 
 fun main(args: Array<String>) {
     val fh = FileHandler("log.txt")
     log.addHandler(fh)
     fh.formatter = SimpleFormatter()
-    val settings = TrainSettings().apply { exitIfError = 1; testNumbers = teachNumbers; epochSize = epoch_size }
+    val settings = TrainSettings().apply { exitIfError = 3; testNumbers = teachNumbers; epochSize = epoch_size }
     Network.useSigma = true
-    Neuron.alpha = 15.0
+    Neuron.alpha = 3.0
     settings.trainLayers = train_layers
     val nw = NetworkIO().load("nets/nw.net")
     var r0 = if (nw == null) 0.0 else testMedianNet(nw, settings.testBatch)

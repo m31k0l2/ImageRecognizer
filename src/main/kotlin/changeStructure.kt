@@ -7,7 +7,7 @@ INFO: 3: 1 -> 0.7315132392304711
  */
 fun main(args: Array<String>) {
     changeStructure("nets/nwx.net", "nets/nw.net", listOf(0,1,2,3), mapOf(
-        0 to listOf(1,3)
+        1 to listOf(0,2)
     ))
 }
 //0-0,1;1-0,1,2,3;2-0,2;3-2,3,5
