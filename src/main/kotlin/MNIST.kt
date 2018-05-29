@@ -19,3 +19,18 @@ object MNIST {
         return Image(files[Random().nextInt(files.size)])
     }
 }
+
+fun main(args: Array<String>) {
+    val nw = NetworkIO().load("nets/nw.net")!!
+    val batch = MNIST.buildBatch(500).filter { it.index in teachNumbers }.shuffled()
+    var counter = 0
+    Neuron.alpha = 15.0
+    batch.forEach {
+        val r = nw.activate(it)
+        val k = r.indexOf(r.max())
+        val i = it.index
+        if (i != k) counter++
+        println("${it.index} -> $k")
+    }
+    println("${1.0 - counter*1.0/batch.size}")
+}

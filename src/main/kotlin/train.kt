@@ -9,7 +9,7 @@ class TrainSettings {
             field = value
             CNetwork.teachFromLayer = value.min() ?: 0
         }
-    val initTestBatch = MNIST.buildBatch(100)
+    val initTestBatch = MNIST.buildBatch(500)
     lateinit var testBatch: List<Image>
     var testNumbers: List<Int> = (0..9).toList()
         set(value) {
@@ -17,14 +17,13 @@ class TrainSettings {
             testBatch = initTestBatch.filter { it.index in testNumbers }
         }
     var count = 100
-    var initBatchSize = 500
     var addBatchSize = 100
     var exitIfError = 1
     var populationSize = 60
     var epochSize = 300
 }
 val log = Logger.getLogger("logger")
-val teachNumbers: List<Int> = listOf(0,1,2)
+val teachNumbers: List<Int> = listOf(0,1,2,3,4)
 
 fun beep() {
     for (i in 1..60) {
@@ -33,7 +32,7 @@ fun beep() {
     }
 }
 
-val train_layers: List<Int> = listOf(1,2,3,4,5)
+val train_layers: List<Int> = listOf(4,5)
 val epoch_size = 200
 
 fun main(args: Array<String>) {
@@ -42,7 +41,7 @@ fun main(args: Array<String>) {
     fh.formatter = SimpleFormatter()
     val settings = TrainSettings().apply { exitIfError = 1; testNumbers = teachNumbers; epochSize = epoch_size }
     Network.useSigma = true
-    Neuron.alpha = 2.0
+    Neuron.alpha = 15.0
     settings.trainLayers = train_layers
     val nw = NetworkIO().load("nets/nw.net")
     var r0 = if (nw == null) 0.0 else testMedianNet(nw, settings.testBatch)
@@ -50,7 +49,7 @@ fun main(args: Array<String>) {
     while (true) {
         val r = train(settings, r0)
         log.info("result: $r")
-        if (r > 0.95 || r <= r0) break
+        if (r > 0.98 || r <= r0) break
         r0 = r
     }
 }

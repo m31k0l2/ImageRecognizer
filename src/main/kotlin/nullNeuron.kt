@@ -2,7 +2,7 @@ import java.util.logging.FileHandler
 import java.util.logging.SimpleFormatter
 
 fun main(args: Array<String>) {
-    Neuron.alpha = 5.0
+    Neuron.alpha = 15.0
     Network.useSigma = true
     val fh = FileHandler("log.txt")
     log.addHandler(fh)
