@@ -21,6 +21,7 @@ object MNIST {
 }
 
 fun main(args: Array<String>) {
+    val teachNumbers = (0..9).toList()
     val nw = NetworkIO().load("nets/nw.net")!!
     val batch = MNIST.buildBatch(500).filter { it.index in teachNumbers }.shuffled()
     var counter = 0

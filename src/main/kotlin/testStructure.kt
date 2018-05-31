@@ -21,7 +21,7 @@ fun testNet(nw: Network, batch: List<Image>): Double {
     return y
 }
 
-fun testMedianNet(nw: Network, batch: List<Image>): Double {
+fun testMedianNet(nw: Network, batch: List<Image>, teachNumbers: IntArray): Double {
     val indexSet = batch.map { it.index }.toSortedSet()
     val b = indexSet.mapNotNull { i -> batch.filter { it.index == i }.map { nw.activate(it)[i] }.let {
         if (it.isNotEmpty()) it.sorted()[it.size / 2] else null
@@ -42,6 +42,6 @@ fun main(args: Array<String>) {
         val size = Scanner(System.`in`).nextInt()
         if (size < 30) return
         val name = "nw.net".takeIf { size > 0 } ?: "_nw.net"
-        NetworkIO().load("nets/$name")?.let { testMedianNet(it, MNIST.buildBatch(size).filter { it.index in teachNumbers }) }
+        NetworkIO().load("nets/$name")?.let { testMedianNet(it, MNIST.buildBatch(size), IntArray(10, {it})) }
     }
 }

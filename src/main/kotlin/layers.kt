@@ -86,6 +86,7 @@ class Layer(size: Int=0) {
 
         fun norm(x: List<Double>): List<Double> {
             val l = sqrt(x.map { it*it }.sum())
+            if (l == 0.0) return x
             return x.map { it / l }
         }
     }
