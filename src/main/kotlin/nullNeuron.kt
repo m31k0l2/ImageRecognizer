@@ -14,13 +14,15 @@ fun clean(teachNumbers: IntArray): MutableMap<Int, MutableList<Pair<Int, Double>
     fh.formatter = SimpleFormatter()
     val nw = NetworkIO().load("nets/nwx.net")!!
     val testBatch = MNIST.buildBatch(500).filter { it.index in teachNumbers }
+    val initResult = testMedianNet(nw, testBatch, teachNumbers)
+    log.info("initResult: $initResult")
     nw.layers.forEachIndexed { layerNumber, layer ->
         if (layerNumber >= 4) return@forEachIndexed
         layer.neurons.forEachIndexed { neuronNumber, _ ->
             val test = nw.clone()
             nullNeuron(test, "nets/nw.net", layerNumber, neuronNumber)
             val res = testMedianNet(test, testBatch, teachNumbers)
-            if (res < 0.9) {
+            if (res*10 < (initResult*10).toInt()) {
                 val list = map[layerNumber]
                 if (list == null) {
                     map[layerNumber] = mutableListOf()

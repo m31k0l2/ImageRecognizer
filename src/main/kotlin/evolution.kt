@@ -15,8 +15,7 @@ data class Individual(val nw: Network, var rate: Double=1.0) {
         rate = try { b.map { it.map {
             val o = nw.activate(it)
             val r = o[it.index]
-            if (r < 0.5 && o.max()!! > 0.5) 2*(1 - r)
-            else 1 - r
+            (1 - r)*(1 - r)
         }.average() }.sorted()[testPosition] } catch (e: Exception) { 1.0 }
     }
 }
@@ -89,7 +88,11 @@ abstract class NetEvolution(
             val median = population[population.size/2-1]
             if (lastRate == median.rate) {
                 stagnation++
-                population = population.union(List(populationAdder, { createIndividual() })).toList()
+                population = if (population.size < 120) {
+                    population.union(List(populationAdder, { createIndividual() })).toList()
+                } else {
+                    population.take(minPopulationSize)
+                }
                 ratePopulation(population)
                 population = population.sortedBy { it.rate }
                 leader = population.first()
@@ -98,11 +101,12 @@ abstract class NetEvolution(
             }
             if (leader!!.rate < 0.05) {
                 rateCount += 2
+                population = population.take(minPopulationSize)
                 ratePopulation(population.filter { it.rate < 0.3 })
             } else if (leader!!.rate > 0.2) {
                 rateCount = 3
             }
-            if (rateCount > 10 || stagnation == 5*maxStagnation) return population
+            if (rateCount > 10 || stagnation == 10*maxStagnation) return population
         }
         return population
     }

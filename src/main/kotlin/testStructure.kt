@@ -22,8 +22,7 @@ fun testNet(nw: Network, batch: List<Image>): Double {
 }
 
 fun testMedianNet(nw: Network, batch: List<Image>, teachNumbers: IntArray): Double {
-    val indexSet = batch.map { it.index }.toSortedSet()
-    val b = indexSet.mapNotNull { i -> batch.filter { it.index == i }.map { nw.activate(it)[i] }.let {
+    val b = teachNumbers.toList().mapNotNull { i -> batch.filter { it.index == i }.map { nw.activate(it)[i] }.let {
         if (it.isNotEmpty()) it.sorted()[it.size / 2] else null
     } }
     b.forEachIndexed { index, y ->
@@ -36,7 +35,7 @@ fun testMedianNet(nw: Network, batch: List<Image>, teachNumbers: IntArray): Doub
 
 fun main(args: Array<String>) {
     Network.useSigma = true
-    Neuron.alpha = 10.0
+    Neuron.alpha = 15.0
     while (true) {
         print("Размер батча: ")
         val size = Scanner(System.`in`).nextInt()

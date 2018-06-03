@@ -6,9 +6,9 @@ INFO: 3: 1 -> 0.7315132392304711
 
  */
 fun main(args: Array<String>) {
-    changeStructure("nets/nwx.net", "nets/nw.net", listOf(0,1,2,3), mapOf(
-        1 to listOf(0,2)
-    ), ImageNetEvolution().createNet())
+    changeStructure("nets/nw.net", "nets/nw.net", listOf(0,1,2,3), mapOf(
+//        1 to listOf(0,2)
+    ), CNetwork(6,6,4,4,60,10))
 }
 //0-0,1;1-0,1,2,3;2-0,2;3-2,3,5
 

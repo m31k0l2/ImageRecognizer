@@ -33,27 +33,34 @@ fun beep() {
 
 fun main(args: Array<String>) {
     setupLog(log)
-    val teachNumbers = intArrayOf(5,6,7,8,9)
+    val teachNumbers = (0..8).toList().toIntArray()
 //    trainNet(teachNumbers, listOf(), intArrayOf(6,6,4,4,40,10))
-    var hiddenLayerNeurons = 40
+    retrainNet(teachNumbers)
+    var hiddenLayerNeurons = 60
     while (true) {
         val sum = getStructure("nets/nwx.net").sum()
         rebuild(teachNumbers, hiddenLayerNeurons)
         if (sum == getStructure("nets/nw.net").sum()) {
-            if (hiddenLayerNeurons == 40) {
-                hiddenLayerNeurons = 20
+            if (hiddenLayerNeurons == 60) {
+                hiddenLayerNeurons = 40
                 continue
             }
             else break
         }
         retrainNet(teachNumbers)
     }
+    beep()
 }
 
 fun retrainNet(teachNumbers: IntArray) {
-    val structure = getStructure("nets/nwx.net")
-    trainNet(teachNumbers, listOf(4,5), structure)
-    trainNet(teachNumbers, listOf(), structure)
+    val structure = getStructure("nets/nw.net")
+    val r1 = trainNet(teachNumbers, listOf(4,5), structure)
+    saveAs("nets/nw.net", "nets/nw_back.net")
+    val r2 = trainNet(teachNumbers, listOf(), structure)
+    if (r2 < 0.98 && r1 > 0.98) {
+        saveAs("nets/nw_back.net", "nets/nwx.net")
+        saveAs("nets/nw_back.net", "nets/nw.net")
+    }
     saveAs("nets/nw.net", "nets/nw${teachNumbers.joinToString("")}_${structure.joinToString("-")}.net")
 }
 
@@ -78,11 +85,20 @@ fun rebuild(teachNumbers: IntArray, hiddenLayerNeurons: Int=40) {
     changeStructure("nets/nwx.net", "nets/nw.net", listOf(0,1,2,3), map.map { it.key to it.value.map { it.first } }.toMap(), CNetwork(*list.toIntArray()))
 }
 
-fun trainNet(teachNumbers: IntArray, trainLayers: List<Int>, structure: IntArray) {
-    for (a in 1..15) {
-        train(teachNumbers, trainLayers, a.toDouble(), structure)
+fun trainNet(teachNumbers: IntArray, trainLayers: List<Int>, structure: IntArray): Double {
+    var r = 0.0
+    for (a in listOf(1,2,3,5,7,10,15)) {
+        r = train(teachNumbers, trainLayers, a.toDouble(), structure)
+        if (r > 0.98) break
     }
     saveAs("nets/nw.net", "nets/nwx.net")
+    return r
+}
+
+fun rateNet(teachNumbers: IntArray): Double {
+    val nw = NetworkIO().load("nets/nw.net") ?: return 0.0
+    Neuron.alpha = 15.0
+    return testMedianNet(nw, MNIST.buildBatch(500).filter { it.index in teachNumbers }, teachNumbers)
 }
 
 fun saveAs(from: String, to: String) {
@@ -96,12 +112,12 @@ fun setupLog(log: Logger) {
     fh.formatter = SimpleFormatter()
 }
 
-fun train(teachNumbers: IntArray, trainLayers: List<Int>, alpha: Double, structure: IntArray) {
+fun train(teachNumbers: IntArray, trainLayers: List<Int>, alpha: Double, structure: IntArray): Double {
     class ImageNetEvolution(rateCount: Int=3): NetEvolution(0.2, rateCount) {
         override fun createNet() = CNetwork(*structure)
     }
     val net = ImageNetEvolution()
-    val settings = TrainSettings().apply { exitIfError = 3; testNumbers = teachNumbers; epochSize = 200 }
+    val settings = TrainSettings().apply { exitIfError = 2; testNumbers = teachNumbers; epochSize = 150 }
     Network.useSigma = true
     Neuron.alpha = alpha
     settings.trainLayers = trainLayers
@@ -114,13 +130,14 @@ fun train(teachNumbers: IntArray, trainLayers: List<Int>, alpha: Double, structu
         if (r > 0.98 || r <= r0) break
         r0 = r
     }
+    return rateNet(teachNumbers)
 }
 
-fun train(settings: TrainSettings, res: Double, teachNumbers: IntArray, net: NetEvolution = ImageNetEvolution()): Double = with(settings) {
+fun train(settings: TrainSettings, res: Double, teachNumbers: IntArray, net: NetEvolution): Double = with(settings) {
     log.info("trainLayers: $trainLayers")
     log.info("testNumbers: ${testNumbers.joinToString()}")
     log.info("alpha: ${Neuron.alpha}")
-    val structure = getStructure("nets/nwx.net")
+    val structure = getStructure("nets/nw.net")
     log.info("structure: ${structure.joinToString()}")
     testBatch.forEach { it.y = null; it.o = null }
     var exitIfError = exitIfError

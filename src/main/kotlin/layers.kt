@@ -56,7 +56,8 @@ class Neuron {
 }
 
 class Layer(size: Int=0) {
-    val neurons = MutableList(size, { Neuron() })
+    val neurons = build(size)
+    internal fun build(size: Int) = MutableList(size, { Neuron() })
     fun activate(input: List<Double>) = neurons.map { it.activate(input) }
     fun activateSigma(input: List<Double>) = neurons.map { it.activateSigma(input) }
 
