@@ -116,3 +116,39 @@ class CNetwork(vararg layerSize: Int): Network {
         return this
     }
 }
+
+class CCNetwork {
+    val layers = mutableListOf<ILayer>()
+    private val calcImages = mutableMapOf<Image, List<Double>>()
+
+    companion object {
+        val dividers = listOf(
+                MatrixDivider(28,5,1),
+                MatrixDivider(24,2,2),
+                MatrixDivider(12,5,1),
+                MatrixDivider(8,2,2),
+                MatrixDivider(4,2,1),
+                MatrixDivider(2,2,1)
+        )
+        var teachFromLayer = 0
+    }
+
+    fun activate(x: Image): List<Double> {
+//        layers[0]
+        TODO()
+    }
+
+    fun clone() = CCNetwork().also { it.layers.addAll(layers.map { it.clone() }) }
+
+    fun dropout(layersNumbers: List<Int>, dropoutRate: Double, isRandom: Boolean): CCNetwork {
+        for (l in layersNumbers) {
+            for (neuron in layers[l].neurons) {
+                for (i in 1..neuron.weights.size) {
+                    if (Random().nextDouble() <= dropoutRate)
+                        neuron.weights[Random().nextInt(neuron.weights.size)] = if (!isRandom) 0.0 else 1 - 2*Random().nextDouble()
+                }
+            }
+        }
+        return this
+    }
+}

@@ -24,15 +24,15 @@ fun alpha(alpha: Double) = alpha
 
 abstract class NewEvolution(val time: Int, val popSize: Int) : NetEvolution()
 
-fun evolution(time: Int, population: Int, init: Network.() -> Unit): NewEvolution {
+fun evolution(time: Int, population: Int, init: NetEvolution.() -> Network): NewEvolution {
     class Evolution : NewEvolution(time, population) {
-        override fun createNet() = CNetwork().apply(init)
+        override fun createNet() = init()
     }
     return Evolution()
 }
 
-fun network(init: Layer.() -> Unit) {
-    Layer().apply(init)
+fun network(init: Network.() -> Unit): Network {
+    return CNetwork().apply(init)
 }
 
 fun NewEvolution.run(numbers: IntArray, trainLayers: IntArray): Network {
@@ -42,7 +42,7 @@ fun NewEvolution.run(numbers: IntArray, trainLayers: IntArray): Network {
             else -> 0.2
         }
     }
-    batch = MNIST.buildBatch(1000).filter { it.index in numbers }
+    batch = MNIST.buildBatch(500).filter { it.index in numbers }
     this.trainLayers = trainLayers.toList()
     evolute(time, popSize)
     return leader!!.nw
@@ -53,52 +53,61 @@ fun Network.saveToFile(path: String) {
 }
 
 fun evolute(structure: IntArray, trainLayers: IntArray, alpha: Double, numbers: IntArray): Network {
-    return evolution(3000, 60) {
-        network {
-            convLayer(structure[0])
-            convLayer(structure[1])
-            convLayer(structure[2])
-            convLayer(structure[3])
-            fullConnectedLayer(structure[4]) {
-                alpha(alpha)
-            }
-            fullConnectedLayer(structure[5]) {
-                alpha(alpha)
-            }
-        }
+    return evolution(150, 60) {
+        buildNetwork(structure, alpha)
     }.run(numbers, trainLayers)
 }
 
+val testBatch = MNIST.buildBatch(500)
+
 fun Network.rate(vararg numbers: Int): Double {
     Neuron.alpha = 15.0
-    return testMedianNet(this, MNIST.buildBatch(500), numbers)
+    return testMedianNet(this, testBatch, numbers)
 }
 
-fun train(structure: IntArray, trainLayers: IntArray, teachNumbers: IntArray) {
-    for (alpha in listOf(1.0, 2.0, 3.0, 5.0, 7.0, 10.0, 15.0)) {
+fun train(structure: IntArray, trainLayers: IntArray, teachNumbers: IntArray): Double {
+    var rate = NetworkIO().load("nets/nw.net")?.rate(*teachNumbers) ?: 0.0
+    for (alpha in listOf(15.0, 3.0, 2.0, 1.0, 2.0, 3.0)) {
         log.info("alpha: $alpha")
         log.info("structure: ${getStructure("nets/nw.net").toList()}")
         log.info("train layers: ${trainLayers.toList()}")
         val nw = evolute(structure, trainLayers, alpha, teachNumbers)
-        nw.saveToFile("nets/nw.net")
-        val rate = nw.rate(*teachNumbers)
-        log.info("rate: $rate")
+        val curRate = nw.rate(*teachNumbers)
+        log.info("rate: $curRate")
+        if (curRate > rate) {
+            nw.saveToFile("nets/nw.net")
+            log.info("SAVE")
+            rate = curRate
+        }
         if (rate > 0.98) break
     }
+    return rate
+}
+
+fun fullTrain(structure: IntArray, trainLayers: IntArray, teachNumbers: IntArray) {
+    var r1 = 0.0
+    while (true) {
+        val r2 = train(structure, trainLayers, teachNumbers)
+        log.info("\r\nresult $r1 -> $r2")
+        if (r2 < r1) break
+        r1 = r2
+    }
     saveAs("nets/nw.net", "nets/nwx.net")
-    rebuild(teachNumbers, 40)
 }
 
 fun main(args: Array<String>) {
     setupLog(log)
-    val teachNumbers = intArrayOf(7, 8, 9)
+    val teachNumbers = (0..8).toList().toIntArray()
     var structure = if (NetworkIO().load("nets/nw.net") != null) getStructure("nets/nw.net") else intArrayOf(6,6,4,4,40,10)
+    fullTrain(structure, intArrayOf(4, 5), teachNumbers)
     while (true) {
-        train(structure, intArrayOf(), teachNumbers)
+        fullTrain(structure, intArrayOf(), teachNumbers)
+        rebuild(teachNumbers, 40)
         structure = getStructure("nets/nw.net")
         if (structure.sum() == getStructure("nets/nwx.net").sum()) break
         if (structure.take(4).sum() < 5) break
-        train(structure, intArrayOf(4, 5), teachNumbers)
+        fullTrain(structure, intArrayOf(4, 5), teachNumbers)
+        saveAs("nets/nwx.net", "nets/nw${teachNumbers.joinToString("")}_${structure.joinToString("-")}.net")
     }
-    saveAs("nets/nwx.net", "nets/nw${teachNumbers.joinToString("")}_${structure.joinToString("-")}.net")
 }
+

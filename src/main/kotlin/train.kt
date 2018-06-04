@@ -1,7 +1,5 @@
 import java.awt.Toolkit
-import java.util.logging.FileHandler
-import java.util.logging.Logger
-import java.util.logging.SimpleFormatter
+import java.util.logging.*
 
 class TrainSettings {
     var trainLayers = (0..4).toList()
@@ -109,7 +107,16 @@ fun saveAs(from: String, to: String) {
 fun setupLog(log: Logger) {
     val fh = FileHandler("log.txt")
     log.addHandler(fh)
-    fh.formatter = SimpleFormatter()
+    class NoTimeStampFormatter : SimpleFormatter() {
+        override fun format(record: LogRecord?): String {
+            return if (record?.level == Level.INFO) {
+                record?.message + "\r\n"
+            } else {
+                super.format(record)
+            }
+        }
+    }
+    fh.formatter = NoTimeStampFormatter()
 }
 
 fun train(teachNumbers: IntArray, trainLayers: List<Int>, alpha: Double, structure: IntArray): Double {
