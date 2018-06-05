@@ -1,7 +1,6 @@
 import java.util.*
 import kotlin.math.exp
 import kotlin.math.max
-import kotlin.math.sqrt
 
 class Neuron {
     var weights = mutableListOf<Double>()
@@ -55,93 +54,48 @@ class Neuron {
     fun clone() = Neuron().also { it.weights = weights.map { it }.toMutableList() }
 }
 
-class Layer(size: Int=0) {
-    val neurons = build(size)
-    private fun build(size: Int) = MutableList(size, { Neuron() })
-    fun activate(input: List<Double>) = neurons.map { it.activate(input) }
-    fun activateSigma(input: List<Double>) = neurons.map { it.activateSigma(input) }
-
-    fun cnn(input: List<List<Double>>, matrixDivider: MatrixDivider): List<List<Double>> {
-        val x = input.map {
-            matrixDivider.divide(it)
-        }
-        return x.flatMap { l ->
-            neurons.map { kernel -> l.map {
-                if (kernel.weights.size != it.size) kernel.setRandomWeights(it.size)
-                kernel.sum(it)
-            } }
-        }
-    }
-
-    companion object {
-        fun relu(x: List<Double>) = x.map { max(it, 0.0) }
-
-        fun pool(x: List<Double>, matrixDivider: MatrixDivider) =  matrixDivider.divide(x).map { it.max()!! }
-
-        fun softmax(x: List<Double>): List<Double> {
-            val y = x.map { if (it < 0) 0.0 else it }
-            val sum = x.sum()
-            if (sum == 0.0) return List(x.size, { 1.0/x.size })
-            return y.map { it/y.sum() }
-        }
-
-        fun norm(x: List<Double>): List<Double> {
-            val l = sqrt(x.map { it*it }.sum())
-            if (l == 0.0) return x
-            return x.map { it / l }
-        }
-    }
-
-    fun clone() = Layer().also { it.neurons.addAll(neurons.map { it.clone() }.toMutableList()) }
-}
-
-interface ILayer {
+interface Layer {
     fun getInstance(): ALayer
-    fun clone(): ILayer
+    fun clone(): Layer
     val neurons: MutableList<Neuron>
 }
 
-abstract class ALayer(size: Int): ILayer {
+abstract class ALayer(size: Int): Layer {
     override val neurons = build(size)
     private fun build(size: Int) = MutableList(size, { Neuron() })
     override fun clone() = getInstance().also { it.neurons.addAll(neurons.map { it.clone() }.toMutableList()) }
 }
 
-class CNNLayer(private val matrixDivider: MatrixDivider, private val size: Int): ALayer(size) {
-    override fun getInstance() = CNNLayer(matrixDivider, size)
+class CNNLayer(private val matrixDivider: MatrixDivider,
+               private val pooler: Pooler?=null, size: Int=0): ALayer(size) {
+    override fun getInstance() = CNNLayer(matrixDivider, pooler, neurons.size)
 
     fun activate(input: List<List<Double>>): List<List<Double>> {
         val x = input.map {
             matrixDivider.divide(it)
         }
-        return x.flatMap { l ->
+        var y = x.flatMap { l ->
             neurons.map { kernel -> l.map {
                 if (kernel.weights.size != it.size) kernel.setRandomWeights(it.size)
                 kernel.sum(it)
             } }
         }
+        y = y.map { relu(it) }
+        pooler?.let { y = it.activate(y) }
+        return y
     }
 
     private fun relu(x: List<Double>) = x.map { max(it, 0.0) }
-
-    private fun pool(x: List<Double>, matrixDivider: MatrixDivider) =  matrixDivider.divide(x).map { it.max()!! }
-
-    private fun softmax(x: List<Double>): List<Double> {
-        val y = x.map { if (it < 0) 0.0 else it }
-        val sum = x.sum()
-        if (sum == 0.0) return List(x.size, { 1.0/x.size })
-        return y.map { it/y.sum() }
-    }
-
-    private fun norm(x: List<Double>): List<Double> {
-        val l = sqrt(x.map { it*it }.sum())
-        if (l == 0.0) return x
-        return x.map { it / l }
-    }
 }
 
-class FullConnectedLayer(private val alpha: Double, private val size: Int): ALayer(size) {
-    override fun getInstance() = FullConnectedLayer(alpha, size)
+class Pooler(private val matrixDivider: MatrixDivider) {
+    fun activate(x: List<List<Double>>) = x.map { pool(it, matrixDivider) }
+
+    private fun pool(x: List<Double>, matrixDivider: MatrixDivider) =  matrixDivider.divide(x).map { it.max()!! }
+}
+
+class FullConnectedLayer(private val alpha: Double=1.0, size: Int=0): ALayer(size) {
+    override fun getInstance() = FullConnectedLayer(alpha, neurons.size)
     fun activate(input: List<Double>) = neurons.map { it.activateSigma(input) }
 }
 

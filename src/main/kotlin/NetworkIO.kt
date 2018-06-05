@@ -6,7 +6,11 @@ class NetworkIO {
     fun save(nw: Network, name: String) {
         val file = FileWriter(File(name))
         nw.layers.forEach {
-            file.write("layer\n")
+            if (it is CNNLayer) {
+                file.write("CNNLayer\n")
+            } else {
+                file.write("layer\n")
+            }
             it.neurons.forEach {
                 file.write("neuron\n")
                 it.weights.forEach { file.write("${(it*10000).toInt()/10000.0}\n") }
@@ -27,13 +31,21 @@ class NetworkIO {
         var neuron: Neuron? = null
         lines.forEach { line ->
             when (line) {
+                "CNNLayer" -> {
+                    layer?.let {
+                        it.neurons.add(neuron!!)
+                        nw.layers.add(it)
+                        neuron = null
+                    }
+                    layer = CNNLayer(CNetwork.cnnDividers[nw.layers.size], CNetwork.poolerDividers[nw.layers.size]?.let { Pooler(it) })
+                }
                 "layer" -> {
                     layer?.let {
                         it.neurons.add(neuron!!)
                         nw.layers.add(it)
                         neuron = null
                     }
-                    layer = Layer()
+                    layer = FullConnectedLayer()
                 }
                 "neuron" -> {
                     neuron?.let { layer!!.neurons.add(it) }

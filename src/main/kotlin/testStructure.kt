@@ -30,7 +30,7 @@ fun testMedianNet(nw: Network, batch: List<Image>, teachNumbers: IntArray): Doub
     }
     val y = b.average()
     println("средний успех: ${(y*1000).toInt()/10.0}%")
-    return y
+    return (y*10000).toInt() / 10000.0
 }
 
 fun main(args: Array<String>) {

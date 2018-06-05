@@ -1,7 +1,7 @@
 val nw1 = NetworkIO().load("nets/nw01234567_1-3-2-3-60-10.net")!!
 val nw2 = NetworkIO().load("nets/nw789_1-2-1-2-40-10.net")!!
 fun main(args: Array<String>) {
-    val nw = CNetwork(0, 0, 0, 0, 60, 10)
+    val nw = buildNetwork(intArrayOf(0, 0, 0, 0, 40, 10), 15.0)
     for (i in 0..3) {
         if (nw.layers[i].neurons.size > 0) continue
         nw.layers[i].neurons.addAll(nw1.layers[i].neurons)

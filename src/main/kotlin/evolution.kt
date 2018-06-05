@@ -90,7 +90,7 @@ abstract class NetEvolution(
             if (lastRate == median.rate) {
                 stagnation++
                 population = if (population.size < 120) {
-                    population.union(List(populationAdder, { createIndividual() })).toList()
+                    population.union(generatePopulation(populationAdder, leader!!)).toList()
                 } else {
                     population.take(minPopulationSize)
                 }
