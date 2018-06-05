@@ -2,8 +2,8 @@ import java.io.File
 import java.util.*
 
 object MNIST {
-    private val mnistTrainPath = "/home/melkor/mnist_png/training"
-    private val mnistTestPath = "/home/melkor/mnist_png/testing"
+    private val mnistTrainPath = "G:\\ih8unem\\mnist_png\\training"
+    private val mnistTestPath = "G:\\ih8unem\\mnist_png\\testing"
     private val dir = File(mnistTrainPath)
 
     fun buildBatch(size: Int): List<Image> {
@@ -22,12 +22,11 @@ object MNIST {
 
 fun main(args: Array<String>) {
     val teachNumbers = (0..9).toList()
-    val nw = NetworkIO().load("nets/nw.net")!!
+    val nw = CNetwork().load("nets/nw.net")!!
     val batch = MNIST.buildBatch(500).filter { it.index in teachNumbers }.shuffled()
     var counter = 0
-    Neuron.alpha = 15.0
     batch.forEach {
-        val r = nw.activate(it)
+        val r = nw.activate(it, 15.0)
         val k = r.indexOf(r.max())
         val i = it.index
         if (i != k) counter++

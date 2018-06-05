@@ -1,18 +1,12 @@
 import java.util.logging.FileHandler
 import java.util.logging.SimpleFormatter
 
-fun main(args: Array<String>) {
-    clean(intArrayOf(5,6,7))
-}
-
 fun clean(teachNumbers: IntArray): MutableMap<Int, MutableList<Pair<Int, Double>>> {
     val map = mutableMapOf<Int, MutableList<Pair<Int, Double>>>()
-    Neuron.alpha = 15.0
-    Network.useSigma = true
     val fh = FileHandler("log.txt")
     log.addHandler(fh)
     fh.formatter = SimpleFormatter()
-    val nw = NetworkIO().load("nets/nwx.net")!!
+    val nw = CNetwork().load("nets/nwx.net")!!
     val testBatch = MNIST.buildBatch(500).filter { it.index in teachNumbers }
     val initResult = testMedianNet(nw, testBatch, teachNumbers)
     log.info("initResult: $initResult")
@@ -39,5 +33,5 @@ fun clean(teachNumbers: IntArray): MutableMap<Int, MutableList<Pair<Int, Double>
 fun nullNeuron(nw: Network, to: String, layerNumber: Int, neuronNumber: Int) {
     val neuron = nw.layers[layerNumber].neurons[neuronNumber]
     neuron.weights = neuron.weights.map { 0.0 }.toMutableList()
-    NetworkIO().save(nw, to)
+    nw.save(to)
 }

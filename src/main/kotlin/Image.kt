@@ -6,12 +6,11 @@ class Image(image: File) {
     val group = getGroup(image)
     val colorsMatrix = getColorBuffers(image)
     val index = group!!.toInt()
-    var y: List<List<Double>>? = null
     var o: List<Double>? = null
 
     private fun getGroup(image: File): String? {
-//        val pattern = Pattern.compile("\\\\(\\d)\\\\")
-        val pattern = Pattern.compile("/(\\d)/")
+        val pattern = Pattern.compile("\\\\(\\d)\\\\")
+//        val pattern = Pattern.compile("/(\\d)/")
         val matcher = pattern.matcher(image.absolutePath)
         if (matcher.find()) {
             return matcher.group(1)

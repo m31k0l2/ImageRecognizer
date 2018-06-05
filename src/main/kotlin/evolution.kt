@@ -9,11 +9,11 @@ import kotlin.math.max
  * [nw] - нейронная сеть, [rate] - рейтинг выживаемости
  */
 data class Individual(val nw: Network, var rate: Double=1.0) {
-    fun rate(batch: List<Image>, rateCount: Int) {
+    fun rate(batch: List<Image>, rateCount: Int, alpha: Double) {
         val testPosition = rateCount/2
         val b = (1..rateCount).map { (0..9).mapNotNull { i -> batch.filter { it.index == i }.shuffled().firstOrNull()} }
         rate = try { b.map { it.map {
-            val o = nw.activate(it)
+            val o = nw.activate(it, alpha)
             val r = o[it.index]
             val e = 1 - r
             e*e
@@ -32,7 +32,7 @@ data class Individual(val nw: Network, var rate: Double=1.0) {
  * должно играть скрещивание
  */
 abstract class NetEvolution(
-        var maxMutateRate: Double=.005,
+        var maxMutateRate: Double=0.2,
         private var rateCount: Int = 3,
         private val scale: Int=1
 ) {
@@ -47,6 +47,7 @@ abstract class NetEvolution(
     private var mutateRate = 0.1
     private val populationAdder = 10
     var minPopulationSize = 60
+    private var alpha: Double = 1.0
 
     init {
         if (File("nets/").mkdir()) {
@@ -60,10 +61,11 @@ abstract class NetEvolution(
      * Создаём популяцию размером populationSize
      * Выполняем эволюцию популяции от эпохи к эпохе
      */
-    fun evolute (epochSize: Int, populationSize: Int, maxStagnation: Int=5) = evolute(epochSize, generatePopulation(populationSize, name), maxStagnation)
+    fun evolute (epochSize: Int, populationSize: Int, alpha: Double, maxStagnation: Int=5) = evolute(epochSize, generatePopulation(populationSize, name), alpha, maxStagnation)
 
-    fun evolute(epochSize: Int, initPopulation: List<Individual>, maxStagnation: Int=5): List<Individual> {
+    fun evolute(epochSize: Int, initPopulation: List<Individual>, alpha: Double, maxStagnation: Int=5): List<Individual> {
         if (trainLayers.isEmpty()) trainLayers = (0 until initPopulation.first().nw.layers.size).toList()
+        this.alpha = alpha
         var population = initPopulation
         population.forEach { it.rate = 1.0 }
         var stagnation = 0
@@ -135,7 +137,7 @@ abstract class NetEvolution(
             return generatePopulation(size, it)
         }
         if (!File(name).exists()) return generatePopulation(size)
-        val nw = NetworkIO().load(name)!!
+        val nw = CNetwork().load(name)!!
         return generatePopulation(size, Individual(nw))
     }
 
@@ -159,7 +161,7 @@ abstract class NetEvolution(
     }
 
     private fun ratePopulation(population: List<Individual>) = population.parallelStream().forEach { individ ->
-        individ.rate(batch, rateCount)
+        individ.rate(batch, rateCount, alpha)
     }
 
     /**

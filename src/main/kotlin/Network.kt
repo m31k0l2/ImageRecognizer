@@ -2,13 +2,11 @@ import java.util.*
 import kotlin.math.sqrt
 
 interface Network {
-    fun activate(x: Image): List<Double>
+    fun activate(x: Image, alpha: Double): List<Double>
+    fun activateConvLayers(x: Image): List<Double>
     fun clone(): Network
     val layers: MutableList<Layer>
     fun dropout(layersNumbers: List<Int>, dropoutRate: Double, isRandom: Boolean=false): Network
-    companion object {
-        var useSigma = true
-    }
 }
 
 class CNetwork: Network {
@@ -23,7 +21,7 @@ class CNetwork: Network {
                 MatrixDivider(2,2,1)
         )
 
-        val poolerDividers = listOf(
+        val poolDividers = listOf(
                 MatrixDivider(24,2,2),
                 MatrixDivider(8,2,2),
                 null,
@@ -31,7 +29,7 @@ class CNetwork: Network {
         )
     }
 
-    fun activateConvLayers(x: Image): List<Double> {
+    override fun activateConvLayers(x: Image): List<Double> {
         var y = x.colorsMatrix
         for (i in 0..3) {
             val layer = layers[i] as CNNLayer
@@ -40,19 +38,19 @@ class CNetwork: Network {
         return norm(y.flatten())
     }
 
-    private fun activateFullConnectedLayers(x: List<Double>): List<Double> {
+    private fun activateFullConnectedLayers(x: List<Double>, alpha: Double): List<Double> {
         var o = x
         for (i in 4..5) {
             val layer = layers[i] as FullConnectedLayer
-            o = layer.activate(o)
+            o = layer.activate(o, alpha)
         }
         return o
     }
 
-    override fun activate(x: Image): List<Double> {
+    override fun activate(x: Image, alpha: Double): List<Double> {
         calcImages[x]?.let { return it }
         var o = x.o ?: activateConvLayers(x)
-        o = activateFullConnectedLayers(o)
+        o = activateFullConnectedLayers(o, alpha)
         val r = softmax(o)
         calcImages[x] = r
         return r
