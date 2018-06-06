@@ -9,8 +9,8 @@ class Image(image: File) {
     var o: List<Double>? = null
 
     private fun getGroup(image: File): String? {
-        val pattern = Pattern.compile("\\\\(\\d)\\\\")
-//        val pattern = Pattern.compile("/(\\d)/")
+//        val pattern = Pattern.compile("\\\\(\\d)\\\\")
+        val pattern = Pattern.compile("/(\\d)/")
         val matcher = pattern.matcher(image.absolutePath)
         if (matcher.find()) {
             return matcher.group(1)

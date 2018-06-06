@@ -147,9 +147,9 @@ fun fullTrain(time: Int, structure: IntArray, trainFullConnectedLayers: Boolean,
 
 fun main(args: Array<String>) {
     setupLog(log)
-    val teachNumbers = IntArray(9, { it })
+    val teachNumbers = IntArray(5, { 5+it })
     var structure = if (CNetwork().load("nets/nw.net") != null) getStructure("nets/nw.net") else intArrayOf(6,6,4,4,40,10)
-    fullTrain(500, structure, true, teachNumbers)
+//    fullTrain(500, structure, true, teachNumbers)
     while (true) {
         fullTrain(150, structure, false, teachNumbers)
         rebuild(teachNumbers, 40)
