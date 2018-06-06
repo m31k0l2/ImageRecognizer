@@ -10,14 +10,14 @@ import kotlin.math.max
  */
 data class Individual(val nw: Network, var rate: Double=1.0) {
     fun rate(batch: List<Image>, rateCount: Int, alpha: Double) {
-        val testPosition = rateCount/2
+        val testPosition = rateCount*0.3
         val b = (1..rateCount).map { (0..9).mapNotNull { i -> batch.filter { it.index == i }.shuffled().firstOrNull()} }
         rate = try { b.map { it.map {
             val o = nw.activate(it, alpha)
             val r = o[it.index]
             val e = 1 - r
             e*e
-        }.average() }.sorted()[testPosition] } catch (e: Exception) { 1.0 }
+        }.average() }.average() } catch (e: Exception) { 1.0 }
     }
 }
 

@@ -60,5 +60,5 @@ fun Network.load(path: String): Network? {
 }
 
 fun saveAs(from: String, to: String) {
-    CNetwork().load(from)!!.save(to)
+    CNetwork().load(from)?.save(to)
 }

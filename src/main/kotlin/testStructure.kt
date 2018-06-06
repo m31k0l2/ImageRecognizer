@@ -2,7 +2,7 @@ import java.util.*
 
 fun testMedianNet(nw: Network, batch: List<Image>, teachNumbers: IntArray): Double {
     val b = teachNumbers.toList().mapNotNull { i -> batch.filter { it.index == i }.map { nw.activate(it, 15.0)[i] }.let {
-        if (it.isNotEmpty()) it.sorted()[it.size / 2] else null
+        if (it.isNotEmpty()) it.average() else null
     } }
     b.forEachIndexed { index, y ->
         println("${teachNumbers[index]} -> ${(y * 1000).toInt() / 10.0}%")

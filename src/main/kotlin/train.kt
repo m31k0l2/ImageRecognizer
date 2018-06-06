@@ -113,51 +113,63 @@ fun Network.rate(vararg numbers: Int): Double {
     return testMedianNet(this, testBatch, numbers)
 }
 
-fun train(time: Int, structure: IntArray, trainFullConnectedLayers: Boolean, teachNumbers: IntArray): Double {
-    var rate = CNetwork().load("nets/nw.net")?.rate(*teachNumbers) ?: 0.0
-    for (alpha in listOf(15.0, 3.0, 2.0, 1.0, 2.0, 3.0)) {
-        log.info("alpha: $alpha")
-        log.info("structure: ${getStructure("nets/nw.net").toList()}")
-        log.info("trainFullConnectedLayers: $trainFullConnectedLayers")
-        while (true) {
-            val nw = evolute(time, structure, trainFullConnectedLayers, alpha, teachNumbers)
-            val curRate = nw.rate(*teachNumbers)
-            log.info("rate: $curRate")
-            if (curRate > rate) {
-                nw.save("nets/nw.net")
-                log.info("SAVE")
-                rate = curRate
-            } else break
-        }
-        if (rate > 0.98) return rate
+fun train(time: Int, structure: IntArray, trainFullConnectedLayers: Boolean, teachNumbers: IntArray, alpha: Double): Pair<Double, Double> {
+    saveAs("nets/nw.net", "nets/nw_back.net")
+    var rate = 0.0
+    log.info("alpha: $alpha")
+    log.info("structure: ${getStructure("nets/nw.net").toList()}")
+    log.info("trainFullConnectedLayers: $trainFullConnectedLayers")
+    var a = alpha
+    while (true) {
+        val nw = evolute(time, structure, trainFullConnectedLayers, a, teachNumbers)
+        val curRate = nw.rate(*teachNumbers)
+        log.info("rate: $curRate")
+        if (curRate > rate) {
+            nw.save("nets/nw.net")
+            log.info("SAVE $a")
+            rate = curRate
+        } else break
+        a += 0.5
     }
-    return rate
+    CNetwork().load("nets/nw_back.net")?.let {
+        val r = testMedianNet(it, testBatch, teachNumbers)
+        if (r > rate) saveAs("nets/nw_back.net", "nets/nw.net")
+    }
+    return a to rate
 }
 
 fun fullTrain(time: Int, structure: IntArray, trainFullConnectedLayers: Boolean, teachNumbers: IntArray) {
+    var alpha = 0.5
     var r1 = 0.0
     while (true) {
-        val r2 = train(time, structure, trainFullConnectedLayers, teachNumbers)
+        val (a, r2) = train(time, structure, trainFullConnectedLayers, teachNumbers, alpha)
         log.info("\r\nresult $r1 -> $r2")
-        if (r2 <= r1) break
-        r1 = r2
+        if (r2 > r1) r1 = r2
+        else if (a > 15.0) break
+        alpha = a
     }
     saveAs("nets/nw.net", "nets/nwx.net")
+    return
 }
 
 fun main(args: Array<String>) {
     setupLog(log)
-    val teachNumbers = IntArray(5, { 5+it })
-    var structure = if (CNetwork().load("nets/nw.net") != null) getStructure("nets/nw.net") else intArrayOf(6,6,4,4,40,10)
-//    fullTrain(500, structure, true, teachNumbers)
+    teach(0,1,2,3)
+}
+
+fun teach(vararg teachNumbers: Int) {
+    var structure = if (CNetwork().load("nets/nw.net") != null) getStructure("nets/nw.net") else intArrayOf(4,4,4,4,40,10)
+//    fullTrain(200, structure, true, teachNumbers)
     while (true) {
         fullTrain(150, structure, false, teachNumbers)
         rebuild(teachNumbers, 40)
         structure = getStructure("nets/nw.net")
         if (structure.sum() == getStructure("nets/nwx.net").sum()) break
         if (structure.take(4).sum() < 5) break
-        fullTrain(500, structure, true, teachNumbers)
+        fullTrain(200, structure, true, teachNumbers)
         saveAs("nets/nwx.net", "nets/nw${teachNumbers.joinToString("")}_${structure.joinToString("-")}.net")
     }
+    saveAs("nets/nwx.net", "nets/nw${teachNumbers.joinToString("")}_${structure.joinToString("-")}.net")
+    saveAs("nets/nwx.net", "nets/nw.net")
 }
 
