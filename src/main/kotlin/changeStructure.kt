@@ -20,5 +20,5 @@ private fun changeNeurons(savedLayerNumber: Int, net: Network, nw: Network, filt
 }
 
 fun main(args: Array<String>) {
-    changeStructure("nets/nw.net", "nets/nw.net", (0..5).toList(), emptyMap(), buildNetwork(4, 4, 4, 4, 80, 10))
+    changeStructure("nets/nw.net", "nets/nw.net", (0..5).toList(), emptyMap(), buildNetwork(2, 2, 2, 2, 40, 3))
 }

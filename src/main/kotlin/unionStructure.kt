@@ -1,12 +1,14 @@
-val nw1 = CNetwork().load("nets/nw01234_1-2-1-3-40-10.net")!!
-val nw2 = CNetwork().load("nets/nw56789_4-3-2-2-40-10.net")!!
+val nets = (1..11).map { "nets/456/nw$it.net" }.mapNotNull { CNetwork().load(it) }
 fun main(args: Array<String>) {
-    val nw = buildNetwork(0, 0, 0, 0, 60, 10)
+    val nw = buildNetwork(0, 0, 0, 0, 0, 0)
+    val structure = intArrayOf(2,2,2,2,40,3)
     for (i in 0..3) {
-        if (nw.layers[i].neurons.size > 0) continue
-        nw.layers[i].neurons.addAll(nw1.layers[i].neurons)
-        if (i < 0) continue
-        nw.layers[i].neurons.addAll(nw2.layers[i].neurons)
+        val neurons = nets.map { it.layers[i] }.flatMap { it.neurons }.shuffled().take(structure[i])
+        nw.layers[i].neurons.addAll(neurons)
+    }
+    for (i in 4..5) {
+        val neurons = nets.map { it.layers[i] }.map { it.neurons }.shuffled().first()
+        nw.layers[i].neurons.addAll(neurons)
     }
     nw.activate(MNIST.buildBatch(10).first(), 1.0)
     nw.save("nets/nw.net")

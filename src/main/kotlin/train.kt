@@ -22,12 +22,13 @@ fun rebuild(teachNumbers: IntArray, hiddenLayerNeurons: Int=40) {
         map[i]?.let { list.add(it.size) } ?: list.add(1)
     }
     if (list.reduce { acc, i -> acc * i } == 1) {
-        list = mutableListOf(1, 1, 2, 2)
+        list = mutableListOf(2, 2, 2, 2)
     }
     list.add(hiddenLayerNeurons)
-    list.add(10)
+    list.add(teachNumbers.size)
     println(list)
     map.map { it.key to it.value.map { it.first } }.toMap()
+
     changeStructure("nets/nwx.net", "nets/nw.net",
             listOf(0,1,2,3),
             map.map { it.key to it.value.map { it.first } }.toMap(),
@@ -81,6 +82,9 @@ fun NewEvolution.run(numbers: IntArray, trainFullConnectedLayers: Boolean, alpha
         }
     }
     batch = MNIST.buildBatch(500).filter { it.index in numbers }
+    batch.forEach {
+        it.index = numbers.indexOf(it.index)
+    }
     if (trainFullConnectedLayers) {
         val nw = CNetwork().load("nets/nw.net")!!
         batch.forEach {
@@ -129,7 +133,7 @@ fun train(time: Int, structure: IntArray, trainFullConnectedLayers: Boolean, tea
             log.info("SAVE $a")
             rate = curRate
         } else break
-        a += 0.5
+        a += 1.0
     }
     CNetwork().load("nets/nw_back.net")?.let {
         val r = testMedianNet(it, testBatch, teachNumbers)
@@ -139,13 +143,13 @@ fun train(time: Int, structure: IntArray, trainFullConnectedLayers: Boolean, tea
 }
 
 fun fullTrain(time: Int, structure: IntArray, trainFullConnectedLayers: Boolean, teachNumbers: IntArray) {
-    var alpha = 0.5
+    var alpha = 1.0
     var r1 = 0.0
     while (true) {
         val (a, r2) = train(time, structure, trainFullConnectedLayers, teachNumbers, alpha)
         log.info("\r\nresult $r1 -> $r2")
         if (r2 > r1) r1 = r2
-        else if (a > 15.0) break
+        else if (a > 10.0) break
         alpha = a
     }
     saveAs("nets/nw.net", "nets/nwx.net")
@@ -154,22 +158,45 @@ fun fullTrain(time: Int, structure: IntArray, trainFullConnectedLayers: Boolean,
 
 fun main(args: Array<String>) {
     setupLog(log)
-    teach(0,1,2,3)
+    teach(true, 4,5,6)
 }
 
-fun teach(vararg teachNumbers: Int) {
-    var structure = if (CNetwork().load("nets/nw.net") != null) getStructure("nets/nw.net") else intArrayOf(4,4,4,4,40,10)
-//    fullTrain(200, structure, true, teachNumbers)
-    while (true) {
-        fullTrain(150, structure, false, teachNumbers)
-        rebuild(teachNumbers, 40)
-        structure = getStructure("nets/nw.net")
-        if (structure.sum() == getStructure("nets/nwx.net").sum()) break
-        if (structure.take(4).sum() < 5) break
-        fullTrain(200, structure, true, teachNumbers)
-        saveAs("nets/nwx.net", "nets/nw${teachNumbers.joinToString("")}_${structure.joinToString("-")}.net")
+fun trainAndRebuild(teachNumbers: IntArray, trainFullConnectedLayers: Boolean) {
+    val structure = if (CNetwork().load("nets/nw.net") != null) getStructure("nets/nw.net") else intArrayOf(4,4,4,4,40,3)
+    fullTrain(150, structure, trainFullConnectedLayers, teachNumbers)
+    rebuild(teachNumbers, 40)
+    if (!testStructure()) saveAs("nets/nwx.net", "nets/nw.net")
+}
+
+fun testStructure(): Boolean {
+    val structure = getStructure("nets/nw.net")
+    if (structure.sum() == getStructure("nets/nwx.net").sum()) return false
+    return (0..3).map { structure[it] < 2 }.reduce { acc, b -> acc && b }
+}
+
+fun saveStructure(teachNumbers: IntArray) {
+    saveAs("nets/nwx.net", "nets/nw${teachNumbers.joinToString("")}_${getStructure("nets/nwx.net").joinToString("-")}.net")
+}
+
+fun teach(pretrain: Boolean, vararg teachNumbers: Int) {
+    if (pretrain) {
+        while (true) {
+            trainAndRebuild(teachNumbers, true)
+            saveStructure(teachNumbers)
+            if (!testStructure()) break
+        }
     }
-    saveAs("nets/nwx.net", "nets/nw${teachNumbers.joinToString("")}_${structure.joinToString("-")}.net")
-    saveAs("nets/nwx.net", "nets/nw.net")
+    while (true) {
+        trainAndRebuild(teachNumbers, false)
+        if (!testStructure()) break
+        trainAndRebuild(teachNumbers, true)
+        if (!testStructure()) break
+        saveStructure(teachNumbers)
+    }
+    if (!getStructure("nets/nw.net").contentEquals(intArrayOf(2,2,2,2,40,3))) {
+        changeStructure("nets/nwx.net", "nets/nw.net", (0..5).toList(), emptyMap(), buildNetwork(2, 2, 2, 2, 40, 3))
+        fullTrain(150, getStructure("nets/nw.net"), false, teachNumbers)
+    }
+    saveStructure(teachNumbers)
 }
 

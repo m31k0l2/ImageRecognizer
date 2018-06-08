@@ -3,14 +3,12 @@ import java.util.*
 import java.util.stream.Collectors
 import kotlin.math.max
 
-
 /**
  * Модель особи.
  * [nw] - нейронная сеть, [rate] - рейтинг выживаемости
  */
 data class Individual(val nw: Network, var rate: Double=1.0) {
     fun rate(batch: List<Image>, rateCount: Int, alpha: Double) {
-        val testPosition = rateCount*0.3
         val b = (1..rateCount).map { (0..9).mapNotNull { i -> batch.filter { it.index == i }.shuffled().firstOrNull()} }
         rate = try { b.map { it.map {
             val o = nw.activate(it, alpha)

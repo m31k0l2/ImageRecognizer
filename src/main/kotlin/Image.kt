@@ -5,7 +5,7 @@ import javax.imageio.ImageIO
 class Image(image: File) {
     val group = getGroup(image)
     val colorsMatrix = getColorBuffers(image)
-    val index = group!!.toInt()
+    var index = group!!.toInt()
     var o: List<Double>? = null
 
     private fun getGroup(image: File): String? {
