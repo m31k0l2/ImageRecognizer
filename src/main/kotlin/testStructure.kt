@@ -1,6 +1,6 @@
 import java.util.*
 
-fun testMedianNet(nw: Network, batch: List<Image>, teachNumbers: IntArray): Double {
+fun testMedianNet(nw: Network, batch: Set<Image>, teachNumbers: IntArray): Double {
     val r = batch.filter { it.index in teachNumbers }.groupBy { it.index }.map {
         (n, list) ->
             val i = teachNumbers.indexOf(n)
@@ -17,12 +17,12 @@ fun testMedianNet(nw: Network, batch: List<Image>, teachNumbers: IntArray): Doub
 }
 
 fun main(args: Array<String>) {
-    val teachNumbers = intArrayOf(4,5,6)
+    val teachNumbers = intArrayOf(7,8,9)
     while (true) {
         print("Размер батча: ")
         val size = Scanner(System.`in`).nextInt()
         if (size < 30) return
-        val name = "nw.net".takeIf { size > 0 } ?: "_nw.net"
+        val name = "789/nw4.net"
         CNetwork().load("nets/$name")?.let {
             testMedianNet(it, MNIST.buildBatch(size), teachNumbers)
         }

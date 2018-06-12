@@ -2,10 +2,10 @@ import java.io.File
 import java.util.regex.Pattern
 import javax.imageio.ImageIO
 
-class Image(image: File) {
+class Image(val image: File) {
     val group = getGroup(image)
     val colorsMatrix = getColorBuffers(image)
-    var index = group!!.toInt()
+    val index = group!!.toInt()
     var o: List<Double>? = null
 
     private fun getGroup(image: File): String? {

@@ -1,7 +1,12 @@
 import java.awt.Toolkit
+import java.io.File
 import java.util.logging.*
 
-val log: Logger = Logger.getLogger("logger")
+val log = Logger.getLogger("logger")!!
+var testBatch = emptySet<Image>()
+//val testBatch = MNIST.buildBatch(500)
+const val hiddenNeurons = 40
+var rateCount = 20
 
 fun beep() {
     for (i in 1..60) {
@@ -15,7 +20,7 @@ fun getStructure(path: String): IntArray {
     return nw.layers.map { it.neurons.size }.toIntArray()
 }
 
-fun rebuild(teachNumbers: IntArray, hiddenLayerNeurons: Int=40) {
+fun rebuild(teachNumbers: IntArray, hiddenLayerNeurons: Int=hiddenNeurons) {
     val map = clean(teachNumbers)
     var list = mutableListOf<Int>()
     for (i in 0..3) {
@@ -61,7 +66,7 @@ fun Network.fullConnectedLayer(neuronCount: Int) {
     layers.add(FullConnectedLayer(neuronCount))
 }
 
-abstract class NewEvolution(val time: Int, val popSize: Int) : NetEvolution()
+abstract class NewEvolution(val time: Int, val popSize: Int) : NetEvolution(0.2, rateCount)
 
 fun evolution(time: Int, population: Int, init: NetEvolution.() -> Network): NewEvolution {
     class Evolution : NewEvolution(time, population) {
@@ -75,16 +80,14 @@ fun network(init: Network.() -> Unit): Network {
 }
 
 fun NewEvolution.run(numbers: IntArray, trainFullConnectedLayers: Boolean, alpha: Double): Network {
+    testBatch = MNIST.buildBatch(500).union(MNIST.buildBatch(500, MNIST.errorPath))
     mutantStrategy = { e, _ ->
         when {
             e < 50 -> ((50 - e) / 50.0)
             else -> 0.2
         }
     }
-    batch = MNIST.buildBatch(500).filter { it.index in numbers }
-    batch.forEach {
-        it.index = numbers.indexOf(it.index)
-    }
+    batch = testBatch.filter { it.index in numbers }
     if (trainFullConnectedLayers) {
         val nw = CNetwork().load("nets/nw.net")!!
         batch.forEach {
@@ -111,8 +114,6 @@ fun evolute(time: Int, structure: IntArray, trainFullConnectedLayers: Boolean, a
     }.run(numbers, trainFullConnectedLayers, alpha)
 }
 
-val testBatch = MNIST.buildBatch(500)
-
 fun Network.rate(vararg numbers: Int): Double {
     return testMedianNet(this, testBatch, numbers)
 }
@@ -133,7 +134,7 @@ fun train(time: Int, structure: IntArray, trainFullConnectedLayers: Boolean, tea
             log.info("SAVE $a")
             rate = curRate
         } else break
-        a += 1.0
+        if (trainFullConnectedLayers) a += 1.0
     }
     CNetwork().load("nets/nw_back.net")?.let {
         val r = testMedianNet(it, testBatch, teachNumbers)
@@ -142,8 +143,8 @@ fun train(time: Int, structure: IntArray, trainFullConnectedLayers: Boolean, tea
     return a to rate
 }
 
-fun fullTrain(time: Int, structure: IntArray, trainFullConnectedLayers: Boolean, teachNumbers: IntArray) {
-    var alpha = 1.0
+fun fullTrain(time: Int, structure: IntArray, trainFullConnectedLayers: Boolean, teachNumbers: IntArray): Double {
+    var alpha = 1.0.takeIf { trainFullConnectedLayers } ?: 15.0
     var r1 = 0.0
     while (true) {
         val (a, r2) = train(time, structure, trainFullConnectedLayers, teachNumbers, alpha)
@@ -153,18 +154,46 @@ fun fullTrain(time: Int, structure: IntArray, trainFullConnectedLayers: Boolean,
         alpha = a
     }
     saveAs("nets/nw.net", "nets/nwx.net")
-    return
+    return r1
+}
+
+fun reteach(id: Int, vararg teachNumbers: Int) {
+    val dir = teachNumbers.map { "$it" }.reduce { acc, a -> "$acc$a" }
+    log.info("nw$id.net")
+    val path = "nets/$dir/nw$id.net"
+    saveAs(path, "nets/nw.net")
+    teach(*teachNumbers)
+    saveAs("nets/nw.net", path)
+    File("nets/nw.net").delete()
+    File("nets/nw_back.net").delete()
+    File("nets/nwx.net").delete()
 }
 
 fun main(args: Array<String>) {
     setupLog(log)
-    teach(true, 4,5,6)
+//    (3..11).forEach {
+        teachOne(4, 7, 8, 9)
+//    }
+}
+
+fun teachOne(id: Int, vararg teachNumbers: Int) {
+    val dir = teachNumbers.map { "$it" }.reduce { acc, a -> "$acc$a" }
+    saveAs("nets/$dir/nw$id.net", "nets/nw.net")
+    do {
+        val r = teach(7,8)
+//    pretrain(2, 4, 5, 6)
+//    reteach(2, 4, 5, 6)
+        File("nets/nw_back.net").delete()
+        File("nets/nwx.net").delete()
+    } while (r < 0.8)
+    saveAs("nets/nw.net", "nets/$dir/nw$id.net")
+    File("nets/nw.net").delete()
 }
 
 fun trainAndRebuild(teachNumbers: IntArray, trainFullConnectedLayers: Boolean) {
-    val structure = if (CNetwork().load("nets/nw.net") != null) getStructure("nets/nw.net") else intArrayOf(4,4,4,4,40,3)
+    val structure = if (CNetwork().load("nets/nw.net") != null) getStructure("nets/nw.net") else intArrayOf(3,2,2,2,hiddenNeurons,3)
     fullTrain(150, structure, trainFullConnectedLayers, teachNumbers)
-    rebuild(teachNumbers, 40)
+    rebuild(teachNumbers, hiddenNeurons)
     if (!testStructure()) saveAs("nets/nwx.net", "nets/nw.net")
 }
 
@@ -178,25 +207,31 @@ fun saveStructure(teachNumbers: IntArray) {
     saveAs("nets/nwx.net", "nets/nw${teachNumbers.joinToString("")}_${getStructure("nets/nwx.net").joinToString("-")}.net")
 }
 
-fun teach(pretrain: Boolean, vararg teachNumbers: Int) {
-    if (pretrain) {
-        while (true) {
-            trainAndRebuild(teachNumbers, true)
-            saveStructure(teachNumbers)
-            if (!testStructure()) break
-        }
-    }
-    while (true) {
-        trainAndRebuild(teachNumbers, false)
-        if (!testStructure()) break
-        trainAndRebuild(teachNumbers, true)
-        if (!testStructure()) break
-        saveStructure(teachNumbers)
-    }
-    if (!getStructure("nets/nw.net").contentEquals(intArrayOf(2,2,2,2,40,3))) {
-        changeStructure("nets/nwx.net", "nets/nw.net", (0..5).toList(), emptyMap(), buildNetwork(2, 2, 2, 2, 40, 3))
-        fullTrain(150, getStructure("nets/nw.net"), false, teachNumbers)
-    }
-    saveStructure(teachNumbers)
+fun pretrain(id: Int, vararg teachNumbers: Int) {
+    rateCount = testBatch.size
+    val dir = teachNumbers.map { "$it" }.reduce { acc, a -> "$acc$a" }
+    log.info("nw$id.net")
+    val path = "nets/$dir/nw$id.net"
+    saveAs(path, "nets/nw.net")
+    val structure = getStructure("nets/nw.net")
+    fullTrain(150, structure, false, teachNumbers)
+    saveAs("nets/nw.net", path)
+    File("nets/nw.net").delete()
+    File("nets/nw_back.net").delete()
+    File("nets/nwx.net").delete()
+}
+
+fun teach(vararg teachNumbers: Int): Double {
+    val structure = intArrayOf(2,2,2,2,hiddenNeurons,3)
+//    rebuild(teachNumbers, hiddenNeurons)
+//    if (!testStructure()) saveAs("nets/nwx.net", "nets/nw.net")
+    val r = fullTrain(150, structure, false, teachNumbers)
+    if (r > 0.8) return r
+    return fullTrain(1000, structure, true, teachNumbers)
+//    if (!getStructure("nets/nw.net").contentEquals(intArrayOf(2,2,2,2,hiddenNeurons,3))) {
+//        changeStructure("nets/nwx.net", "nets/nw.net", (0..5).toList(), emptyMap(), buildNetwork(2, 2, 2, 2, hiddenNeurons, 3))
+//        fullTrain(300, getStructure("nets/nw.net"), true, teachNumbers)
+//    }
+//    saveStructure(teachNumbers)
 }
 

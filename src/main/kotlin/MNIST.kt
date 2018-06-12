@@ -1,21 +1,25 @@
 import java.io.File
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.StandardCopyOption
 import java.util.*
 
 object MNIST {
     private val mnistTrainPath = "/home/melkor/mnist_png/training"
     private val mnistTestPath = "/home/melkor/mnist_png/testing"
-    private val dir = File(mnistTrainPath)
+    const val errorPath = "error_images"
 
-    fun buildBatch(size: Int): List<Image> {
+    fun buildBatch(size: Int, path: String = mnistTrainPath): Set<Image> {
+        val dir = File(path)
         return (0 until size/10).flatMap {
             dir.listFiles().map {
                 it.listFiles().toList().shuffled().first()
             }.map { Image(it) }
-        }
+        }.toSet()
     }
 
-    fun next(): Image {
-        val files = File(mnistTestPath).listFiles().flatMap { it.listFiles().toList() }
+    fun next(path: String = mnistTrainPath): Image {
+        val files = File(path).listFiles().flatMap { it.listFiles().toList() }
         return Image(files[Random().nextInt(files.size)])
     }
 }
@@ -26,22 +30,27 @@ fun calcResult(nets: List<Network>, image: Image) = nets.map { net ->
         it.map { if (it < max) 0.0 else 1.0 }
     }.reduce { acc, list -> acc + list }
 
+fun Image.save() {
+    val dir = "${MNIST.errorPath}/$group"
+    val path = "$dir/${Date().time}.png"
+    File(dir).mkdir()
+    Files.copy(image.toPath(), (File(path)).toPath(), StandardCopyOption.REPLACE_EXISTING)
+}
+
 fun main(args: Array<String>) {
-    val teachNumbers = (4..6).toList()
+    val teachNumbers = (7..9).toList()
 //    val nw0123 = (1..7).map { "nets/0123/nw$it.net" }.map { CNetwork().load(it)!! }
-    val nw456 = (1..11).map { "nets/456/nw$it.net" }.mapNotNull { CNetwork().load(it) }
-    val batch = MNIST.buildBatch(500).filter { it.index in teachNumbers }.shuffled()
-    batch.forEach {
-        it.index = teachNumbers.indexOf(it.index)
-    }
+    val nw456 = (1..11).map { "nets/789/nw$it.net" }.mapNotNull { CNetwork().load(it) }
+    val batch = MNIST.buildBatch(5000).filter { it.index in teachNumbers }.shuffled()
     var counter = 0
     batch.forEach { image ->
         val r = calcResult(nw456, image)
         val k = r.indexOf(r.max())
-        val i = image.index
+        val i = teachNumbers.indexOf(image.index)
         if (i != k) {
             counter++
-            println("${image.index} -> $k, $r")
+            image.save()
+            println("${image.index} -> ${teachNumbers[k]}, $r")
         }
 
     }

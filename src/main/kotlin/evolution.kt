@@ -2,6 +2,7 @@ import java.io.File
 import java.util.*
 import java.util.stream.Collectors
 import kotlin.math.max
+import kotlin.math.min
 
 /**
  * Модель особи.
@@ -9,13 +10,14 @@ import kotlin.math.max
  */
 data class Individual(val nw: Network, var rate: Double=1.0) {
     fun rate(batch: List<Image>, rateCount: Int, alpha: Double) {
-        val b = (1..rateCount).map { (0..9).mapNotNull { i -> batch.filter { it.index == i }.shuffled().firstOrNull()} }
-        rate = try { b.map { it.map {
-            val o = nw.activate(it, alpha)
-            val r = o[it.index]
-            val e = 1 - r
-            e*e
-        }.average() }.average() } catch (e: Exception) { 1.0 }
+        val b = batch.groupBy { it.index }.map {
+            (i, list) ->  i to list.shuffled().take(rateCount)
+        }.toMap()
+        val numbers = b.keys.toSortedSet()
+        rate = b.keys.map { i ->
+            val n = numbers.indexOf(i)
+            b[i]!!.map { nw.activate(it, alpha) }.map { (1 - it[n])*(1 - it[n]) }.average()
+        }.average()
     }
 }
 
@@ -31,10 +33,11 @@ data class Individual(val nw: Network, var rate: Double=1.0) {
  */
 abstract class NetEvolution(
         var maxMutateRate: Double=0.2,
-        private var rateCount: Int = 3,
+        private val maxRateCount: Int = 3,
         private val scale: Int=1
 ) {
     private val random = Random()
+    private var rateCount = 1
     var mutantRate = 1.0
     var genMutateRate = 0.05
     var name: String = "nets/nw.net"
@@ -101,13 +104,11 @@ abstract class NetEvolution(
                 lastRate = median.rate
             }
             if (leader!!.rate < 0.05) {
-                rateCount += 2
+                rateCount = min(rateCount+3, maxRateCount)
                 population = population.take(minPopulationSize)
                 ratePopulation(population.filter { it.rate < 0.3 })
-            } else if (leader!!.rate > 0.2) {
-                rateCount = 3
             }
-            if (rateCount > 10 || stagnation == 5*maxStagnation) return population
+            if (stagnation == 5*maxStagnation) return population
         }
         return population
     }

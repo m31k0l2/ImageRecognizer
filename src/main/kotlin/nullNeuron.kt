@@ -7,7 +7,7 @@ fun clean(teachNumbers: IntArray): MutableMap<Int, MutableList<Pair<Int, Double>
     log.addHandler(fh)
     fh.formatter = SimpleFormatter()
     val nw = CNetwork().load("nets/nwx.net")!!
-    val testBatch = MNIST.buildBatch(500).filter { it.index in teachNumbers }
+    val testBatch = MNIST.buildBatch(500).filter { it.index in teachNumbers }.toSet()
     val initResult = testMedianNet(nw, testBatch, teachNumbers)
     log.info("initResult: $initResult")
     nw.layers.forEachIndexed { layerNumber, layer ->
