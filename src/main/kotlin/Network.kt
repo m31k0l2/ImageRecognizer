@@ -40,7 +40,7 @@ class CNetwork: Network {
 
     private fun activateFullConnectedLayers(x: List<Double>, alpha: Double): List<Double> {
         var o = x
-        for (i in 4..5) {
+        for (i in 4 until layers.size) {
             val layer = layers[i] as FullConnectedLayer
             o = layer.activate(o, alpha)
         }
