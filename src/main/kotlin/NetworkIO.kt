@@ -6,9 +6,9 @@ fun Network.save(path: String) {
     val file = FileWriter(File(path))
     layers.forEach {
         if (it is CNNLayer) {
-            file.write("CNNLayer\r\n")
-        } else {
-            file.write("layer\r\n")
+            file.write("CNNLayer ${it.classNet}\r\n")
+        } else if (it is FullConnectedLayer) {
+            file.write("layer ${it.classNet}\r\n")
         }
         it.neurons.forEach {
             file.write("neuron\r\n")
@@ -28,28 +28,32 @@ fun Network.load(path: String): Network? {
     var layer: Layer? = null
     var neuron: Neuron? = null
     lines.forEach { line ->
-        when (line) {
-            "CNNLayer" -> {
+        when {
+            line.contains("CNNLayer") -> {
                 layer?.let {
                     it.neurons.add(neuron!!)
                     layers.add(it)
                     neuron = null
                 }
-                layer = CNNLayer(CNetwork.cnnDividers[layers.size], CNetwork.poolDividers[layers.size]?.let { Pooler(it) })
+                val list = line.split(" ")
+                val netId = if (list.size > 1) list[1] else "?"
+                layer = CNNLayer(netId, CNetwork.cnnDividers[layers.size % 6], CNetwork.poolDividers[layers.size % 6]?.let { Pooler(it) })
             }
-            "layer" -> {
+            line.contains("layer") -> {
                 layer?.let {
                     it.neurons.add(neuron!!)
                     layers.add(it)
                     neuron = null
                 }
-                layer = FullConnectedLayer()
+                val list = line.split(" ")
+                val netId = if (list.size > 1) list[1] else "?"
+                layer = FullConnectedLayer(netId)
             }
-            "neuron" -> {
+            line == "neuron" -> {
                 neuron?.let { layer!!.neurons.add(it) }
                 neuron = Neuron()
             }
-            "end" -> {
+            line == "end" -> {
                 layer!!.neurons.add(neuron!!)
                 layers.add(layer!!)
             }

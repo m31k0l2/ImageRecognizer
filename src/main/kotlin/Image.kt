@@ -7,6 +7,7 @@ class Image(val image: File) {
     val colorsMatrix = getColorBuffers(image)
     val index = group!!.toInt()
     var o: List<Double>? = null
+    var y: List<Double>? = null
 
     private fun getGroup(image: File): String? {
 //        val pattern = Pattern.compile("\\\\(\\d)\\\\")

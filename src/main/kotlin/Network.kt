@@ -3,7 +3,7 @@ import kotlin.math.sqrt
 
 interface Network {
     fun activate(x: Image, alpha: Double): List<Double>
-    fun activateConvLayers(x: Image): List<Double>
+    fun activateConvLayers(layers: List<CNNLayer>, x: Image): List<Double>
     fun clone(): Network
     val layers: MutableList<Layer>
     fun dropout(layersNumbers: List<Int>, dropoutRate: Double, isRandom: Boolean=false): Network
@@ -12,6 +12,10 @@ interface Network {
 class CNetwork: Network {
     override val layers = mutableListOf<Layer>()
     private val calcImages = mutableMapOf<Image, List<Double>>()
+
+    val netClasses by lazy {
+        layers.map { it.classNet }.toSet()
+    }
 
     companion object {
         val cnnDividers = listOf(
@@ -29,28 +33,42 @@ class CNetwork: Network {
         )
     }
 
-    override fun activateConvLayers(x: Image): List<Double> {
+    override fun activateConvLayers(layers: List<CNNLayer>, x: Image): List<Double> {
         var y = x.colorsMatrix
-        for (i in 0..3) {
-            val layer = layers[i] as CNNLayer
-            y = layer.activate(y)
+        layers.forEach {
+            y = it.activate(y)
         }
         return norm(y.flatten())
     }
 
-    private fun activateFullConnectedLayers(x: List<Double>, alpha: Double): List<Double> {
+    private fun activateFullConnectedLayers(layers: List<FullConnectedLayer>, x: List<Double>, alpha: Double): List<Double> {
         var o = x
-        for (i in 4 until layers.size) {
-            val layer = layers[i] as FullConnectedLayer
-            o = layer.activate(o, alpha)
+        layers.forEach {
+            o = it.activate(o, alpha)
         }
         return o
     }
 
+    private fun activateClass(classNet: String, x: Image, alpha: Double): List<Double> {
+        val layers = layers.filter { it.classNet == classNet }
+        var o = activateConvLayers(layers.filter { it is CNNLayer }.map { it as CNNLayer }, x)
+        o = activateFullConnectedLayers(layers.filter { it is FullConnectedLayer }.map { it as FullConnectedLayer }, o, alpha)
+        return softmax(o)
+    }
+
     override fun activate(x: Image, alpha: Double): List<Double> {
         calcImages[x]?.let { return it }
-        var o = x.o ?: activateConvLayers(x)
-        o = activateFullConnectedLayers(o, alpha)
+        if (netClasses.size > 1) {
+            val y = x.y ?: netClasses.filter { it != "final" }.flatMap {
+                activateClass(it, x, alpha)
+            }
+            val o = activateFullConnectedLayers(layers.filter { it.classNet == "final" }.map { it as FullConnectedLayer }, y, alpha)
+            val r = softmax(o)
+            calcImages[x] = r
+            return r
+        }
+        var o = x.o ?: activateConvLayers(layers.filter { it is CNNLayer }.map { it as CNNLayer }, x)
+        o = activateFullConnectedLayers(layers.filter { it is FullConnectedLayer }.map { it as FullConnectedLayer }, o, alpha)
         val r = softmax(o)
         calcImages[x] = r
         return r

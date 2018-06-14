@@ -36,9 +36,10 @@ interface Layer {
     fun getInstance(): ALayer
     fun clone(): Layer
     val neurons: MutableList<Neuron>
+    val classNet: String
 }
 
-abstract class ALayer(size: Int): Layer {
+abstract class ALayer(override val classNet: String, size: Int): Layer {
     override val neurons = build(size)
     private fun build(size: Int) = MutableList(size, { Neuron() })
     override fun clone() = getInstance().also {
@@ -46,9 +47,9 @@ abstract class ALayer(size: Int): Layer {
     }
 }
 
-class CNNLayer(private val matrixDivider: MatrixDivider,
-               private val pooler: Pooler?=null, size: Int=0): ALayer(size) {
-    override fun getInstance() = CNNLayer(matrixDivider, pooler)
+class CNNLayer(classNet: String, private val matrixDivider: MatrixDivider,
+               private val pooler: Pooler?=null, size: Int=0): ALayer(classNet, size) {
+    override fun getInstance() = CNNLayer(classNet, matrixDivider, pooler)
 
     fun activate(input: List<List<Double>>): List<List<Double>> {
         val x = input.map {
@@ -74,8 +75,8 @@ class Pooler(private val matrixDivider: MatrixDivider) {
     private fun pool(x: List<Double>, matrixDivider: MatrixDivider) =  matrixDivider.divide(x).map { it.max()!! }
 }
 
-class FullConnectedLayer(size: Int=0): ALayer(size) {
-    override fun getInstance() = FullConnectedLayer()
+class FullConnectedLayer(classNet: String, size: Int=0): ALayer(classNet, size) {
+    override fun getInstance() = FullConnectedLayer(classNet)
     fun activate(input: List<Double>, alpha: Double) = neurons.map { it.activate(input, alpha) }
 }
 

@@ -54,14 +54,14 @@ fun setupLog(log: Logger) {
     fh.formatter = NoTimeStampFormatter()
 }
 
-fun Network.convLayer(neuronCount: Int, divider: MatrixDivider, pooler: Pooler?=null) {
+fun Network.convLayer(id: String, neuronCount: Int, divider: MatrixDivider, pooler: Pooler?=null) {
 
-    val layer = CNNLayer(divider, pooler, neuronCount)
+    val layer = CNNLayer(id, divider, pooler, neuronCount)
     layers.add(layer)
 }
 
-fun Network.fullConnectedLayer(neuronCount: Int) {
-    layers.add(FullConnectedLayer(neuronCount))
+fun Network.fullConnectedLayer(id: String, neuronCount: Int) {
+    layers.add(FullConnectedLayer(id, neuronCount))
 }
 
 abstract class NewEvolution(val time: Int, val popSize: Int) : NetEvolution(0.2, rateCount)
@@ -90,7 +90,7 @@ fun NewEvolution.run(numbers: IntArray, trainFullConnectedLayers: Boolean, alpha
     if (trainFullConnectedLayers) {
         val nw = CNetwork().load("nets/nw.net")!!
         batch.forEach {
-            it.o = nw.activateConvLayers(it)
+            it.o = nw.activateConvLayers(nw.layers.filter { it is CNNLayer }.map { it as CNNLayer }, it)
         }
         trainLayers = listOf(4, 5)
     }
@@ -99,13 +99,31 @@ fun NewEvolution.run(numbers: IntArray, trainFullConnectedLayers: Boolean, alpha
 }
 
 fun buildNetwork(vararg structure: Int)= network {
-    convLayer(structure[0], CNetwork.cnnDividers[0], Pooler(CNetwork.poolDividers[0]!!))
-    convLayer(structure[1], CNetwork.cnnDividers[1], Pooler(CNetwork.poolDividers[1]!!))
-    convLayer(structure[2], CNetwork.cnnDividers[2])
-    convLayer(structure[3], CNetwork.cnnDividers[3])
+    convLayer("0", structure[0], CNetwork.cnnDividers[0], Pooler(CNetwork.poolDividers[0]!!))
+    convLayer("0", structure[1], CNetwork.cnnDividers[1], Pooler(CNetwork.poolDividers[1]!!))
+    convLayer("0", structure[2], CNetwork.cnnDividers[2])
+    convLayer("0", structure[3], CNetwork.cnnDividers[3])
     for (i in 4 until structure.size) {
-        fullConnectedLayer(structure[i])
+        fullConnectedLayer("0", structure[i])
     }
+}
+
+fun buildDoubleNetwork(vararg structure: Int)= network {
+    convLayer("0", structure[0], CNetwork.cnnDividers[0], Pooler(CNetwork.poolDividers[0]!!))
+    convLayer("0", structure[1], CNetwork.cnnDividers[1], Pooler(CNetwork.poolDividers[1]!!))
+    convLayer("0", structure[2], CNetwork.cnnDividers[2])
+    convLayer("0", structure[3], CNetwork.cnnDividers[3])
+    for (i in 4..5) {
+        fullConnectedLayer("0", structure[i])
+    }
+    convLayer("1", structure[6], CNetwork.cnnDividers[0], Pooler(CNetwork.poolDividers[0]!!))
+    convLayer("1", structure[7], CNetwork.cnnDividers[1], Pooler(CNetwork.poolDividers[1]!!))
+    convLayer("1", structure[8], CNetwork.cnnDividers[2])
+    convLayer("1", structure[9], CNetwork.cnnDividers[3])
+    for (i in 10..11) {
+        fullConnectedLayer("1", structure[i])
+    }
+    fullConnectedLayer("final", structure.last())
 }
 
 fun evolute(time: Int, structure: IntArray, trainFullConnectedLayers: Boolean, alpha: Double, numbers: IntArray): Network {
@@ -163,11 +181,12 @@ fun main(args: Array<String>) {
 ////    (3..11).forEach {
 //        teachOne(4, 7, 8, 9)
 ////    }
-    rateCount = 17
+    rateCount = 100
     val trainNumbers = intArrayOf(7,8,9)
-//    fullTrain(100, intArrayOf(6,6,6,6,40,10,4), false, intArrayOf(7,8,9))
+//    fullTrain(100, intArrayOf(6,6,6,6,40,10,4), false, trainNumbers)
+//    fullTrain(900, getStructure("nets/nw.net"), true, trainNumbers)
     fullTrain(1500, getStructure("nets/nw.net"), false, trainNumbers)
-//    fullTrain(3000, getStructure("nets/nw.net"), true, trainNumbers)
+//    fullTrain(900, getStructure("nets/nw.net"), true, trainNumbers)
 //    rebuild(trainNumbers, intArrayOf(4))
     File("nets/nw_back.net").delete()
 //    fullTrain(150, intArrayOf(6,6,6,6,40,10,3), true, intArrayOf(3,4,8))
