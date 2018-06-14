@@ -13,7 +13,7 @@ class CNetwork: Network {
     override val layers = mutableListOf<Layer>()
     private val calcImages = mutableMapOf<Image, List<Double>>()
 
-    val netClasses by lazy {
+    private val netClasses by lazy {
         layers.map { it.classNet }.toSet()
     }
 
@@ -51,17 +51,18 @@ class CNetwork: Network {
 
     private fun activateClass(classNet: String, x: Image, alpha: Double): List<Double> {
         val layers = layers.filter { it.classNet == classNet }
-        var o = activateConvLayers(layers.filter { it is CNNLayer }.map { it as CNNLayer }, x)
-        o = activateFullConnectedLayers(layers.filter { it is FullConnectedLayer }.map { it as FullConnectedLayer }, o, alpha)
-        return softmax(o)
+        val o = activateConvLayers(layers.filter { it is CNNLayer }.map { it as CNNLayer }, x)
+        return activateFullConnectedLayers(layers.filter { it is FullConnectedLayer }.map { it as FullConnectedLayer }, o, alpha)
+    }
+
+    fun activateLayers(x: Image, alpha: Double) = netClasses.filter { it != "final" }.flatMap {
+        activateClass(it, x, alpha)
     }
 
     override fun activate(x: Image, alpha: Double): List<Double> {
         calcImages[x]?.let { return it }
         if (netClasses.size > 1) {
-            val y = x.y ?: netClasses.filter { it != "final" }.flatMap {
-                activateClass(it, x, alpha)
-            }
+            val y = x.y ?: activateLayers(x, alpha)
             val o = activateFullConnectedLayers(layers.filter { it.classNet == "final" }.map { it as FullConnectedLayer }, y, alpha)
             val r = softmax(o)
             calcImages[x] = r

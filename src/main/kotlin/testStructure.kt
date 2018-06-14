@@ -6,13 +6,15 @@ fun testMedianNet(nw: Network, batch: Set<Image>, teachNumbers: IntArray): Doubl
             val i = teachNumbers.indexOf(n)
             n to list.map { nw.activate(it, 15.0)[i] }.average() }.toMap()
 //    var sum = 0.0
-    val y = teachNumbers.map {
+    val o = teachNumbers.map {
         val y = r[it]!!
         println("$it -> ${(y * 1000).toInt() / 10.0}%")
         y
-    }.min()!!
+    }
+    val y = o.min()!!
 //    val y = sum / teachNumbers.size
-    println("средний успех: ${(y*1000).toInt()/10.0}%")
+    println("min успех: ${(y*1000).toInt()/10.0}%")
+    println("средний успех: ${(o.average()*1000).toInt()/10.0}%")
     return (y*10000).toInt() / 10000.0
 }
 

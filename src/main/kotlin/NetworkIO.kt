@@ -37,7 +37,7 @@ fun Network.load(path: String): Network? {
                 }
                 val list = line.split(" ")
                 val netId = if (list.size > 1) list[1] else "?"
-                layer = CNNLayer(netId, CNetwork.cnnDividers[layers.size % 6], CNetwork.poolDividers[layers.size % 6]?.let { Pooler(it) })
+                layer = CNNLayer(netId, CNetwork.cnnDividers[layers.size % 5], CNetwork.poolDividers[layers.size % 5]?.let { Pooler(it) })
             }
             line.contains("layer") -> {
                 layer?.let {
