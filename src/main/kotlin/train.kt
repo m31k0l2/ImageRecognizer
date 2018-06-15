@@ -154,10 +154,9 @@ fun train(time: Int, structure: IntArray, trainFullConnectedLayers: Boolean, tea
         } else break
         if (trainFullConnectedLayers) a += 1.0
     }
+
     CNetwork().load("nets/nw_back.net")?.let {
-//        val testBatch = MNIST.buildBatch(50)
-        val r = testMedianNet(it, testBatch, teachNumbers)
-        if (r > rate) saveAs("nets/nw_back.net", "nets/nw.net")
+        if (it.rate(*teachNumbers) > rate) saveAs("nets/nw_back.net", "nets/nw.net")
     }
     return a to rate
 }
@@ -170,6 +169,7 @@ fun fullTrain(time: Int, structure: IntArray, trainFullConnectedLayers: Boolean,
         log.info("\r\nresult $r1 -> $r2")
         if (r2 > r1) r1 = r2
         else if (a > 10.0) break
+        if (r1 > 0.99) return r1
         alpha = a
     }
     saveAs("nets/nw.net", "nets/nwx.net")
@@ -178,22 +178,26 @@ fun fullTrain(time: Int, structure: IntArray, trainFullConnectedLayers: Boolean,
 
 fun main(args: Array<String>) {
     setupLog(log)
-    train(100, intArrayOf(7, 8, 9), intArrayOf(6), 200, 600, false)
+    train(4, intArrayOf(7, 8, 9), intArrayOf(40, 10), 100, 200, true, 0.8)
 //    rateCount = 100
-//    fullTrain(1500, getStructure("nets/nw.net")!!, true, intArrayOf(7,8,9), true)
+//    for (i in 1..100) {
+//        testBatch = testBatch.union(MNIST.buildBatch(100))
+//        log.info("$i -> testBatch: ${testBatch.size}")
+//        fullTrain(1500, getStructure("nets/nw.net")!!, true, intArrayOf(7, 8, 9), true)
+//    }
 }
 
-fun train(rate: Int, trainNumbers: IntArray, hiddenLayerNeurons: IntArray, time1: Int, time2: Int, doRebuild: Boolean) {
+fun train(rate: Int, trainNumbers: IntArray, hiddenLayerNeurons: IntArray, time1: Int, time2: Int, doRebuild: Boolean, limit: Double) {
     rateCount = rate
     val structure = getStructure("nets/nw.net") ?: intArrayOf(6,6,6,6,40,10,4)
-    fullTrain(time1, structure, false, trainNumbers)
-    val r = fullTrain(time2, structure, true, trainNumbers)
+    var r = fullTrain(time1, structure, false, trainNumbers)
+    if (r < limit) r = fullTrain(time2, structure, true, trainNumbers)
     File("nets/nw_back.net").delete()
-    if (doRebuild && r > 0.7) {
+    if (doRebuild && r > limit) {
         rebuild(trainNumbers, hiddenLayerNeurons)
         fullTrain(time2, getStructure("nets/nw.net")!!, true, trainNumbers)
     } else if (doRebuild) {
-        train(2*rate, trainNumbers, hiddenLayerNeurons, 2*time1, 2*time2, doRebuild)
+        train(2*rate, trainNumbers, hiddenLayerNeurons, 2*time1, 2*time2, doRebuild, limit-0.1)
     }
 }
 

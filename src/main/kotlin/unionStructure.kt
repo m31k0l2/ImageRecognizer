@@ -1,6 +1,6 @@
 
 fun main(args: Array<String>) {
-    union(6, "nets/789", 3)
+    union(8, "nets/789", 3)
 }
 
 fun union(size: Int, dir: String, outputSize: Int) {
