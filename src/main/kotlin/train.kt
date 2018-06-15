@@ -3,11 +3,11 @@ import java.io.File
 import java.util.logging.*
 
 val log = Logger.getLogger("logger")!!
-var testBatch = MNIST.buildBatch(5000)
+var testBatch = MNIST.buildBatch(500)
 var rateCount = 5
 
 fun beep() {
-    for (i in 1..60) {
+    for (i in 1..10) {
         Toolkit.getDefaultToolkit().beep()
         Thread.sleep(1000)
     }
@@ -178,20 +178,22 @@ fun fullTrain(time: Int, structure: IntArray, trainFullConnectedLayers: Boolean,
 
 fun main(args: Array<String>) {
     setupLog(log)
-//    train(100, intArrayOf(7, 8, 9), intArrayOf(5), 200, 600, false)
-    rateCount = 100
-    fullTrain(1500, getStructure("nets/nw.net")!!, true, intArrayOf(7,8,9), true)
+    train(100, intArrayOf(7, 8, 9), intArrayOf(6), 200, 600, false)
+//    rateCount = 100
+//    fullTrain(1500, getStructure("nets/nw.net")!!, true, intArrayOf(7,8,9), true)
 }
 
 fun train(rate: Int, trainNumbers: IntArray, hiddenLayerNeurons: IntArray, time1: Int, time2: Int, doRebuild: Boolean) {
     rateCount = rate
     val structure = getStructure("nets/nw.net") ?: intArrayOf(6,6,6,6,40,10,4)
     fullTrain(time1, structure, false, trainNumbers)
-    fullTrain(time2, structure, true, trainNumbers)
-    if (doRebuild) {
+    val r = fullTrain(time2, structure, true, trainNumbers)
+    File("nets/nw_back.net").delete()
+    if (doRebuild && r > 0.7) {
         rebuild(trainNumbers, hiddenLayerNeurons)
         fullTrain(time2, getStructure("nets/nw.net")!!, true, trainNumbers)
+    } else if (doRebuild) {
+        train(2*rate, trainNumbers, hiddenLayerNeurons, 2*time1, 2*time2, doRebuild)
     }
-    File("nets/nw_back.net").delete()
 }
 
