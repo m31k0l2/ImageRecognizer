@@ -104,11 +104,11 @@ abstract class NetEvolution(
                 lastRate = median.rate
             }
             if (leader!!.rate < 0.02) {
-                rateCount = min(rateCount+1, maxRateCount)
+                rateCount++
                 population = population.take(minPopulationSize)
                 ratePopulation(population.filter { it.rate < 0.3 })
             }
-            if (rateCount == maxRateCount || stagnation == 5*maxStagnation) return population
+            if (rateCount > maxRateCount || stagnation == 5*maxStagnation) return population
         }
         return population
     }

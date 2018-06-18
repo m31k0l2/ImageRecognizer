@@ -38,13 +38,13 @@ fun Image.save() {
 }
 
 fun main(args: Array<String>) {
-    val teachNumbers = (4..6).toList()
+    val teachNumbers = (7..9).toList()
 //    val nw0123 = (1..7).map { "nets/0123/nw$it.net" }.map { CNetwork().load(it)!! }
-    val nw456 = (1..11).map { "nets/456/nw$it.net" }.mapNotNull { CNetwork().load(it) }
+    val nw789 = (1..7).map { "nets/789/union/nw$it.net" }.mapNotNull { CNetwork().load(it) }
     val batch = MNIST.buildBatch(500).filter { it.index in teachNumbers }.shuffled()
     var counter = 0
     batch.forEach { image ->
-        val r = calcResult(nw456, image)
+        val r = calcResult(nw789, image)
         val k = r.indexOf(r.max())
         val i = teachNumbers.indexOf(image.index)
         if (i != k) {

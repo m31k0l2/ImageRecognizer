@@ -35,3 +35,7 @@ fun nullNeuron(nw: Network, to: String, layerNumber: Int, neuronNumber: Int) {
     neuron.weights = neuron.weights.map { 0.0 }.toMutableList()
     nw.save(to)
 }
+
+fun main(args: Array<String>) {
+    rebuild(intArrayOf(7,8,9), intArrayOf(40,10))
+}

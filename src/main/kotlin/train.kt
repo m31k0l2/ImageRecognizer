@@ -126,6 +126,20 @@ fun buildMultiNetwork(count: Int, vararg structure: Int)= network {
     fullConnectedLayer("final", structure.last())
 }
 
+fun buildTotalMultiNetwork(count1: Int, count2: Int, vararg structure: Int)= network {
+    for (i in 0 until count1) {
+        convLayer("$i", structure[0+i*5], CNetwork.cnnDividers[0], Pooler(CNetwork.poolDividers[0]!!))
+        convLayer("$i", structure[1+i*5], CNetwork.cnnDividers[1], Pooler(CNetwork.poolDividers[1]!!))
+        convLayer("$i", structure[2+i*5], CNetwork.cnnDividers[2])
+        convLayer("$i", structure[3+i*5], CNetwork.cnnDividers[3])
+        fullConnectedLayer("$i", structure[4+i*5])
+    }
+    for (i in 0 until count2) {
+        fullConnectedLayer("connected", structure[structure.size-1 - i])
+    }
+    fullConnectedLayer("final", structure.last())
+}
+
 fun evolute(time: Int, structure: IntArray, trainFullConnectedLayers: Boolean, alpha: Double, numbers: IntArray, trainFinal: Boolean=false): Network {
     return evolution(time, 60) {
         buildNetwork(*structure)
@@ -178,7 +192,10 @@ fun fullTrain(time: Int, structure: IntArray, trainFullConnectedLayers: Boolean,
 
 fun main(args: Array<String>) {
     setupLog(log)
-    train(4, intArrayOf(7, 8, 9), intArrayOf(40, 10), 100, 200, true, 0.8)
+//    train(5, intArrayOf(7, 8, 9), intArrayOf(10), 100, 300, true, 0.8)
+//    train(100, intArrayOf(7, 8, 9), intArrayOf(10), 200, 600, false, 0.8)
+    rateCount = 500
+    fullTrain(1500, getStructure("nets/nw.net")!!, true, intArrayOf(7, 8, 9), true)
 //    rateCount = 100
 //    for (i in 1..100) {
 //        testBatch = testBatch.union(MNIST.buildBatch(100))
@@ -190,14 +207,14 @@ fun main(args: Array<String>) {
 fun train(rate: Int, trainNumbers: IntArray, hiddenLayerNeurons: IntArray, time1: Int, time2: Int, doRebuild: Boolean, limit: Double) {
     rateCount = rate
     val structure = getStructure("nets/nw.net") ?: intArrayOf(6,6,6,6,40,10,4)
-    var r = fullTrain(time1, structure, false, trainNumbers)
-    if (r < limit) r = fullTrain(time2, structure, true, trainNumbers)
+    var r = CNetwork().load("nets/nw.net")?.let { fullTrain(time2, structure, true, trainNumbers) } ?: 0.0
+    if (r < limit) r = fullTrain(time1, structure, false, trainNumbers)
     File("nets/nw_back.net").delete()
     if (doRebuild && r > limit) {
         rebuild(trainNumbers, hiddenLayerNeurons)
         fullTrain(time2, getStructure("nets/nw.net")!!, true, trainNumbers)
     } else if (doRebuild) {
-        train(2*rate, trainNumbers, hiddenLayerNeurons, 2*time1, 2*time2, doRebuild, limit-0.1)
+        train(rate+2, trainNumbers, hiddenLayerNeurons, time1+100, time2+100, doRebuild, limit-0.1)
     }
 }
 
