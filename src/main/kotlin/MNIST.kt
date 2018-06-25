@@ -9,12 +9,19 @@ object MNIST {
     private val mnistTestPath = "/home/melkor/mnist_png/testing"
     const val errorPath = "error_images"
 
-    fun buildBatch(size: Int, path: String = mnistTrainPath): Set<Image> {
+    fun buildBatch(size: Int, path: String = errorPath): Set<Image> {
         val dir = File(path)
         return (0 until size/10).flatMap {
             dir.listFiles().map {
                 it.listFiles().toList().shuffled().first()
             }.map { Image(it) }
+        }.toSet()
+    }
+
+    fun allSet(path: String = mnistTrainPath): Set<Image> {
+        val dir = File(path)
+        return dir.listFiles().flatMap {
+            it.listFiles().map { Image(it) }
         }.toSet()
     }
 
@@ -24,37 +31,31 @@ object MNIST {
     }
 }
 
-fun calcResult(nets: List<Network>, image: Image) = nets.map { net ->
-    net.activate(image, 15.0) }.map {
-        val max = it.max()!!
-        it.map { if (it < max) 0.0 else 1.0 }
-    }.reduce { acc, list -> acc + list }
-
 fun Image.save() {
     val dir = "${MNIST.errorPath}/$group"
-    val path = "$dir/${Date().time}.png"
+    val path = "$dir/$name"
     File(dir).mkdir()
     Files.copy(image.toPath(), (File(path)).toPath(), StandardCopyOption.REPLACE_EXISTING)
 }
 
+fun Image.delete() {
+    val dir = "${MNIST.errorPath}/$group"
+    File("$dir/$name").delete()
+}
+
 fun main(args: Array<String>) {
-    val teachNumbers = (7..9).toList()
-//    val nw0123 = (1..7).map { "nets/0123/nw$it.net" }.map { CNetwork().load(it)!! }
-    val nw789 = (1..7).map { "nets/789/union/nw$it.net" }.mapNotNull { CNetwork().load(it) }
-    val batch = MNIST.buildBatch(500).filter { it.index in teachNumbers }.shuffled()
     var counter = 0
-    batch.forEach { image ->
-        val r = calcResult(nw789, image)
-        val k = r.indexOf(r.max())
-        val i = teachNumbers.indexOf(image.index)
-        if (i != k) {
+    val agent = Agent0()
+    val set = MNIST.allSet()
+    set.forEach { image ->
+        val r = agent.recognize(image)
+        if (image.index != r) {
             counter++
             image.save()
-            println("${image.index} -> $k, $r")
-        }
-
+            println("${image.index} -> $r")
+        } else image.delete()
     }
-    println("${1.0 - counter*1.0/batch.size}")
+    println("${1.0 - counter*1.0/set.size}")
 }
 
 private operator fun List<Double>.plus(b: List<Double>) = zip(b).map { (a, b) -> a + b }

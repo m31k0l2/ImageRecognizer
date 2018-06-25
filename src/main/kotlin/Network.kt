@@ -70,9 +70,9 @@ class CNetwork: Network {
         }
         var o = x.o ?: activateConvLayers(layers.filter { it is CNNLayer }.map { it as CNNLayer }, x)
         o = activateFullConnectedLayers(layers.filter { it is FullConnectedLayer }.map { it as FullConnectedLayer }, o, alpha)
-        val r = softmax(o)
-        calcImages[x] = r
-        return r
+//        val r = softmax(o)
+        calcImages[x] = o
+        return o
     }
 
     private fun softmax(x: List<Double>): List<Double> {

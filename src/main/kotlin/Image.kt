@@ -8,6 +8,7 @@ class Image(val image: File) {
     val index = group!!.toInt()
     var o: List<Double>? = null
     var y: List<Double>? = null
+    val name: String = image.name
 
     private fun getGroup(image: File): String? {
 //        val pattern = Pattern.compile("\\\\(\\d)\\\\")

@@ -2,22 +2,16 @@ import java.io.File
 import java.util.*
 import java.util.stream.Collectors
 import kotlin.math.max
-import kotlin.math.min
 
 /**
  * Модель особи.
  * [nw] - нейронная сеть, [rate] - рейтинг выживаемости
  */
 data class Individual(val nw: Network, var rate: Double=1.0) {
-    fun rate(batch: List<Image>, rateCount: Int, alpha: Double) {
-        val b = batch.groupBy { it.index }.map {
-            (i, list) ->  i to list.shuffled().take(rateCount)
-        }.toMap()
-        val numbers = b.keys.toSortedSet()
-        rate = b.keys.map { i ->
-            val n = numbers.indexOf(i)
-            b[i]!!.map { nw.activate(it, alpha) }.map { (1 - it[n])*(1 - it[n]) }.average()
-        }.average()
+    fun rate(number: Int, batch: List<Image>, rateCount: Int, alpha: Double) {
+        val b = batch.groupBy { it.index }.flatMap {
+            (_, list) ->  list.shuffled().take(rateCount) }.toSet()
+        rate = 1-testMedianNet(number, nw, b, alpha)
     }
 }
 
@@ -32,6 +26,7 @@ data class Individual(val nw: Network, var rate: Double=1.0) {
  * должно играть скрещивание
  */
 abstract class NetEvolution(
+        var trainNumber: Int,
         var maxMutateRate: Double=0.2,
         private val maxRateCount: Int = 3,
         private val scale: Int=1
@@ -159,8 +154,13 @@ abstract class NetEvolution(
         return population.sortedBy { it.rate }
     }
 
-    private fun ratePopulation(population: List<Individual>) = population.parallelStream().forEach { individ ->
-        individ.rate(batch, rateCount, alpha)
+    private fun ratePopulation(population: List<Individual>) {
+        if (population.isEmpty()) return
+        try {
+            population.parallelStream().forEach { individ ->
+                individ.rate(trainNumber, batch, rateCount, alpha)
+            }
+        } catch (e: Exception) {}
     }
 
     /**
