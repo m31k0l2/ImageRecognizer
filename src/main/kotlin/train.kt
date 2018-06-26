@@ -84,7 +84,7 @@ fun NewEvolution.run(numbers: IntArray, trainFullConnectedLayers: Boolean, alpha
         }
     }
 //    val testBatch = MNIST.buildBatch(50)
-    batch = testBatch.filter { it.index in numbers }
+    batch = testBatch.toList()
     if (trainFinal) {
         val nw = CNetwork().load("nets/nw.net")!! as CNetwork
         batch.forEach {
@@ -155,7 +155,7 @@ fun train(number: Int, time: Int, structure: IntArray, trainFullConnectedLayers:
     log.info("structure: ${getStructure("nets/nw.net")?.toList()}")
     log.info("trainFullConnectedLayers: $trainFullConnectedLayers")
     var a = alpha
-    while (true) {
+    while (rate < 0.99) {
         val nw = evolute(number, time, structure, trainFullConnectedLayers, a, teachNumbers, trainFinalLayer)
         val curRate = nw.rate(number)
         log.info("rate: $curRate")
@@ -176,34 +176,29 @@ fun train(number: Int, time: Int, structure: IntArray, trainFullConnectedLayers:
 fun fullTrain(number: Int, time: Int, structure: IntArray, trainFullConnectedLayers: Boolean, teachNumbers: IntArray, trainFinalLayer: Boolean=false): Double {
     var alpha = 1.0.takeIf { trainFullConnectedLayers } ?: 15.0
     var r1 = 0.0
-    while (true) {
+    while (r1 < 0.99) {
         val (a, r2) = train(number, time, structure, trainFullConnectedLayers, teachNumbers, alpha, trainFinalLayer)
         log.info("\r\nresult $r1 -> $r2")
         if (r2 > r1) r1 = r2
         else if (a > 10.0) break
-        if (r1 > 0.99) return r1
         alpha = a
     }
     saveAs("nets/nw.net", "nets/nwx.net")
     return r1
 }
 
-val number = 9
 fun main(args: Array<String>) {
-    val teachNumbers = (0..9).toList().toIntArray()
     setupLog(log)
-    train(number,5, teachNumbers, intArrayOf(30), 100, 300, true, 0.3)
-    testBatch = MNIST.buildBatch(500)
-    train(number, 1000, teachNumbers, intArrayOf(30), 200, 600, false, 0.3)
-    beep()
-//    rateCount = 500
-//    fullTrain(1500, getStructure("nets/nw.net")!!, true, intArrayOf(7, 8, 9), true)
-//    rateCount = 100
-//    for (i in 1..100) {
-//        testBatch = testBatch.union(MNIST.buildBatch(100))
-//        log.info("$i -> testBatch: ${testBatch.size}")
-//        fullTrain(1500, getStructure("nets/nw.net")!!, true, intArrayOf(7, 8, 9), true)
-//    }
+    for (number in 6..9) {
+        saveAs("nets/nw$number.net", "nets/nw.net")
+        log.info("------------- $number -----------------")
+//        train(number, 100, IntArray(10), intArrayOf(30), 100, 300, true, 0.3)
+        train(number, 1000, IntArray(10), intArrayOf(30), 200, 600, false, 0.5)
+        saveAs("nets/nw.net", "nets/nw$number.net")
+        File("nets/nw_back.net").delete()
+        File("nets/nwx.net").delete()
+        File("nets/nw.net").delete()
+    }
 }
 
 fun train(number: Int, rate: Int, trainNumbers: IntArray, hiddenLayerNeurons: IntArray, time1: Int, time2: Int, doRebuild: Boolean, limit: Double) {

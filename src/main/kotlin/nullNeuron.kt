@@ -16,7 +16,7 @@ fun clean(number: Int, teachNumbers: IntArray): MutableMap<Int, MutableList<Pair
             val test = nw.clone()
             nullNeuron(test, "nets/nw.net", layerNumber, neuronNumber)
             val res = testMedianNet(number, test, testBatch)
-            if (res < initResult) {
+            if ((res*1000).toInt() <= (initResult*1000).toInt()) {
                 val list = map[layerNumber]
                 if (list == null) {
                     map[layerNumber] = mutableListOf()

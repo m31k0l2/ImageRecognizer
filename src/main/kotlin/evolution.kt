@@ -76,12 +76,8 @@ abstract class NetEvolution(
             val getRate = { pos: Int, population: List<Individual> -> ((population[pos].rate*1000000).toInt()/10000.0).toString()}
             println("мутация ${(mutantRate*1000).toInt()/10.0} % / $mutateRate")
             println("популяция ${population.size}")
-            if (population.size > minPopulationSize) {
-                val rateInfo = "${getRate(0, population)} < ${getRate(population.size / 4 - 1, population)} < ${getRate(population.size / 2 - 1, population)}"
-                println("Рейтинг [$rateCount]: $rateInfo")
-            } else {
-                println("Рейтинг [$rateCount]: ${getRate(0, population)}")
-            }
+            val rateInfo = "${getRate(0, population)} < ${getRate(population.size / 4 - 1, population)} < ${getRate(population.size / 2 - 1, population)}"
+            println("Рейтинг [$rateCount]: $rateInfo")
             println("Время: ${(fin-start)/1_000_000} мс\n")
             leader = population.first()
             val median = population[population.size/2-1]
@@ -179,7 +175,7 @@ abstract class NetEvolution(
      */
     private fun nextGeneration(population: List<Individual>): List<Individual> {
         val survivors = if (population.size < minPopulationSize) population else population.take(population.size/2)
-        val mutants = survivors.mapNotNull { if (random.nextDouble() < mutantRate) mutate(it) else null }.take(population.size/2)
+        val mutants = try { survivors.mapNotNull { if (random.nextDouble() < mutantRate) mutate(it) else null }.take(population.size/2) } catch (e: Exception) { emptyList<Individual>() }
         val parents = selection(survivors, population.size/2-mutants.size)
         val offspring = createChildren(parents)
         return survivors.union(offspring).union(mutants).toList()

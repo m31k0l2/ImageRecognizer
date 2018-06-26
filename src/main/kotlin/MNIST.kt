@@ -9,7 +9,7 @@ object MNIST {
     private val mnistTestPath = "/home/melkor/mnist_png/testing"
     const val errorPath = "error_images"
 
-    fun buildBatch(size: Int, path: String = errorPath): Set<Image> {
+    fun buildBatch(size: Int, path: String = mnistTrainPath): Set<Image> {
         val dir = File(path)
         return (0 until size/10).flatMap {
             dir.listFiles().map {
