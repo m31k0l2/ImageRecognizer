@@ -5,8 +5,8 @@ import java.nio.file.StandardCopyOption
 import java.util.*
 
 object MNIST {
-    private val mnistTrainPath = "/home/melkor/mnist_png/training"
-    private val mnistTestPath = "/home/melkor/mnist_png/testing"
+    private val mnistTrainPath = "G:\\ih8unem\\mnist_png\\training"
+    private val mnistTestPath = "G:\\ih8unem\\mnist_png\\testing"
     const val errorPath = "error_images"
 
     fun buildBatch(size: Int, path: String = errorPath): Set<Image> {
@@ -43,26 +43,23 @@ fun Image.delete() {
     File("$dir/$name").delete()
 }
 
-// 60_000 -agent0-> 31551 -agent1-> 18097 -agent2-> 13393 -agent3-> 10346 -agent4-> 8529 -agent5-> 7452 -agent6-> 6366
 fun main(args: Array<String>) {
-    println(MNIST.allSet().size)
-//    File(MNIST.errorPath).mkdir()
-//    var counter = 0
-//    val agent = TestAgent()
-//    val set = MNIST.allSet()
-//    set.forEach { image ->
-//        try {
-//            val r = agent.recognize(image)
-//            if (image.index != r) throw RecognizeError()
-//            image.delete()
-//            println("${image.index} -> ok")
-//        } catch (e: RecognizeError) {
-//            counter++
-//            image.save()
-//            println("${image.index} -> fail")
-//        }
-//    }
-//    println("${1.0 - counter*1.0/set.size}")
+    var counter = 0
+    val agent = TestAgent()
+    val set = MNIST.allSet()
+    set.forEach { image ->
+        try {
+            val r = agent.recognize(image)
+            if (image.index != r) throw RecognizeError()
+            image.delete()
+            println("${image.index} -> ok")
+        } catch (e: RecognizeError) {
+            counter++
+            image.save()
+            println("${image.index} -> fail")
+        }
+    }
+    println("${1.0 - counter*1.0/set.size}")
 }
 
 private operator fun List<Double>.plus(b: List<Double>) = zip(b).map { (a, b) -> a + b }

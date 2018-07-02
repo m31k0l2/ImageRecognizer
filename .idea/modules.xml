@@ -5,6 +5,7 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/ImageRecognizer.iml" filepath="$PROJECT_DIR$/.idea/modules/ImageRecognizer.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/ImageRecognizer_main.iml" filepath="$PROJECT_DIR$/.idea/modules/ImageRecognizer_main.iml" group="ImageRecognizer" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/ImageRecognizer_test.iml" filepath="$PROJECT_DIR$/.idea/modules/ImageRecognizer_test.iml" group="ImageRecognizer" />
+      <module fileurl="file://$PROJECT_DIR$/src/main/search.iml" filepath="$PROJECT_DIR$/src/main/search.iml" />
     </modules>
   </component>
 </project>

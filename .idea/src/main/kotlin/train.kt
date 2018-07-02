@@ -54,7 +54,7 @@ fun network(init: Network.() -> Unit): Network {
     return CNetwork().apply(init)
 }
 
-fun NewEvolution.run(trainFullConnectedLayers: Boolean, alpha: Double, trainFinal: Boolean): Network? {
+fun NewEvolution.run(trainFullConnectedLayers: Boolean, alpha: Double, trainFinal: Boolean): Network {
 //    testBatch = MNIST.buildBatch(500).union(MNIST.buildBatch(500, MNIST.errorPath))
     mutantStrategy = { e, _ ->
         when {
@@ -78,7 +78,7 @@ fun NewEvolution.run(trainFullConnectedLayers: Boolean, alpha: Double, trainFina
         trainLayers = listOf(4, 5)
     }
     evolute(time, popSize, alpha)
-    return leader?.nw
+    return leader!!.nw
 }
 
 fun buildNetwork(vararg structure: Int)= network {
@@ -117,7 +117,7 @@ fun buildTotalMultiNetwork(count1: Int, count2: Int, vararg structure: Int)= net
     fullConnectedLayer("final", structure.last())
 }
 
-fun evolute(number: Int, time: Int, structure: IntArray, trainFullConnectedLayers: Boolean, alpha: Double, trainFinal: Boolean=false): Network? {
+fun evolute(number: Int, time: Int, structure: IntArray, trainFullConnectedLayers: Boolean, alpha: Double, trainFinal: Boolean=false): Network {
     return evolution(number, time, 60) {
         buildNetwork(*structure)
     }.run(trainFullConnectedLayers, alpha, trainFinal)
@@ -128,33 +128,88 @@ fun Network.rate(number: Int, batch: Set<Image>): Double {
 }
 
 fun train(number: Int, time: Int) {
-    testBatch = MNIST.buildBatch(300)
+    testBatch = MNIST.buildBatch(500)
     var nw: Network
-    val structure = intArrayOf(5, 5, 5, 5, 40, 1)
-    var rate = 0.0
-    for (alpha in 1..20) {
-        var curRate = 0.0
-        var counter = 0
-        do {
-            rate = max(curRate, rate)
-            log.info("> $alpha) $rate")
-            nw = evolute(number, time + (alpha/5)*50-counter*25, structure, alpha > 5, alpha.toDouble()) ?: buildNetwork(*structure)
-            nw = nw.rebuild(number, testBatch)
-            curRate = nw.rate(number, testBatch)
-            if (rate < curRate) nw.save("nets/nw.net")
-            counter++
-        } while (rate < curRate)
-        if (curRate > 0.99) break
+    val structure = intArrayOf(6, 6, 6, 6, 40, 1)
+    for (flag in listOf(false, true)) {
+        for (alpha in 1..15) {
+            var curRate = 0.0
+            var rate: Double
+            do {
+                rate = curRate
+                nw = evolute(number, time, structure, flag, alpha.toDouble())
+                nw = nw.rebuild(number, testBatch)
+                curRate = nw.rate(number, testBatch)
+                log.info("$alpha")
+                if (rate < curRate) nw.save("nets/nw.net")
+            } while (rate < curRate)
+        }
     }
     saveAs("nets/nw.net", "nets/nw$number.net")
     File("nets/nw.net").delete()
 }
 
+fun train(number: Int, time: Int, structure: IntArray, trainFullConnectedLayers: Boolean, alpha: Double, trainFinalLayer: Boolean=false): Pair<Double, Double> {
+    saveAs("nets/nw.net", "nets/nw_back.net")
+    var rate = 0.0
+    log.info("alpha: $alpha")
+    log.info("structure: ${getStructure("nets/nw.net")?.toList()}")
+    log.info("trainFullConnectedLayers: $trainFullConnectedLayers")
+    var a = alpha
+    while (rate < 0.99) {
+        val nw = evolute(number, time, structure, trainFullConnectedLayers, a, trainFinalLayer)
+        val curRate = nw.rate(number, testBatch)
+        log.info("rate: $curRate")
+        if (curRate > rate) {
+            nw.save("nets/nw.net")
+            log.info("SAVE $a")
+            rate = curRate
+        } else break
+        if (trainFullConnectedLayers) a += 1.0
+    }
+
+    CNetwork().load("nets/nw_back.net")?.let {
+        if (it.rate(number, testBatch) > rate) saveAs("nets/nw_back.net", "nets/nw.net")
+    }
+    return a to rate
+}
+
+fun fullTrain(number: Int, time: Int, structure: IntArray, trainFullConnectedLayers: Boolean, trainFinalLayer: Boolean=false): Double {
+    var alpha = 1.0.takeIf { trainFullConnectedLayers } ?: 15.0
+    var r1 = 0.0
+    while (r1 < 0.99) {
+        val (a, r2) = train(number, time, structure, trainFullConnectedLayers, alpha, trainFinalLayer)
+        log.info("\r\nresult $r1 -> $r2")
+        if (r2 > r1) r1 = r2
+        else if (a > 10.0) break
+        alpha = a
+    }
+    return r1
+}
+
 fun main(args: Array<String>) {
     setupLog(log)
-    for (i in 9..9) {
-        log.info("------------- $i -----------------")
-        train(i, 100)
-    }
+    train(5, 100)
+//    for (number in (3..9)) {
+//        testBatch = MNIST.buildBatch(500)
+//        saveAs("nets/nw$number.net", "nets/nw.net")
+//        log.info("------------- $number -----------------")
+//        train(number, 3, 100, 200, true, 0.6)
+//        saveAs("nets/nw.net", "nets/nw$number.net")
+//        File("nets/nw_back.net").delete()
+//        File("nets/nw.net").delete()
+//    }
+}
+
+fun train(trainNumber: Int, rate: Int, time1: Int, time2: Int, doRebuild: Boolean, limit: Double) {
+    log.info("limit is $limit")
+    rateCount = rate
+    val structure = getStructure("nets/nw.net") ?: intArrayOf(6,6,6,6,40,1)
+    var r = CNetwork().load("nets/nw.net")?.let { fullTrain(trainNumber, time2, structure, true) } ?: 0.0
+    if (r < limit) r = fullTrain(trainNumber, time1, structure, false)
+    File("nets/nw_back.net").delete()
+    val nw = CNetwork().load("nets/nw.net")!!
+    nw.rebuild(trainNumber, testBatch).save("nets/nw.net")
+    if (r < limit) train(trainNumber, rate+2, time1, time2, doRebuild, limit-0.1)
 }
 

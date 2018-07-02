@@ -16,7 +16,6 @@ open class Agent(private val nets: List<Network>) {
 class TestAgent: Agent((0..9).mapNotNull { CNetwork().load("nets/nw$it.net") })
 
 class Agent0: Agent((0..9).mapNotNull { CNetwork().load("nets/agent0/nw$it.net") })
-class Agent1: Agent((0..9).mapNotNull { CNetwork().load("nets/agent1/nw$it.net") })
 
 private fun Agent.test(showError: Boolean) {
     var counter = 0
