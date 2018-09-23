@@ -14,7 +14,7 @@ class CNetwork: Network {
     private val calcImages = mutableMapOf<Image, List<Double>>()
 
     private val netClasses by lazy {
-        layers.map { it.classNet }.toSet()
+        layers.asSequence().map { it.classNet }.toSet()
     }
 
     companion object {
@@ -51,8 +51,8 @@ class CNetwork: Network {
 
     private fun activateClass(classNet: String, x: Image, alpha: Double): List<Double> {
         val layers = layers.filter { it.classNet == classNet }
-        val o = activateConvLayers(layers.filter { it is CNNLayer }.map { it as CNNLayer }, x)
-        return activateFullConnectedLayers(layers.filter { it is FullConnectedLayer }.map { it as FullConnectedLayer }, o, alpha)
+        val o = activateConvLayers(layers.asSequence().filter { it is CNNLayer }.map { it as CNNLayer }.toList(), x)
+        return activateFullConnectedLayers(layers.asSequence().filter { it is FullConnectedLayer }.map { it as FullConnectedLayer }.toList(), o, alpha)
     }
 
     fun activateLayers(x: Image, alpha: Double) = netClasses.filter { it != "final" }.flatMap {
@@ -63,13 +63,13 @@ class CNetwork: Network {
         calcImages[x]?.let { return it }
         if (netClasses.size > 1) {
             val y = x.y ?: activateLayers(x, alpha)
-            val o = activateFullConnectedLayers(layers.filter { it.classNet == "final" }.map { it as FullConnectedLayer }, y, alpha)
+            val o = activateFullConnectedLayers(layers.asSequence().filter { it.classNet == "final" }.map { it as FullConnectedLayer }.toList(), y, alpha)
             val r = softmax(o)
             calcImages[x] = r
             return r
         }
-        var o = x.o ?: activateConvLayers(layers.filter { it is CNNLayer }.map { it as CNNLayer }, x)
-        o = activateFullConnectedLayers(layers.filter { it is FullConnectedLayer }.map { it as FullConnectedLayer }, o, alpha)
+        var o = x.o ?: activateConvLayers(layers.asSequence().filter { it is CNNLayer }.map { it as CNNLayer }.toList(), x)
+        o = activateFullConnectedLayers(layers.asSequence().filter { it is FullConnectedLayer }.map { it as FullConnectedLayer }.toList(), o, alpha)
 //        val r = softmax(o)
         calcImages[x] = o
         return o
@@ -78,17 +78,17 @@ class CNetwork: Network {
     private fun softmax(x: List<Double>): List<Double> {
         val y = x.map { if (it < 0) 0.0 else it }
         val sum = x.sum()
-        if (sum == 0.0) return List(x.size, { 1.0/x.size })
+        if (sum == 0.0) return List(x.size) { 1.0/x.size }
         return y.map { it/y.sum() }
     }
 
     private fun norm(x: List<Double>): List<Double> {
-        val l = sqrt(x.map { it*it }.sum())
+        val l = sqrt(x.asSequence().map { it*it }.sum())
         if (l == 0.0) return x
         return x.map { it / l }
     }
 
-    override fun clone() = CNetwork().also { it.layers.addAll(layers.map { it.clone() }) }
+    override fun clone() = CNetwork().also { nw -> nw.layers.addAll(layers.map { it.clone() }) }
 
     override fun dropout(layersNumbers: List<Int>, dropoutRate: Double, isRandom: Boolean): CNetwork {
         for (l in layersNumbers) {

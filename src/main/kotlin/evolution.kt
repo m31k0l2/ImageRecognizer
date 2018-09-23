@@ -197,7 +197,7 @@ abstract class NetEvolution(
             rangCounter += it.second
             it.first to rangCounter
         }
-        return (0 until count).map {
+        return (0 until count).map { _ ->
             rangs.find { it.second > random.nextDouble() }!!.first to rangs.find { it.second > random.nextDouble() }!!.first
         }
     }

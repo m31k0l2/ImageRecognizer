@@ -51,5 +51,5 @@ private fun Agent.test(showError: Boolean) {
 }
 
 fun main(args: Array<String>) {
-    TestAgent().test(true)
+    Agent0().test(true)
 }

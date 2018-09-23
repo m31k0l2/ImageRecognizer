@@ -5,13 +5,13 @@ import java.nio.file.StandardCopyOption
 import java.util.*
 
 object MNIST {
-    private val mnistTrainPath = "/home/melkor/mnist_png/training"
-    private val mnistTestPath = "/home/melkor/mnist_png/testing"
+    val mnistTrainPath = "/home/melkor/mnist_png/training"
+    val mnistTestPath = "/home/melkor/mnist_png/testing"
     const val errorPath = "error_images"
 
-    fun buildBatch(size: Int, path: String = errorPath): Set<Image> {
+    fun buildBatch(size: Int, path: String = mnistTrainPath): Set<Image> {
         val dir = File(path)
-        return (0 until size/10).flatMap {
+        return (0 until size/10).flatMap { _ ->
             dir.listFiles().map {
                 it.listFiles().toList().shuffled().first()
             }.map { Image(it) }
@@ -20,8 +20,8 @@ object MNIST {
 
     fun allSet(path: String = errorPath): Set<Image> {
         val dir = File(path)
-        return dir.listFiles().flatMap {
-            it.listFiles().map { Image(it) }
+        return dir.listFiles().flatMap { subdir ->
+            subdir.listFiles().map { Image(it) }
         }.toSet()
     }
 

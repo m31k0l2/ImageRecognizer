@@ -17,7 +17,7 @@ fun Network.rebuild(rateNumber: Int, batch: Set<Image>): Network {
         log.info("$r0")
         return this
     }
-    val nw = clearCNNLayers(rateNumber, batch).clearFNNLayers(4, rateNumber, batch)
+    val nw = clearCNNLayers(rateNumber, batch).clearFNNLayers(4, rateNumber, batch).clearFNNLayers(5, rateNumber, batch)
     val r1 = nw.rate(rateNumber, batch)
     log.info("rebuild: $r0 -> $r1")
     log.info("new structure: ${nw.layers.map { it.neurons.size }}")

@@ -91,32 +91,6 @@ fun buildNetwork(vararg structure: Int)= network {
     }
 }
 
-fun buildMultiNetwork(count: Int, vararg structure: Int)= network {
-    for (i in 0 until count) {
-        convLayer("$i", structure[0+i*5], CNetwork.cnnDividers[0], Pooler(CNetwork.poolDividers[0]!!))
-        convLayer("$i", structure[1+i*5], CNetwork.cnnDividers[1], Pooler(CNetwork.poolDividers[1]!!))
-        convLayer("$i", structure[2+i*5], CNetwork.cnnDividers[2])
-        convLayer("$i", structure[3+i*5], CNetwork.cnnDividers[3])
-        fullConnectedLayer("$i", structure[4+i*5])
-    }
-    fullConnectedLayer("final", structure[structure.size-2])
-    fullConnectedLayer("final", structure.last())
-}
-
-fun buildTotalMultiNetwork(count1: Int, count2: Int, vararg structure: Int)= network {
-    for (i in 0 until count1) {
-        convLayer("$i", structure[0+i*5], CNetwork.cnnDividers[0], Pooler(CNetwork.poolDividers[0]!!))
-        convLayer("$i", structure[1+i*5], CNetwork.cnnDividers[1], Pooler(CNetwork.poolDividers[1]!!))
-        convLayer("$i", structure[2+i*5], CNetwork.cnnDividers[2])
-        convLayer("$i", structure[3+i*5], CNetwork.cnnDividers[3])
-        fullConnectedLayer("$i", structure[4+i*5])
-    }
-    for (i in 0 until count2) {
-        fullConnectedLayer("connected", structure[structure.size-1 - i])
-    }
-    fullConnectedLayer("final", structure.last())
-}
-
 fun evolute(number: Int, time: Int, structure: IntArray, trainFullConnectedLayers: Boolean, alpha: Double, trainFinal: Boolean=false): Network? {
     return evolution(number, time, 60) {
         buildNetwork(*structure)
@@ -127,10 +101,10 @@ fun Network.rate(number: Int, batch: Set<Image>): Double {
     return testMedianNet(number, this, batch)
 }
 
-fun train(number: Int, time: Int) {
-    testBatch = MNIST.buildBatch(300)
+fun train(number: Int, pos: Int, time: Int) {
+    testBatch = MNIST.buildBatch(1500)
     var nw: Network
-    val structure = intArrayOf(5, 5, 5, 5, 40, 1)
+    val structure = intArrayOf(5, 5, 5, 5, 120, 40, 1)
     var rate = 0.0
     for (alpha in 1..20) {
         var curRate = 0.0
@@ -146,15 +120,15 @@ fun train(number: Int, time: Int) {
         } while (rate < curRate)
         if (curRate > 0.99) break
     }
-    saveAs("nets/nw.net", "nets/nw$number.net")
+    saveAs("nets/nw.net", "nets/nw$number$pos.net")
     File("nets/nw.net").delete()
 }
 
 fun main(args: Array<String>) {
     setupLog(log)
-    for (i in 9..9) {
+    for (i in 1..3) {
         log.info("------------- $i -----------------")
-        train(i, 100)
+        train(1, i, 100)
     }
 }
 
