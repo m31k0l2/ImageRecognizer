@@ -24,25 +24,32 @@ fun testMedianNet(number: Int, nw: Network, batch: Set<Image>, alpha: Double=15.
 //    }
 //}
 
-fun main(args: Array<String>) {
-    var batch = MNIST.buildBatch(1000).asSequence().filter { it.index == 0 }
-    val nw = CNetwork().load("nets/nw05.net")!!
+fun test(number: Int, nw: Network) {
+    var batch = MNIST.buildBatch(1000, MNIST.mnistTestPath).asSequence().filter { it.index == number }
     var counter = 0
     batch.forEach {
-        var r = nw.activate(it, 15.0)[0]
-        r = round(r)
-        if (r == 1.0) counter++
-        println("${it.index} -> $r ")
+        val r = nw.activate(it, 15.0)[0]
+        if (r >= 0.5) counter++
+//        println("${it.index} -> $r ")
     }
     val c1 = counter*1.0/batch.count()
-    batch = MNIST.buildBatch(1000).asSequence().filter { it.index != 0 }
+    batch = MNIST.buildBatch(1000, MNIST.mnistTestPath).asSequence().filter { it.index != number }
     counter = 0
     batch.forEach {
         var r = nw.activate(it, 15.0)[0]
         r = round(r)
-        if (r == 0.0) counter++
+        if (r < 0.5) counter++
 //        println("${it.index} -> $r ")
     }
     val c2 = counter*1.0/batch.count()
     println("$c1, $c2")
+}
+
+fun main(args: Array<String>) {
+    val number = 2
+    for (i in 1..10) {
+        CNetwork().load("nets/nw$number$i.net")?.let {
+            test(number, it)
+        }
+    }
 }

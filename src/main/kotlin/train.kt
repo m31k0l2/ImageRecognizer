@@ -126,9 +126,9 @@ fun train(number: Int, pos: Int, time: Int) {
 
 fun main(args: Array<String>) {
     setupLog(log)
-    for (i in 1..3) {
+    for (i in 9..10) {
         log.info("------------- $i -----------------")
-        train(1, i, 100)
+        train(2, i, 100)
     }
 }
 
