@@ -104,9 +104,10 @@ fun Network.rate(number: Int, batch: Set<Image>): Double {
 fun train(number: Int, pos: Int, time: Int) {
     testBatch = MNIST.buildBatch(1500)
     var nw: Network
-    val structure = intArrayOf(5, 5, 5, 5, 120, 40, 1)
+//    val structure = intArrayOf(5, 5, 5, 5, 120, 40, 1)
+    val structure = intArrayOf(3, 3, 4, 4, 60, 40, 1)
     var rate = 0.0
-    for (alpha in 1..20) {
+    for (alpha in 1..15 step 2) {
         var curRate = 0.0
         var counter = 0
         do {
@@ -126,7 +127,7 @@ fun train(number: Int, pos: Int, time: Int) {
 
 fun main(args: Array<String>) {
     setupLog(log)
-    for (i in 9..10) {
+    for (i in 10..15) {
         log.info("------------- $i -----------------")
         train(2, i, 100)
     }

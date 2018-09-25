@@ -47,8 +47,9 @@ fun test(number: Int, nw: Network) {
 
 fun main(args: Array<String>) {
     val number = 2
-    for (i in 1..10) {
+    for (i in 1..100) {
         CNetwork().load("nets/nw$number$i.net")?.let {
+            print("$i) ")
             test(number, it)
         }
     }
