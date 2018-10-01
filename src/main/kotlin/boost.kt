@@ -1,3 +1,4 @@
+import java.util.*
 import kotlin.math.round
 
 data class Example(val image: Image, var w: Double)
@@ -20,7 +21,7 @@ fun adaBoost(number: Int, examples: List<Example>, h: List<Network>, weights: Li
                 example.w = example.w*error/(1-error)
             }
         }
-        val w = Math.sqrt(examples.asSequence().map{ it.w*it.w }.sum())
+        val w = examples.map { it.w }.sum()
         examples.forEach { it.w /= w }
         z[m] *= Math.log((1-error)/error)
     }
@@ -37,7 +38,8 @@ fun test(number: Int, w: List<Double>, b: Set<Image>) {
         if (r > 0.5) counter++
 //        println("${image.index} -> $r ")
     }
-    val c1 = counter*1.0/batch.count()
+    var totalCounter = counter
+    val c1 = (counter*1.0/batch.count()*100).toInt()/100.0
     batch = b.asSequence().filter { it.index != number }
     counter = 0
     batch.forEach { image ->
@@ -45,33 +47,45 @@ fun test(number: Int, w: List<Double>, b: Set<Image>) {
         if (r < 0.5) counter++
 //        println("${image.index} -> $r ")
     }
-    val c2 = counter*1.0/batch.count()
-    println("$c1, $c2")
+    totalCounter += counter
+    val c2 = (counter*1.0/batch.count()*100).toInt()/100.0
+    val c3 = (totalCounter*1.0/b.count()*100).toInt()/100.0
+    println("$c1, $c2, $c3")
 }
 
 fun boost(number: Int, batch: Set<Image>, weights: List<Double>?=null): List<Double> {
-    val h = (1..11).mapNotNull { CNetwork().load("nets/nw$number$it.net") }
+    val h = (1..100).mapNotNull { CNetwork().load("nets/nw$number$it.net") }
     val examples = batch.asSequence().map { Example(it, 1.0/batch.size) }.toList()
-    val w = adaBoost(number, examples, h, weights).asSequence().map { it*100 }.map { it.toInt() }.map { it / 100.0 }.toList()
-    println(w)
-    return w
+    return adaBoost(number, examples, h, weights).asSequence().map { it*100 }.map { it.toInt() }.map { it / 100.0 }.toList()
 }
 
 fun main(args: Array<String>) {
+    val number = 6
+    val tb = MNIST.buildBatch(1000, MNIST.mnistTestPath)
 //    val w = listOf(1.27, 0.65, 0.69, 0.32, 0.0) // 0
 //    val w = listOf(3.18, 0.0, 1.06, 0.0, 2.44) // 1
-//    val w0 = listOf(1.0856164383561644, 0.08561643835616438, 0.08561643835616438, 0.08561643835616438, 0.08561643835616438, 0.5445205479452055, 0.08904109589041097, 0.6335616438356165, 0.0, 0.085616438356164382)
-    val b = MNIST.buildBatch(1000)
-    val w = boost(2, b)
-    val tb = MNIST.buildBatch(1000, MNIST.mnistTestPath)
-    test(2, w, tb)
-    test(2, w.map { if (it < 0) 0.0 else it }, tb)
-    val min = w.min()!!
-    val max = w.max()!!
-    val s = Math.sqrt(w.map { it*it }.sum())
-    val s2 = Math.sqrt(w.map { (it - min)*(it - min) }.sum())
-    test(2, w.map { it - min }, tb)
-    test(2, w.map { (it - min)/max }, tb)
-    test(2, w.map { it/s }, tb)
-    test(2, w.map { (it - min)/s2 }, tb)
+//    val w = listOf(2.21, 1.34, 0.82, 0.39, 0.3) // 2
+
+    val b = MNIST.buildBatch(500)
+    val w = boost(number, b)
+    w.forEachIndexed { i, d ->
+        if (d < 0) {
+            val path = "nets/nw$number${i+1}.net"
+            delete(path)
+        }
+    }
+    test(number, w, tb)
+    test(number, w.map { if (it < 0) 0.0 else it }, tb)
+    var n = 1
+    for (i in 1..100) {
+        val path = "nets/nw$number$i.net"
+        CNetwork().load(path)?.let {
+            if (n != i) {
+                saveAs(path, "nets/nw$number$n.net")
+                delete(path)
+            }
+            n++
+        }
+    }
+    println(w.filter { it > 0 })
 }

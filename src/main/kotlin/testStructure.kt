@@ -1,3 +1,4 @@
+import java.io.File
 import java.util.*
 import kotlin.math.round
 
@@ -24,7 +25,7 @@ fun testMedianNet(number: Int, nw: Network, batch: Set<Image>, alpha: Double=15.
 //    }
 //}
 
-fun test(number: Int, nw: Network) {
+fun test(number: Int, nw: Network): Boolean {
     var batch = MNIST.buildBatch(1000, MNIST.mnistTestPath).asSequence().filter { it.index == number }
     var counter = 0
     batch.forEach {
@@ -32,7 +33,8 @@ fun test(number: Int, nw: Network) {
         if (r >= 0.5) counter++
 //        println("${it.index} -> $r ")
     }
-    val c1 = counter*1.0/batch.count()
+    val c1 = (counter*1.0/batch.count()*100).toInt()/100.0
+    var c3 = counter.toDouble()
     batch = MNIST.buildBatch(1000, MNIST.mnistTestPath).asSequence().filter { it.index != number }
     counter = 0
     batch.forEach {
@@ -41,16 +43,33 @@ fun test(number: Int, nw: Network) {
         if (r < 0.5) counter++
 //        println("${it.index} -> $r ")
     }
-    val c2 = counter*1.0/batch.count()
-    println("$c1, $c2")
+    val c2 = (counter*1.0/batch.count()*100).toInt()/100.0
+    c3 += counter
+    c3 = (c3/10).toInt()/100.0
+    println("$c1, $c2, $c3")
+    return !(c3 < 0.9 || c1 < 0.5 || c2 < 0.9)
 }
 
 fun main(args: Array<String>) {
     val number = 2
+    var n = 1
     for (i in 1..100) {
-        CNetwork().load("nets/nw$number$i.net")?.let {
+        val path = "nets/nw$number$i.net"
+        CNetwork().load(path)?.let {
             print("$i) ")
-            test(number, it)
+            val r = true//test(number, it)
+            if (r) {
+                if (n != i) {
+                    saveAs(path, "nets/nw$number$n.net")
+                    delete(path)
+                }
+                n++
+            } else delete(path)
         }
     }
+}
+
+fun delete(name: String) {
+    val f = File(name)
+    f.delete()
 }
